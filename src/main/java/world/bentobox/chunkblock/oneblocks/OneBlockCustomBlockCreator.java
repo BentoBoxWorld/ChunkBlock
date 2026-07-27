@@ -1,0 +1,96 @@
+package world.bentobox.chunkblock.oneblocks;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+import world.bentobox.chunkblock.oneblocks.customblock.BlockDataCustomBlock;
+import world.bentobox.chunkblock.oneblocks.customblock.MobCustomBlock;
+import world.bentobox.chunkblock.oneblocks.customblock.MobDataCustomBlock;
+import world.bentobox.chunkblock.oneblocks.customblock.MythicMobCustomBlock;
+
+/**
+ * A creator for {@link OneBlockCustomBlock}
+ *
+ * @author HSGamer
+ */
+public final class OneBlockCustomBlockCreator {
+    private static final Map<String, Function<Map<?, ?>, Optional<? extends OneBlockCustomBlock>>> creatorMap = new LinkedHashMap<>();
+    private static final List<Function<String, Optional<? extends OneBlockCustomBlock>>> shortCreatorList = new ArrayList<>();
+
+    static {
+        register("block-data", BlockDataCustomBlock::fromMap);
+        // Alias: `block` routes to the same handler as `block-data`. Both accept
+        // anything valid after `setblock <x> <y> <z>` — a block id, optional
+        // states `[…]`, optional NBT `{…}`, and an optional
+        // destroy|keep|replace mode.
+        register("block", BlockDataCustomBlock::fromMap);
+        register("mob", MobCustomBlock::fromMap);
+        register("mob-data", MobDataCustomBlock::fromMap);
+        register("mythic-mob", MythicMobCustomBlock::fromMap);
+        register("short", map -> {
+            String type = Objects.toString(map.get("data"), null);
+            if (type == null) {
+                return Optional.empty();
+            }
+            return create(type);
+        });
+    }
+
+    private OneBlockCustomBlockCreator() {
+        // EMPTY
+    }
+
+    /**
+     * Register a creator
+     *
+     * @param type    the type
+     * @param creator the creator
+     */
+    public static void register(String type, Function<Map<?, ?>, Optional<? extends OneBlockCustomBlock>> creator) {
+        creatorMap.put(type, creator);
+    }
+
+    /**
+     * Register a short creator
+     *
+     * @param creator the creator
+     */
+    public static void register(Function<String, Optional<? extends OneBlockCustomBlock>> creator) {
+        shortCreatorList.add(creator);
+    }
+
+    /**
+     * Create a custom block from the map
+     *
+     * @param map the map
+     * @return the custom block
+     */
+    public static Optional<OneBlockCustomBlock> create(Map<?, ?> map) {
+        String type = Objects.toString(map.get("type"), null);
+        if (type == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(creatorMap.get(type)).flatMap(builder -> builder.apply(map));
+    }
+
+    /**
+     * Create a custom block from the string value
+     *
+     * @param value the value
+     * @return the custom block
+     */
+    public static Optional<OneBlockCustomBlock> create(String value) {
+        for (Function<String, Optional<? extends OneBlockCustomBlock>> creator : shortCreatorList) {
+            Optional<? extends OneBlockCustomBlock> customBlock = creator.apply(value);
+            if (customBlock.isPresent()) {
+                return Optional.of(customBlock.get());
+            }
+        }
+        return Optional.empty();
+    }
+}

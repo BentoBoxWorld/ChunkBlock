@@ -1,0 +1,141 @@
+protection:
+  flags:
+    MAGIC_BLOCK:
+      name: Mágikus Blokk Védelem
+      description: |-
+        &b Rang, amely képes
+        &b szétrombolni a mágikus
+        &b blokkot, ha tud blokkokat
+        &b rombolni.
+      hint: "&c A rangod nem törheti szét a mágikus blokkot!"
+    START_SAFETY:
+      name: Kezdő Biztonság
+      description: |-
+        &b Megakadályozza az új játékosokat
+        &b a mozgásban 1 percig,
+        &b hogy ne essenek le.
+      hint: "&c Mozgás blokkolva biztonsági okokból még [number] másodpercig!"
+      free-to-move: "&a Szabadon mozoghatsz. Légy óvatos!"
+    ONEBLOCK_BOSSBAR:
+        name: Boss Bar
+        description: |-
+          &b Állapotjelző sávot
+          &b mutat minden fázishoz.
+    ONEBLOCK_ACTIONBAR:
+      name: Műveleti Sáv (Action Bar)
+      description: |-
+        &b Állapotot mutat
+        &b minden fázishoz
+        &b a Műveleti Sávban.
+chunkblock:
+  bossbar:
+    title: Blokkok maradtak
+    status: '&a Fázisblokkok &b [done] &d / &b [total]'
+    color: RED
+    style: SEGMENTED_20
+    not-active: '&c A Boss Bar nem aktív ezen a szigeten'
+  actionbar:
+    status: "&a Fázis: &b [phase-name] &d | &a Blokkok: &b [done] &d / &b [total] &d | &a Haladás: &b [percent-done]"
+    not-active: "&c Az akciósáv nem aktív ezen a szigeten"
+  commands:
+    admin:
+      setcount:
+        parameters: <név> <szám>
+        description: állítsa be a játékos blokkszámát
+        set: '&a [name] számának beállítása erre: [number]'
+        set-lifetime: '&a [name] élettartama a következőre van állítva: [number]'
+      setchest:
+        parameters: <fázis> <ritkaság>
+        description: helyezze a nézett mellkasát egy szakaszba a megadott ritkasággal
+        chest-is-empty: '&c A mellkas üres, ezért nem adható hozzá'
+        unknown-phase: '&c Ismeretlen fázis. A Tab-Complete használatával megtekintheti őket'
+        unknown-rarity: '&c Ismeretlen ritkaság. Használjon COMMON, UNCOMMON, RARE vagy EPIC'
+        look-at-chest: '&c Nézzen meg egy töltött mellkasat, hogy beállítsa'
+        only-single-chest: '&c Csak egyetlen ládát lehet beállítani'
+        success: és egy mellkas sikeresen hozzáadva a fázishoz
+        failure: '&c A mellkas nem adható hozzá a fázishoz! A hibákat lásd a konzolon'
+      sanity:
+        parameters: <Fázisban>
+        description: >-
+          jelenítse meg a fázis valószínűségeinek józanság-ellenőrzését a
+          konzolban
+        see-console: '&a Lásd a jelentés konzolt'
+    count:
+      description: mutassa meg a blokkok számát és a fázist
+      info: '&a Ön a &b [number] blokkban van a &a [name] fázisban'
+    info:
+      count: >-
+        Az &a sziget a &b [number]&a blokkon található, a &b [name] &a fázisban.
+        Élettartam száma &b [lifetime] &a.
+    phases:
+      description: az összes fázis felsorolása
+      title: '&2 OneBlock Fázis'
+      name-syntax: '&a [name]'
+      description-syntax: '&b [number] blokkolja'
+    island:
+      bossbar:
+        description: váltók fázisú főnök sáv
+        status_on: '&b Bossbar &a bekapcsolt'
+        status_off: '&b Bossbar &c kikapcsolt'
+      actionbar:
+        description: fázis akciósáv ki/bekapcsolása
+        status_on: "&b Akciósáv &a bekapcsolva"
+        status_off: "&b Akciósáv &c kikapcsolva"
+      setcount:
+        parameters: <szám>
+        description: állítsa be a blokkszámot a korábban kitöltött értékre
+        set: '&a A számláló értéke [szám].'
+        too-high: '&c A beállítható maximum [number]!'
+    respawn-block:
+      description: varázsblokkot hoz újra olyan helyzetekben, amikor eltűnik
+      block-exist: '&a Blokk létezik, nem igényelt újbóli megjelenést. megjelöltem neked.'
+      block-respawned: '&a blokk újjáéledt.'
+  phase:
+    insufficient-level: >-
+      &c A sziget szintje túl alacsony a folytatáshoz! Ennek a következőnek kell
+      lennie: [number].
+    insufficient-funds: '&c A kerete túl kevés a folytatáshoz! Ezeknek [number]-nak kell lenniük.'
+    insufficient-bank-balance: >-
+      &c A sziget banki egyenlege túl alacsony a folytatáshoz! Ennek a
+      következőnek kell lennie: [number].
+    insufficient-permission: '&c Nem folytathatja tovább, amíg meg nem szerzi a [name] engedélyt!'
+    cooldown: '&c A következő szakasz [number] másodpercen belül elérhető lesz!'
+  placeholders:
+    infinite: Végtelen
+    my-island-phase-default: Ismeretlen
+  gui:
+    titles:
+      phases: '&0&l OneBlock fázisok'
+    buttons:
+      previous:
+        name: '&f&l Előző oldal'
+        description: '&7 Váltás a [number] oldalra'
+      next:
+        name: '&f&l Következő oldal'
+        description: '&7 Váltás a [number] oldalra'
+      phase:
+        name: '&f&l [phase]'
+        description: |-
+          [starting-block]
+          [biome]
+          [bank]
+          [economy]
+          [level]
+          [permission]
+        starting-block: '&7 Az &e [number] blokk feltörése után indul.'
+        biome: '&7 életrajz: &e [biome]'
+        bank: '&7 Szükséges &e $[number] &7 bankszámlára.'
+        economy: '&7 &e $[number] &7 játékos fiókot igényel.'
+        level: '&7 &e [number] &7 szigetszint szükséges.'
+        permission: '&7 `&e[permission]&7` engedély szükséges.'
+        blocks-prefix: '&7 Blokkok fázisban -'
+        blocks: '&e [name], '
+        wrap-at: '50'
+    tips:
+      click-to-previous: '&e Kattintson a &7 gombra az előző oldal megtekintéséhez.'
+      click-to-next: '&e Kattintson a &7 gombra a következő oldal megtekintéséhez.'
+      click-to-change: '&e Kattintson a &7 gombra a módosításhoz.'
+  island:
+    starting-hologram: |-
+      &aÜdvözlünk az ChunkBlockban
+      &eSzüntesse meg ezt a blokkot a kezdéshez

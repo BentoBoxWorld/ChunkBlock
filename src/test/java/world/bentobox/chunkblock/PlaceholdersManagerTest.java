@@ -1,0 +1,287 @@
+package world.bentobox.chunkblock;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
+import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
+import world.bentobox.chunkblock.oneblocks.OneBlocksManager;
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.bentobox.database.objects.Island;
+
+/**
+ * @author tastybento
+ *
+ */
+public class PlaceholdersManagerTest extends CommonTestSetup {
+    @Mock
+    private ChunkBlock addon;
+    @Mock
+    private User user;
+
+    private ChunkBlockPlaceholders pm;
+    @Mock
+    private OneBlocksManager obm;
+
+    /**
+     */
+    @Override
+    @BeforeEach
+    public void setUp() throws Exception {
+        super.setUp();
+        // User
+        when(user.getLocation()).thenReturn(location);
+        when(user.getTranslation("chunkblock.placeholders.infinite")).thenReturn("Infinite");
+        when(user.getTranslation("chunkblock.placeholders.my-island-phase-default")).thenReturn("Unknown");
+        when(user.getWorld()).thenReturn(world);
+        // Addon
+        when(addon.getIslands()).thenReturn(im);
+        when(addon.getOverWorld()).thenReturn(world);
+        when(addon.getOneBlockManager()).thenReturn(obm);
+        when(addon.inWorld(world)).thenReturn(true);
+        when(im.getProtectedIslandAt(any())).thenReturn(Optional.of(island));
+        when(im.getIsland(world, user)).thenReturn(island);
+        when(im.getIslands(world, user)).thenReturn(List.of(island));
+        @NonNull OneBlockIslands obi = new OneBlockIslands("uniqueId");
+        obi.setPhaseName("first");
+        obi.setBlockNumber(1000);
+        when(addon.getOneBlocksIsland(any())).thenReturn(obi);
+        // OneBlockManager
+        when(obm.getNextPhase(any(OneBlockIslands.class))).thenReturn("next_phase");
+        when(obm.getPercentageDone(any(OneBlockIslands.class))).thenReturn(70D);
+        when(obm.getNextPhaseBlocks(any(OneBlockIslands.class))).thenReturn(123);
+        // Settings
+        Settings settings = new Settings();
+        when(addon.getSettings()).thenReturn(settings);
+        // Island
+        when(island.getOwner()).thenReturn(uuid);
+
+        pm = new ChunkBlockPlaceholders(addon, phm);
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getPhaseByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetPhaseByLocation() {
+        assertEquals("", pm.getPhaseByLocation(user));
+        assertEquals("", pm.getPhaseByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("first", pm.getPhaseByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getPhaseByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getCountByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetCountByLocation() {
+        assertEquals("", pm.getCountByLocation(user));
+        assertEquals("", pm.getCountByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("1000", pm.getCountByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getCountByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getPhase(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetPhase() {
+        assertEquals("", pm.getPhase(user));
+        assertEquals("", pm.getPhase(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("first", pm.getPhase(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("Unknown", pm.getPhase(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getCount(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetCount() {
+        assertEquals("", pm.getCount(user));
+        assertEquals("", pm.getCount(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("1000", pm.getCount(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("0", pm.getCount(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getNextPhaseByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetNextPhaseByLocation() {
+        assertEquals("", pm.getNextPhaseByLocation(user));
+        assertEquals("", pm.getNextPhaseByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("next_phase", pm.getNextPhaseByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getNextPhaseByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getNextPhase(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetNextPhase() {
+        assertEquals("", pm.getNextPhase(user));
+        assertEquals("", pm.getNextPhase(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("next_phase", pm.getNextPhase(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("", pm.getNextPhase(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getNextPhaseBlocksByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetNextPhaseBlocksByLocation() {
+        assertEquals("", pm.getNextPhaseBlocksByLocation(user));
+        assertEquals("", pm.getNextPhaseBlocksByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("123", pm.getNextPhaseBlocksByLocation(user));
+        when(obm.getNextPhaseBlocks(any())).thenReturn(-1);
+        assertEquals("Infinite", pm.getNextPhaseBlocksByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getNextPhaseBlocksByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getNextPhaseBlocks(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetNextPhaseBlocks() {
+        assertEquals("", pm.getNextPhaseBlocks(user));
+        assertEquals("", pm.getNextPhaseBlocks(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("123", pm.getNextPhaseBlocks(user));
+        when(obm.getNextPhaseBlocks(any())).thenReturn(-1);
+        assertEquals("Infinite", pm.getNextPhaseBlocks(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("", pm.getNextPhaseBlocks(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getPercentDoneByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetPercentDoneByLocation() {
+        assertEquals("", pm.getPercentDoneByLocation(user));
+        assertEquals("", pm.getPercentDoneByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("70%", pm.getPercentDoneByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getPercentDoneByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getPercentDone(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetPercentDone() {
+        assertEquals("", pm.getPercentDone(user));
+        assertEquals("", pm.getPercentDone(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("70%", pm.getPercentDone(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("0%", pm.getPercentDone(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getDoneScaleByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetDoneScaleByLocation() {
+        assertEquals("", pm.getDoneScaleByLocation(user));
+        assertEquals("", pm.getDoneScaleByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("&a■■■■■&c■■■", pm.getDoneScaleByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getDoneScaleByLocation(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getDoneScale(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetDoneScale() {
+        assertEquals("", pm.getDoneScale(user));
+        assertEquals("", pm.getDoneScale(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("&a■■■■■&c■■■", pm.getDoneScale(user));
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getIslands(world, user)).thenReturn(List.of());
+        assertEquals("", pm.getDoneScale(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getLifetime(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetLifetime() {
+        assertEquals("", pm.getLifetime(user));
+        assertEquals("", pm.getLifetime(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        // Default setup: island is owned by uuid, getIsland returns island
+        assertEquals("1000", pm.getLifetime(user));
+        // No island found
+        when(im.getIsland(world, user)).thenReturn(null);
+        when(im.getOwnedIslands(world, user)).thenReturn(Set.of());
+        assertEquals("", pm.getLifetime(user));
+    }
+
+    /**
+     * Test that my_island_lifetime_count returns the player's OWN island's count,
+     * not the team island they are currently visiting as a member.
+     */
+    @Test
+    void testGetLifetimeTeamMember() {
+        when(user.getUniqueId()).thenReturn(uuid);
+        // Set up a team island owned by someone else
+        Island teamIsland = mock(Island.class);
+        UUID teamOwnerUUID = UUID.randomUUID();
+        when(teamIsland.getOwner()).thenReturn(teamOwnerUUID);
+        // The user's primary island (via getIsland) is the team island they are visiting
+        when(im.getIsland(world, user)).thenReturn(teamIsland);
+        // The user owns a separate island, returned by getOwnedIslands
+        when(im.getOwnedIslands(world, user)).thenReturn(Set.of(island));
+        // island is the user's own island (owned by uuid), with blockNumber=1000 (lifetime >= blockNumber)
+        assertEquals("1000", pm.getLifetime(user));
+    }
+
+    /**
+     * Test method for {@link world.bentobox.chunkblock.ChunkBlockPlaceholders#getLifetimeByLocation(world.bentobox.bentobox.api.user.User)}.
+     */
+    @Test
+    void testGetLifetimeByLocation() {
+        assertEquals("", pm.getLifetimeByLocation(user));
+        assertEquals("", pm.getLifetimeByLocation(null));
+        when(user.getUniqueId()).thenReturn(uuid);
+        assertEquals("1000", pm.getLifetimeByLocation(user));
+        when(im.getProtectedIslandAt(location)).thenReturn(Optional.empty());
+        assertEquals("", pm.getLifetimeByLocation(user));
+    }
+
+}

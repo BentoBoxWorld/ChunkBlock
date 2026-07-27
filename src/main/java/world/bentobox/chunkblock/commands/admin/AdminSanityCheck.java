@@ -1,0 +1,76 @@
+package world.bentobox.chunkblock.commands.admin;
+
+import java.util.List;
+import java.util.Optional;
+
+import world.bentobox.chunkblock.ChunkBlock;
+import world.bentobox.chunkblock.oneblocks.OneBlockPhase;
+import world.bentobox.bentobox.api.commands.CompositeCommand;
+import world.bentobox.bentobox.api.user.User;
+
+/**
+ * Command to run a sanity check
+ * @author tastybento
+ *
+ */
+public class AdminSanityCheck extends CompositeCommand {
+
+    private ChunkBlock addon;
+    private OneBlockPhase phase;
+
+    public AdminSanityCheck(CompositeCommand islandCommand) {
+        super(islandCommand, "sanity");
+    }
+
+    @Override
+    public void setup() {
+        setParametersHelp("chunkblock.commands.admin.sanity.parameters");
+        setDescription("chunkblock.commands.admin.sanity.description");
+        // Permission
+        setPermission("admin.sanity");
+        addon = getAddon();
+    }
+
+    @Override
+    public boolean canExecute(User user, String label, List<String> args) {
+        // No args
+        if (args.size() > 1) {
+            showHelp(this, user);
+            return false;
+        }
+        if (args.isEmpty()) return true;
+        // Check phase
+        Optional<OneBlockPhase> opPhase = addon.getOneBlockManager().getPhase(args.getFirst().toUpperCase());
+        if (opPhase.isEmpty()) {
+            user.sendMessage("chunkblock.commands.admin.sanity.unknown-phase");
+            return false;
+        } else {
+            phase = opPhase.get();
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean execute(User user, String label, List<String> args) {
+        if (args.isEmpty()) {
+            addon.getOneBlockManager().getAllProbs();
+        } else {
+            addon.getOneBlockManager().getProbs(phase);
+        }
+        if (user.isPlayer()) {
+            user.sendMessage("chunkblock.commands.admin.sanity.see-console");
+        }
+        return true;
+    }
+
+    @Override
+    public Optional<List<String>> tabComplete(User user, String alias, List<String> args) {
+        if (args.size() == 2) {
+            // Get a list of phases
+            return Optional.of(addon.getOneBlockManager().getPhaseList());
+        }
+        // Return nothing
+        return Optional.empty();
+    }
+}

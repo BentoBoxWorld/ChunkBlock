@@ -1,0 +1,228 @@
+package world.bentobox.chunkblock.listeners;
+
+import java.util.List;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+
+import world.bentobox.chunkblock.ChunkBlock;
+import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
+import world.bentobox.chunkblock.oneblocks.OneBlockPhase;
+import world.bentobox.chunkblock.oneblocks.OneBlocksManager;
+import world.bentobox.chunkblock.oneblocks.Requirement;
+import world.bentobox.bank.Bank;
+import world.bentobox.bentobox.api.localization.TextVariables;
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bentobox.util.Util;
+import world.bentobox.level.Level;
+
+/**
+ * Performs end of phase checking
+ * 
+ * @author tastybento
+ *
+ */
+public class CheckPhase {
+
+    private final ChunkBlock addon;
+    private final OneBlocksManager oneBlocksManager;
+    private final BlockListener blockListener;
+
+    /**
+     * @param addon         ChunkBlock
+     */
+    public CheckPhase(ChunkBlock addon, BlockListener blockListener) {
+	this.addon = addon;
+	this.oneBlocksManager = addon.getOneBlockManager();
+	this.blockListener = blockListener;
+
+    }
+
+    /**
+     * Runs end phase commands, sets new phase and runs new phase commands
+     *
+     * @param player - player
+     * @param i      - island
+     * @param is     - OneBlockIslands object
+     * @param phase  - current phase
+     */
+    void setNewPhase(@Nullable Player player, @NonNull Island i, @NonNull OneBlockIslands is,
+	    @NonNull OneBlockPhase phase) {
+	// Handle NPCs
+	User user;
+	if (player == null || player.hasMetadata("NPC")) {
+	    // Default to the owner
+	    user = addon.getPlayers().getUser(i.getOwner());
+	} else {
+	    user = User.getInstance(player);
+	}
+
+	String rawPhaseName = phase.getPhaseName();
+	String newPhaseName = rawPhaseName == null ? "" : rawPhaseName;
+
+	// Run previous phase end commands
+	oneBlocksManager.getPhase(is.getPhaseName()).ifPresent(oldPhase -> {
+	    String oldPhaseName = oldPhase.getPhaseName() == null ? "" : oldPhase.getPhaseName();
+	    Util.runCommands(user,
+		    replacePlaceholders(player, oldPhaseName, phase.getBlockNumber(), i, oldPhase.getEndCommands()),
+		    "Commands run for end of " + oldPhaseName);
+	    // If first time
+	    if (is.getBlockNumber() >= is.getLifetime()) {
+		Util.runCommands(user,
+			replacePlaceholders(player, oldPhaseName, phase.getBlockNumber(), i,
+				oldPhase.getFirstTimeEndCommands()),
+			"Commands run for first time completing " + oldPhaseName);
+	    }
+	});
+	// Set the phase name
+	is.setPhaseName(newPhaseName);
+	// user.getPlayer() is @NonNull and throws for non-players, so it must be
+	// called only after isPlayer() has short-circuited.
+	if (user.isPlayer() && user.isOnline() && addon.inWorld(user.getWorld())) {
+	    user.getPlayer().showTitle(Title.title(Component.text(newPhaseName), Component.empty()));
+	}
+	// Run phase start commands
+	Util.runCommands(user,
+		replacePlaceholders(player, newPhaseName, phase.getBlockNumber(), i, phase.getStartCommands()),
+		"Commands run for start of " + newPhaseName);
+
+	blockListener.saveIsland(i);
+    }
+
+    /**
+     * Checks whether the player can proceed to the next phase
+     *
+     * @param player - player
+     * @param i      - island
+     * @param phase  - one block phase
+     * @param world  - world
+     * @return true if the player cannot proceed to the next phase.
+     */
+    protected boolean phaseRequirementsFail(@Nullable Player player, @NonNull Island i, @NonNull OneBlockIslands is,
+	    OneBlockPhase phase, @NonNull World world) {
+
+	if (phase.getRequirements().isEmpty()) {
+	    return false;
+	}
+
+    if (player == null) {
+        // Minions cannot fulfill requirements
+        return true;
+    }
+	return phase.getRequirements().stream()
+		.anyMatch(r -> checkRequirement(r, User.getInstance(player), i, is, world));
+    }
+
+    private boolean checkRequirement(Requirement r, User user, Island i, OneBlockIslands is, World world) {
+	return switch (r.getType()) {
+	case LEVEL -> checkLevelRequirement(r, user, i, world);
+	case BANK -> checkBankRequirement(r, user, i);
+	case ECO -> checkEcoRequirement(r, user, world);
+	case PERMISSION -> checkPermissionRequirement(r, user);
+	case COOLDOWN -> checkCooldownRequirement(r, user, is);
+	};
+    }
+
+    private boolean checkLevelRequirement(Requirement r, User user, Island i, World world) {
+	// Level checking logic
+	return addon.getAddonByName("Level").map(l -> {
+	    if (((Level) l).getIslandLevel(world, i.getOwner()) < r.getLevel()) {
+		user.sendMessage("chunkblock.phase.insufficient-level", TextVariables.NUMBER,
+			String.valueOf(r.getLevel()));
+		return true;
+	    }
+	    return false;
+	}).orElse(false);
+    }
+
+    private boolean checkBankRequirement(Requirement r, User user, Island i) {
+	// Bank checking logic
+	return addon.getAddonByName("Bank").map(l -> {
+	    if (((Bank) l).getBankManager().getBalance(i).getValue() < r.getBank()) {
+		user.sendMessage("chunkblock.phase.insufficient-bank-balance", TextVariables.NUMBER,
+			String.valueOf(r.getBank()));
+		return true;
+	    }
+	    return false;
+	}).orElse(false);
+    }
+
+    private boolean checkEcoRequirement(Requirement r, User user, World world) {
+	// Eco checking logic
+	return addon.getPlugin().getVault().map(vaultHook -> {
+	    if (vaultHook.getBalance(user, world) < r.getEco()) {
+		user.sendMessage("chunkblock.phase.insufficient-funds", TextVariables.NUMBER,
+			vaultHook.format(r.getEco()));
+		return true;
+	    }
+	    return false;
+	}).orElse(false);
+    }
+
+    private boolean checkPermissionRequirement(Requirement r, User user) {
+	// Permission checking logic
+	if (user != null && !user.hasPermission(r.getPermission())) {
+	    user.sendMessage("chunkblock.phase.insufficient-permission", TextVariables.NAME, r.getPermission());
+	    return true;
+	}
+	return false;
+    }
+
+    private boolean checkCooldownRequirement(Requirement r, User player, OneBlockIslands is) {
+	// Cooldown checking logic
+	long remainingTime = r.getCooldown() - (System.currentTimeMillis() - is.getLastPhaseChangeTime()) / 1000;
+	if (remainingTime > 0) {
+	    player.sendMessage("chunkblock.phase.cooldown", TextVariables.NUMBER, String.valueOf(remainingTime));
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * Replaces placeholders in commands.
+     * 
+     * <pre>
+     * [island] - Island name
+     * [owner] - Island owner's name
+     * [player] - The name of the player who broke the block triggering the commands
+     * [phase] - the name of this phase
+     * [blocks] - the number of blocks broken
+     * [level] - island level (Requires Levels Addon)
+     * [bank-balance] - island bank balance (Requires Bank Addon)
+     * [eco-balance] - player's economy balance (Requires Vault and an economy plugin)
+     * </pre>
+     *
+     * @param player      - player
+     * @param phaseName   - phase name
+     * @param phaseNumber - phase's block number
+     * @param i           - island
+     * @param commands    - list of commands
+     * @return list of commands with placeholders replaced
+     */
+    @NonNull
+    List<String> replacePlaceholders(@Nullable Player player, @NonNull String phaseName, @NonNull String phaseNumber,
+	    @NonNull Island i, List<String> commands) {
+	return commands.stream().map(c -> {
+	    long level = addon.getAddonByName("Level")
+		    .map(l -> ((Level) l).getIslandLevel(addon.getOverWorld(), i.getOwner())).orElse(0L);
+	    double balance = addon.getAddonByName("Bank").map(b -> ((Bank) b).getBankManager().getBalance(i).getValue())
+		    .orElse(0D);
+        double ecoBalance = player == null ? 0D
+                : addon.getPlugin().getVault()
+		    .map(v -> v.getBalance(User.getInstance(player), addon.getOverWorld())).orElse(0D);
+
+	    return c.replace("[island]", i.getName() == null ? "" : i.getName())
+		    .replace("[owner]", addon.getPlayers().getName(i.getOwner())).replace("[phase]", phaseName)
+		    .replace("[blocks]", phaseNumber).replace("[level]", String.valueOf(level))
+		    .replace("[bank-balance]", String.valueOf(balance))
+		    .replace("[eco-balance]", String.valueOf(ecoBalance));
+
+	}).map(c -> addon.getPlugin().getPlaceholdersManager().replacePlaceholders(player, c))
+		.toList();
+    }
+}

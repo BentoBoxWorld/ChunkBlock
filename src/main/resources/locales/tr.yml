@@ -1,0 +1,137 @@
+protection:
+  flags:
+    MAGIC_BLOCK:
+      name: Büyülü Blok Koruması
+      description: |-
+        &b Blokları kırabilirlerse
+        &b büyülü bloğu kırabilecek
+        &b rütbe.
+      hint: "&c Rütbeniz büyülü bloğu kıramaz!"
+    START_SAFETY:
+      name: Başlangıç Güvenliği
+      description: |-
+        &b Yeni oyuncuların 1 dakika
+        &b boyunca hareket etmesini
+        &b engelleyerek düşmelerini önler.
+      hint: "&c Güvenlik için hareket [number] saniye daha engellendi!"
+      free-to-move: "&a Serbestçe hareket edebilirsiniz. Dikkatli olun!"
+    ONEBLOCK_BOSSBAR:
+        name: Boss Çubuğu
+        description: |-
+          &b Her aşama için bir
+          &b durum çubuğu gösterir.
+    ONEBLOCK_ACTIONBAR:
+      name: Eylem Çubuğu (Action Bar)
+      description: |-
+        &b Her aşama için bir
+        &b durumu Eylem Çubuğunda
+        &b gösterir.
+chunkblock:
+  bossbar:
+    title: Kalan bloklar
+    status: '&a Faz blokları &b [done] &d / &b [total]'
+    color: RED
+    style: SEGMENTED_20
+    not-active: '&c Patron Bar bu ada için aktif değil'
+  actionbar:
+    status: "&a Aşama: &b [phase-name] &d | &a Bloklar: &b [done] &d / &b [total] &d | &a İlerleme: &b [percent-done]"
+    not-active: "&c Bu ada için eylem çubuğu aktif değil"
+  commands:
+    admin:
+      setcount:
+        parameters: <ad> <sayı> [lifetime]
+        description: oyuncunun blok sayısını ayarla
+        set: '&a [name] ''ın sayısı [number] olarak ayarlandı'
+        set-lifetime: '&a [name]''nin toplam kırılan blok sayısı [number] olarak ayarlandı'
+      setchest:
+        parameters: <aşama> <nadirlik>
+        description: bakılan sandığı nadir görülen bir evreye koyar
+        chest-is-empty: '&c Bu sandık boş, bu yüzden eklenemez'
+        unknown-phase: >-
+          &c Bilinmeyen aşama. Bunları görmek için sekme-tamamlama özelliğini
+          kullanın
+        unknown-rarity: '& c Bilinmeyen nadirlik. COMMON, UNCOMMON, RARE veya EPIC kullanın'
+        look-at-chest: '&c Ayarlamak için dolu bir sandığa bakın'
+        only-single-chest: '&c Yalnızca tek sandık ayarlanabilir'
+        success: '&a Sandık aşamaya başarıyla eklendi'
+        failure: '&c Sandık aşamaya eklenemedi! Hatalar için konsola bakın'
+      sanity:
+        parameters: <Aşama>
+        description: konsoldaki faz olasılıklarının akıl sağlığını kontrol etmek
+        see-console: '&a Rapor için konsola bakın'
+    count:
+      description: blok sayısını ve aşamayı göster
+      info: '&a [name] aşamasında blok &b [number] üzerindesiniz'
+    info:
+      count: >-
+        &a Ada blok sayısı &b [number]  &b [name] &a aşamasında. Toplam kırılan
+        blok &b [lifetime] &a.
+    phases:
+      description: tüm aşamaların bir listesini göster
+      title: '&2 TekBlok Aşaması'
+      name-syntax: '&a [name]'
+      description-syntax: '&b [number] blokları'
+    island:
+      bossbar:
+        description: Faz patron çubuğunu değiştirir
+        status_on: '&b Bossbar &a açıldı'
+        status_off: '&b Bossbar &c kapandı'
+      actionbar:
+        description: aşama eylem çubuğunu açar/kapatır
+        status_on: "&b Eylem Çubuğu &a açıldı"
+        status_off: "&b Eylem Çubuğu &c kapatıldı"
+      setcount:
+        parameters: <say>
+        description: blok sayısını önceden tamamlanmış değere ayarla
+        set: '&a Sayım [number] olarak ayarlandı.'
+        too-high: '&c Ayarlayabileceğiniz maksimum sayı [number]!'
+    respawn-block:
+      description: Kaynak bloğunu kaybolma durumlarında yeniden doğurur
+      block-exist: '&a Kaynak bloğu yerinde senin için işaretledim.'
+      block-respawned: '&a Kaynak bloğu yeniden doğdu.'
+  phase:
+    insufficient-level: '&c Ada seviyeniz devam etmek için çok düşük! [number] olmalıdır.'
+    insufficient-funds: '&c Paranız devam etmek için çok düşük! [number] olmalıdırlar.'
+    insufficient-bank-balance: '&c Ada bankası bakiyesi devam etmek için çok düşük! [number] olmalıdır.'
+    insufficient-permission: '&c [name] iznini alana kadar devam edemezsiniz!'
+    cooldown: '&c Bir sonraki aşama [number] saniye içinde hazır olacak!'
+  placeholders:
+    infinite: Sonsuz
+    my-island-phase-default: Bilinmiyor
+  gui:
+    titles:
+      phases: '&0&l TekBlok Aşamaları'
+    buttons:
+      previous:
+        name: '&f&l Önceki Sayfa'
+        description: '&7 [number] Sayılı sayfaya geçer'
+      next:
+        name: '&f&l Sıradaki Sayfa '
+        description: '&7 [number] Sayılı sayfaya geçer'
+      phase:
+        name: '&f&l [phase]'
+        description: |-
+          [starting-block]
+          [biome]
+          [bank]
+          [economy]
+          [level]
+          [permission]
+          [blocks]
+        starting-block: '&7 &e [sayı] kadar blok kırdıktan sonra başlar.'
+        biome: '&7 Biome: &e [biome]'
+        bank: '&7 Banka hesabında &e $[number] &7 olması gerekli.'
+        economy: '&7 Bakiyenizin &e $[number] &7 olması gerekli.'
+        level: '&7 &e [sayı] &7 kadar ada seviyeniz olmalı.'
+        permission: '&7 `&e[izin]&7` izni gerektirir.'
+        blocks-prefix: '&7 Aşamadaki bloklar - '
+        blocks: '&e [name], '
+        wrap-at: '50'
+    tips:
+      click-to-previous: '&e Önceki sayfayı görüntülemek için &7 tıklayın.'
+      click-to-next: '&e Sonraki sayfayı görüntülemek için &7 tıklayın.'
+      click-to-change: '&e Değiştirmek için &7 tıklayın.'
+  island:
+    starting-hologram: |-
+      &aTekBlok'a Hoş Geldiniz
+      &eBaşlamak için Bu Bloğu Kırın

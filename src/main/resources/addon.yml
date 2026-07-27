@@ -1,0 +1,325 @@
+name: ChunkBlock
+main: world.bentobox.chunkblock.ChunkBlock
+version: ${version}${build.number}
+api-version: 3.13.0
+metrics: true
+icon: "STONE"
+repository: "BentoBoxWorld/ChunkBlock"
+
+authors: tastybento
+
+permissions:
+# Non-command permissions
+  chunkblock.island.lock:
+    description: Allows island locking in settings
+    default: true
+  chunkblock.settings.*:
+    description: Allow use of settings on island
+    default: true
+  chunkblock.mod.clearreset:
+    description: Allow clearing of island reset limit
+    default: false
+  chunkblock.mod.bypasscooldowns:
+    description: Allow moderator to bypass cooldowns
+    default: op
+  chunkblock.mod.bypassdelays:
+    description: Allow moderator to bypass delays
+    default: op
+  chunkblock.mod.bypassprotect:
+    description: Allow moderator to bypass island protection
+    default: op
+  chunkblock.mod.bypassexpel:
+    description: Allow moderator to bypass island expulsion
+    default: op
+  chunkblock.mod.lock:
+    description: Allows lock or unlock of an island
+    default: op
+  chunkblock.mod.bypasslock:
+    description: Bypasses an island lock
+    default: op
+  chunkblock.mod.bypassban:
+    description: Bypasses island ban
+    default: op
+  chunkblock.admin.noban:
+    description: Player cannot be banned from an island
+    default: op
+  chunkblock.admin.noexpel:
+    description: Player cannot be expelled from an island
+    default: op
+  # Command permissions
+  chunkblock.island:
+    description: Allow use of '/cb' command - the main island command
+    default: TRUE
+  chunkblock.island.actionbar:
+      description: Allow use of '/cb actionbar' command - toggle the actionbar
+      default: TRUE
+  chunkblock.island.bossbar:
+    description: Allow use of '/cb bossbar' command - toggle the bossbar
+    default: TRUE
+  chunkblock.island.home:
+    description: Allow use of '/cb go' command - teleport you to your island
+    default: TRUE
+  chunkblock.island.spawn:
+    description: Allow use of '/cb spawn' command - teleport you to the spawn
+    default: TRUE
+  chunkblock.island.create:
+    description: Allow use of '/cb create' command - create an island, using optional blueprint (requires permission)
+    default: TRUE
+  chunkblock.island.reset:
+    description: Allow use of '/cb reset' command - restart your island and remove the old one
+    default: TRUE
+  chunkblock.island.info:
+    description: Allow use of '/cb info' command - display info about your island or the player's island
+    default: TRUE
+  chunkblock.island.settings:
+    description: Allow use of '/cb settings' command - display island settings
+    default: TRUE
+  chunkblock.island.name:
+    description: Allow use of '/cb setname' or '/cb resetname' command - your island name
+    default: TRUE
+  chunkblock.island.language:
+    description: Allow use of '/cb language' command - select language
+    default: TRUE
+  chunkblock.island.ban:
+    description: Allow use of '/cb ban' or '/cb unban' or '/cb banlist' command - banned players
+    default: TRUE
+  chunkblock.island.expel:
+    description: Allow use of '/cb expel' command - expel a player from your island
+    default: TRUE
+  chunkblock.island.near:
+    description: Allow use of '/cb near' command - show the name of neighboring islands around you
+    default: TRUE
+  chunkblock.island.team:
+    description: Allow use of '/cb team' command - manage your team
+    default: TRUE
+  chunkblock.island.team.invite:
+    description: Allow use of '/cb team invite' command - invite a player to join your island
+    default: TRUE
+  chunkblock.island.team.leave:
+    description: Allow use of '/cb team leave' command - leave your island
+    default: TRUE
+  chunkblock.island.team.setowner:
+    description: Allow use of '/cb team setowner' command - transfer your island ownership to a member
+    default: TRUE
+  chunkblock.island.team.kick:
+    description: Allow use of '/cb team kick' command - remove a member from your island
+    default: TRUE
+  chunkblock.island.team.accept:
+    description: Allow use of '/cb team accept' command - accept an invitation
+    default: TRUE
+  chunkblock.island.team.reject:
+    description: Allow use of '/cb team reject' command - reject an invitation
+    default: TRUE
+  chunkblock.island.team.coop:
+    description: Allow use of '/cb team coop, uncoop' commands
+    default: TRUE
+  chunkblock.island.team.trust:
+    description: Allow use of '/cb team trust, untrust' commands
+    default: TRUE
+  chunkblock.island.team.promote:
+    description: Allow use of '/cb team promote, demote' command
+    default: TRUE
+  chunkblock.island.sethome:
+    description: Allow use of '/cb sethome' command - set your home teleport point
+    default: TRUE
+  chunkblock.island.deletehome:
+    description: Allow use of '/cb deletehome' command - delete a home location
+    default: OP
+  chunkblock.island.renamehome:
+    description: Allow use of '/cb renamehome' command - rename a home location
+    default: OP
+  chunkblock.island.homes:
+    description: Allow use of '/cb homes' command - list your homes
+    default: OP
+  chunkblock.count:
+    description: Allow use of '/cb count' command - show the block count and phase
+    default: TRUE
+  chunkblock.phases:
+    description: Allow use of '/cb phases' command - show a list of all the phases
+    default: FALSE
+  chunkblock.island.setcount:
+    description: Allow use of '/cb setCount' command - set block count to previously completed value
+    default: OP
+  chunkblock.respawn-block:
+    description: Allow use of '/cb respawnBlock' command - respawns magic block in situations when they disappear
+    default: TRUE
+  chunkblock.admin:
+    description: Allow use of '/cbadmin' command - admin command
+    default: OP
+  chunkblock.admin.version:
+    description: Allow use of '/cbadmin version' command - display BentoBox and addons versions
+    default: OP
+  chunkblock.admin.tp:
+    description: Allow use of '/cbadmin tp/tpnether/tpend' command - teleport to a player's island
+    default: OP
+  chunkblock.admin.getrank:
+    description: Allow use of '/cbadmin getrank' command - get a player's rank on their island or the island of the owner
+    default: OP
+  chunkblock.admin.setrank:
+    description: Allow use of '/cbadmin setrank' command - set a player's rank on their island or the island of the owner
+    default: OP
+  chunkblock.mod.info:
+    description: Allow use of '/cbadmin info' command - get info on where you are or player's island
+    default: OP
+  chunkblock.mod.team:
+    description: Allow use of '/cbadmin team' command - manage teams
+    default: FALSE
+  chunkblock.mod.team.add:
+    description: Allow use of '/cbadmin team add' or '/cbadmin add' command - add player to owner's team
+    default: OP
+  chunkblock.mod.team.disband:
+    description: Allow use of '/cbadmin team disband' or '/cbadmin disband' command - disband owner's team
+    default: OP
+  chunkblock.mod.team.fix:
+    description: Allow use of '/cbadmin team fix' or '/cbadmin fix' command - scans and fixes cross island membership in database
+    default: OP
+  chunkblock.mod.team.kick:
+    description: Allow use of '/cbadmin team kick' or '/cbadmin kick' command - kick a player from a team
+    default: OP
+  chunkblock.mod.team.setowner:
+    description: Allow use of '/cbadmin team setowner' command - transfers island ownership to the player
+    default: OP
+  chunkblock.admin.blueprint:
+    description: Allow use of '/cbadmin blueprint' command - manipulate blueprints
+    default: OP
+  chunkblock.admin.blueprint.load:
+    description: Allow use of '/cbadmin blueprint load' command - load blueprint into the clipboard
+    default: OP
+  chunkblock.admin.blueprint.paste:
+    description: Allow use of '/cbadmin blueprint paste' command - paste the clipboard to your location
+    default: OP
+  chunkblock.admin.blueprint.origin:
+    description: Allow use of '/cbadmin blueprint origin' command - set the blueprint's origin to your position
+    default: OP
+  chunkblock.admin.blueprint.copy:
+    description: Allow use of '/cbadmin blueprint copy' command - copy the clipboard set by pos1 and pos2 and optionally the air blocks
+    default: OP
+  chunkblock.admin.blueprint.save:
+    description: Allow use of '/cbadmin blueprint save' command - save the copied clipboard
+    default: OP
+  chunkblock.admin.blueprint.rename:
+    description: Allow use of '/cbadmin blueprint rename' command - rename a blueprint
+    default: OP
+  chunkblock.admin.blueprint.delete:
+    description: Allow use of '/cbadmin blueprint delete' command - delete the blueprint
+    default: OP
+  chunkblock.admin.blueprint.pos1:
+    description: Allow use of '/cbadmin blueprint pos1' command - set 1st corner of cuboid clipboard
+    default: OP
+  chunkblock.admin.blueprint.pos2:
+    description: Allow use of '/cbadmin blueprint pos2' command - set 2nd corner of cuboid clipboard
+    default: OP
+  chunkblock.admin.blueprint.list:
+    description: Allow use of '/cbadmin blueprint list' command - list available blueprints
+    default: OP
+  chunkblock.admin.register:
+    description: Allow use of '/cbadmin register' command - register player to unowned island you are on
+    default: OP
+  chunkblock.admin.unregister:
+    description: Allow use of '/cbadmin unregister' command - unregister owner from island, but keep island blocks
+    default: OP
+  chunkblock.admin.range:
+    description: Allow use of '/cbadmin range' command - admin island range command
+    default: OP
+  chunkblock.admin.range.display:
+    description: Allow use of '/cbadmin range display' command - show/hide island range indicators
+    default: OP
+  chunkblock.admin.range.set:
+    description: Allow use of '/cbadmin range set' command - sets the island protected range
+    default: OP
+  chunkblock.admin.range.reset:
+    description: Allow use of '/cbadmin range reset' command - resets the island protected range to the world default
+    default: OP
+  chunkblock.admin.range.add:
+    description: Allow use of '/cbadmin range add' command - increases the island protected range
+    default: OP
+  chunkblock.admin.range.remove:
+    description: Allow use of '/cbadmin range remove' command - decreases the island protected range
+    default: OP
+  chunkblock.admin.resets:
+    description: Allow use of '/cbadmin resets' command - edit player reset values
+    default: OP
+  chunkblock.admin.resets.set:
+    description: Allow use of '/cbadmin resets set' command - sets how many times this player has reset his island
+    default: OP
+  chunkblock.admin.resets.add:
+    description: Allow use of '/cbadmin resets add' command - adds this player's island reset count
+    default: OP
+  chunkblock.admin.resets.remove:
+    description: Allow use of '/cbadmin resets remove' command - reduces the player's island reset count
+    default: OP
+  chunkblock.admin.delete:
+    description: Allow use of '/cbadmin delete' command - deletes a player's island
+    default: OP
+  chunkblock.admin.why:
+    description: Allow use of '/cbadmin why' command - toggle console protection debug reporting
+    default: OP
+  chunkblock.admin.deaths:
+    description: Allow use of '/cbadmin deaths' command - edit deaths of players
+    default: OP
+  chunkblock.admin.deaths.reset:
+    description: Allow use of '/cbadmin deaths reset' command - resets deaths of the player
+    default: OP
+  chunkblock.admin.deaths.set:
+    description: Allow use of '/cbadmin deaths set' command - sets deaths of the player
+    default: OP
+  chunkblock.admin.deaths.add:
+    description: Allow use of '/cbadmin deaths add' command - adds deaths to the player
+    default: OP
+  chunkblock.admin.deaths.remove:
+    description: Allow use of '/cbadmin deaths remove' command - removes deaths to the player
+    default: OP
+  chunkblock.admin.reload:
+    description: Allow use of '/cbadmin reload' command - reload
+    default: OP
+  chunkblock.admin.setspawn:
+    description: Allow use of '/cbadmin setspawn' command - set an island as spawn for this gamemode
+    default: OP
+  chunkblock.admin.setspawnpoint:
+    description: Allow use of '/cbadmin setspawnpoint' command - set current location as spawn point for this island
+    default: OP
+  chunkblock.admin.resetflags:
+    description: Allow use of '/cbadmin resetflags' command - Reset all islands to default flag settings in config.yml
+    default: OP
+  chunkblock.mod.switch:
+    description: Allow use of '/cbadmin switch' command - switch on/off protection bypass
+    default: OP
+  chunkblock.admin.purge:
+    description: Allow use of '/cbadmin purge' command - purge islands abandoned for more than [days]
+    default: OP
+  chunkblock.admin.purge.status:
+    description: Allow use of '/cbadmin purge status' command - displays the status of the purge
+    default: OP
+  chunkblock.admin.purge.stop:
+    description: Allow use of '/cbadmin purge stop' command - stop a purge in progress
+    default: OP
+  chunkblock.admin.purge.unowned:
+    description: Allow use of '/cbadmin purge unowned' command - purge unowned islands
+    default: OP
+  chunkblock.admin.purge.protect:
+    description: Allow use of '/cbadmin purge protect' command - toggle island purge protection
+    default: OP
+  chunkblock.admin.settings:
+    description: Allow use of '/cbadmin settings' command - open settings GUI or set settings
+    default: OP
+  chunkblock.admin.setprotectionlocation:
+    description: Allow use of '/cbadmin setprotectionlocation' command - set current location or [x y z] as center of island's protection area
+    default: OP
+  chunkblock.mod.deletehomes:
+    description: Allow use of '/cbadmin deletehomes' command - deletes all named homes from an island
+    default: OP
+  chunkblock.mod.resetname:
+    description: Allow use of '/cbadmin resetname' command - reset player island name
+    default: OP
+  chunkblock.admin.setcount:
+    description: Allow use of '/cbadmin setcount' command - set player's block count
+    default: OP
+  chunkblock.admin.setchest:
+    description: Allow use of '/cbadmin setchest' command - put the looked-at chest in a phase with the rarity specified
+    default: OP
+  chunkblock.admin.sanity:
+    description: Allow use of '/cbadmin sanity' command - display a sanity check of the phase probabilities in the console
+    default: OP
+  chunkblock.admin.phases:
+    description: Allow use of '/cbadmin phases' command - open the phase order editor
+    default: OP 

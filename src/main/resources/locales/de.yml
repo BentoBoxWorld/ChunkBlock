@@ -1,0 +1,151 @@
+protection:
+  flags:
+    MAGIC_BLOCK:
+      name: Schutz des Magischen Blocks
+      description: |-
+        &b Rang, der den magischen
+        &b Block zerstören kann, falls
+        &b Blöcke zerstört werden können.
+      hint: "&c Dein Rang kann den magischen Block nicht zerstören!"
+    START_SAFETY:
+      name: Start-Sicherheit
+      description: |-
+        &b Verhindert, dass neue Spieler
+        &b sich 1 Minute lang bewegen,
+        &b damit sie nicht herunterfallen.
+      hint: "&c Bewegung aus Sicherheitsgründen für [number] weitere Sekunden blockiert!"
+      free-to-move: "&a Du kannst dich frei bewegen. Sei vorsichtig!"
+    ONEBLOCK_BOSSBAR:
+        name: Boss-Balken
+        description: |-
+          &b Zeigt eine Statusleiste
+          &b für jede Phase.
+    ONEBLOCK_ACTIONBAR:
+      name: Action-Leiste
+      description: |-
+        &b Zeigt einen Status
+        &b für jede Phase
+        &b in der Action-Leiste.
+chunkblock:
+  bossbar:
+    title: Verbleibende Blöcke
+    status: '&a Phasenblöcke &b [done] &d / &b [total]'
+    color: RED
+    style: SEGMENTED_20
+    not-active: '&c Boss Bar ist für diese Insel nicht aktiv'
+  actionbar:
+    status: "&a Phase: &b [phase-name] &d | &a Blöcke: &b [done] &d / &b [total] &d | &a Fortschritt: &b [percent-done]"
+    not-active: "&c Action Bar ist für diese Insel nicht aktiv"
+  commands:
+    admin:
+      setcount:
+        parameters: <Name> <Anzahl>[lifetime]
+        description: Setze die Blockanzahl des Spielers
+        set: '&a [name] zählt auf [number]'
+        set-lifetime: Die Lebenszeitanzahl von &a [name] wurde auf [number] gesetzt
+      setchest:
+        parameters: <Phase> <Rarität>
+        description: >-
+          Versetzen Sie die betrachtete Truhe in eine Phase mit der angegebenen
+          Seltenheit
+        chest-is-empty: '&c Diese Truhe ist leer und kann daher nicht hinzugefügt werden'
+        unknown-phase: '&c Unbekannte Phase. Verwenden Sie tab-complete, um sie anzuzeigen'
+        unknown-rarity: >-
+          &c Unbekannte Seltenheit. Verwenden Sie COMMON, UNCOMMON, RARE oder
+          EPIC
+        look-at-chest: '&c Sieh dir eine gefüllte Truhe an, um sie einzustellen'
+        only-single-chest: '&c Es können nur einzelne Truhen eingestellt werden'
+        success: '&a Eine Truhe erfolgreich zur Phase hinzugefügt'
+        failure: >-
+          &c Truhe konnte nicht zur Phase hinzugefügt werden! Siehe Konsole für
+          Fehler
+      sanity:
+        parameters: <Phase>
+        description: >-
+          Zeigen Sie eine Überprüfung der Phasenwahrscheinlichkeiten in der
+          Konsole an
+        see-console: '&a Den Bericht finden Sie in der Konsole'
+    count:
+      description: Zeige die Blockanzahl und Phase
+      info: '&a Sie befinden sich in der Phase &a [name] in Block &b [number]'
+    info:
+      count: >-
+        &a Island befindet sich in Block &b [number]&a in der Phase &b [Name]
+        &a. Lebenszeitanzahl &b [lifetime] &a.
+    phases:
+      description: Zeigen Sie eine Liste aller Phasen an
+      title: '&2 OneBlock-Phasen'
+      name-syntax: '&a [name]'
+      description-syntax: '&b [number] Blöcke'
+    island:
+      bossbar:
+        description: Phase Boss Bar umschalten
+        status_on: '&b Bossbar &a eingeschaltet'
+        status_off: '&b Bossbar &c ausgeschaltet'
+      actionbar:
+        description: "schaltet die Phasen-Aktionsleiste um"
+        status_on: "&b Action Bar &a eingeschaltet"
+        status_off: "&b Action Bar &c ausgeschaltet"
+      setcount:
+        parameters: <Anzahl>
+        description: Setzen Sie die Blockanzahl auf den zuvor abgeschlossenen Wert
+        set: '&a Zähler auf [number] gesetzt.'
+        too-high: '&c Das Maximum, das Sie festlegen können, ist [number]!'
+    respawn-block:
+      description: >-
+        lässt den magischen Block in Situationen wieder erscheinen, in denen er
+        verschwindet
+      block-exist: >-
+        &ein Block existiert, musste nicht neu gestartet werden. Ich habe es für
+        dich markiert.
+      block-respawned: '&a Block wieder aufgetaucht.'
+  phase:
+    insufficient-level: '&c Ihr Insellevel ist zu niedrig, um fortzufahren! Es muss [number] sein.'
+    insufficient-funds: '&c Ihr Guthaben ist zu gering, um fortzufahren! Sie müssen [number] sein.'
+    insufficient-bank-balance: >-
+      &c Der Saldo der Inselbank ist zu niedrig, um fortzufahren! Es muss
+      [number] sein.
+    insufficient-permission: >-
+      &c Sie können nicht weitermachen, bis Sie die [name]-Berechtigung
+      erhalten!
+    cooldown: '&c Die nächste Stufe ist in [number] Sekunden verfügbar!'
+  placeholders:
+    infinite: Unendlich
+    my-island-phase-default: Unbekannt
+  gui:
+    titles:
+      phases: '&0&l OneBlock-Phasen'
+    buttons:
+      previous:
+        name: '&f&l Vorherige Seite'
+        description: '&7 Zur Seite [number] wechseln'
+      next:
+        name: '&f&l Nächste Seite'
+        description: '&7 Zur Seite [number] wechseln'
+      phase:
+        name: '&f&l [phase]'
+        description: |-
+          [starting-block]
+          [biome]
+          [bank]
+          [economy]
+          [level]
+          [permission]
+        starting-block: '&7 Startet nach dem Aufbrechen von &e [number] Blöcken.'
+        biome: '&7 Biom: &e [biome]'
+        bank: '&7 Erfordert &e $[number] &7 auf dem Bankkonto.'
+        economy: '&7 Erfordert &e $[number] &7 im Spielerkonto.'
+        level: '&7 Erfordert &e [number] &7 Inselebene.'
+        permission: '&7 Erfordert die Berechtigung „&e[permission]&7“.'
+        blocks-prefix: '&7 Blöcke in Phase -'
+        blocks: '&e [name], '
+        wrap-at: '50'
+    tips:
+      click-to-previous: '&e Klicken Sie auf &7, um die vorherige Seite anzuzeigen.'
+      click-to-next: '&e Klicken Sie auf &7, um die nächste Seite anzuzeigen.'
+      click-to-change: '&e Zum Ändern &7klicken.'
+  island:
+    starting-hologram: |-
+      &aWillkommen bei ChunkBlock
+      &eBrechen Sie diesen Block,
+      &eum zu beginnen

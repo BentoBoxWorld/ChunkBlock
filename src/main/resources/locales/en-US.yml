@@ -1,0 +1,183 @@
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+###########################################################################################
+
+protection:
+  flags:
+    MAGIC_BLOCK:
+      name: Magic Block Protection
+      description: |-
+        &b Rank that can break the magic
+        &b block if they can break blocks.
+      hint: "&c Your rank cannot break the magic block!"
+    START_SAFETY:
+      name: Starting Safety
+      description: |-
+        &b Prevents new players
+        &b from moving for 1 minute
+        &b so they don't fall off.
+      hint: "&c Movement blocked for safety for [number] more seconds!"
+      free-to-move: "&a You are free to move. Be careful!"
+    ONEBLOCK_BOSSBAR:
+        name: Boss Bar
+        description: |-
+          &b Shows a status bar
+          &b for each phase.
+    ONEBLOCK_ACTIONBAR:
+      name: Action Bar
+      description: |-
+        &b Shows a status
+        &b for each phase
+        &b in the Action Bar.
+
+chunkblock:
+  bossbar:
+    title: "Blocks remaining"
+    # status: "&a Phase blocks &b [total]. Blocks left: [todo]"
+    # status: "&a [phase-name] : [percent-done]"
+    status: "&a Phase blocks &b [done] &d / &b [total]"
+    # RED, WHITE, PINK, BLUE, GREEN, YELLOW, or PURPLE
+    color: RED
+    # SOLID, SEGMENTED_6,  SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+    style: SOLID
+    not-active: "&c Boss Bar is not active for this island"
+  actionbar:
+    status: "&a Phase: &b [phase-name] &d | &a Blocks: &b [done] &d / &b [total] &d | &a Progression: &b [percent-done]"
+    not-active: "&c Action Bar is not active for this island"
+  commands:
+    admin:
+      setcount:
+        parameters: "<name> <count> [lifetime]"
+        description: "set player's block count"
+        set: "&a [name]'s count set to [number]"
+        set-lifetime: "&a [name]'s lifetime count set to [number]"
+      setchest:
+        parameters: "<phase> <rarity>"
+        description: "put the looked-at chest in a phase with the rarity specified"
+        chest-is-empty: "&c That chest is empty so cannot be added"
+        unknown-phase: "&c Unknown phase. Use tab-complete to see them"
+        unknown-rarity: "&c Unknown rarity. Use COMMON, UNCOMMON, RARE or EPIC"
+        look-at-chest: "&c Look at a filled chest to set it"
+        only-single-chest: "&c Only single chests can be set"
+        success: "&a Chest successfully added to phase"
+        failure: "&c Chest could not be added to the phase! See console for errors"
+      sanity:
+        parameters: "<phase>"
+        description: "display a sanity check of the phase probabilities in the console"
+        see-console: "&a See the console for the report"
+      phases:
+        description: "open the phase order editor"
+        no-index: "&c No phase index is loaded, so phases cannot be reordered"
+        saved: "&a Phase order saved and applied"
+        save-failed: "&c Could not save the phase order! See console for errors"
+        gui:
+          title: "&2 Phase Order"
+          info-title: "&f How to use"
+          instructions: |-
+            &7 Click a phase to pick it up,
+            &7 then click where it should go.
+            &7 Right-click toggles a phase
+            &7 on or off.
+          repeat: "&7 After the last phase the count jumps to &b [number]"
+          phase-name: "&a [name]"
+          start: "&7 Start: &b [number]"
+          length: "&7 Length: &b [number]"
+          disabled: "&c Disabled"
+          version-locked: "&c Needs Minecraft [version]+"
+          pick-up: "&e Click to move"
+          toggle: "&e Right-click to toggle"
+          set-length: "&e Shift-left-click to set length"
+          drop-here: "&e Click to drop here"
+          drop-at-end: "&a Drop at the end"
+          held: "&e Moving: [name]"
+          put-back: "&e Click to put back"
+          enter-length: "&e Enter a new length in chat for &a [name] &e - it is currently &b [number] &e blocks. Type &c cancel &e to keep it."
+          invalid-length: "&c The length must be a whole number above 0"
+          length-cancelled: "&c Length unchanged"
+          cancel-word: "cancel"
+    count:
+      description: show the block count and phase
+      info: "&a You are on block &b [number] in the &a [name] phase"
+    info:
+      count: "&a Island is on block &b [number] &a in the &b [name] &a phase. Lifetime count &b [lifetime] &a."
+    phases:
+      description: show a list of all the phases
+      title: "&2 OneBlock Phases"
+      name-syntax: "&a [name]"
+      description-syntax: "&b [number] blocks"
+    island:
+      bossbar:
+        description: "toggles phase boss bar"
+        status_on: "&b Bossbar turned &a on"
+        status_off: "&b Bossbar turned &c off"
+      actionbar:
+        description: "toggles phase action bar"
+        status_on: "&b Action Bar turned &a on"
+        status_off: "&b Action Bar turned &c off"
+      setcount:
+        parameters: "<count>"
+        description: "set block count to previously completed value"
+        set: "&a Count set to [number]."
+        too-high: "&c The maximum you can set is [number]!"
+    respawn-block:
+      description: "respawns magic block in situations when it disappears"
+      block-exist: "&a Block exists, did not require respawning. I marked it for you."
+      block-respawned: "&a Block respawned."
+  phase:
+    insufficient-level: "&c Your island level is too low to proceed! It must be [number]."
+    insufficient-funds: "&c Your funds are too low to proceed! They must be [number]."
+    insufficient-bank-balance: "&c The island bank balance is too low to proceed! It must be [number]."
+    insufficient-permission: "&c You can proceed no further until you obtain the [name] permission!"
+    cooldown: "&c Next phase will be available in [number] seconds!"
+  placeholders:
+    infinite: Infinite
+    my-island-phase-default: Unknown
+  gui:
+    titles:
+      phases: '&0&l OneBlock Phases'
+    # This section contains all button names and lore (description)
+    buttons:
+      # List of buttons in GUI's
+      # Button that is used in multipage GUIs which allows to return to previous page.
+      previous:
+        name: "&f&l Previous Page"
+        description: |-
+          &7 Switch to [number] page
+      # Button that is used in multipage GUIs which allows to go to next page.
+      next:
+        name: "&f&l Next Page"
+        description: |-
+          &7 Switch to [number] page
+      phase:
+        name: "&f&l [phase]"
+        description: |-
+          [starting-block]
+          [biome]
+          [bank]
+          [economy]
+          [level]
+          [permission]
+          [blocks]
+        # Replaces text with [starting-block]
+        starting-block: "&7 Starts after breaking &e [number] blocks."
+        # Replaces text with [biome]
+        biome: "&7 Biome: &e [biome]"
+        # Replaces text with [bank]
+        bank: "&7 Requires &e $[number] &7 in bank account."
+        # Replaces text with [economy]
+        economy: "&7 Requires &e $[number] &7 in player account."
+        # Replaces text with [level]
+        level: "&7 Requires &e [number] &7 island level."
+        # Replaces text with [permission]
+        permission: "&7 Requires `&e[permission]&7` permission."
+        # Replaces text with [blocks]
+        blocks-prefix: '&7 Blocks in phase - '
+        blocks: '&e [name], '
+        wrap-at: '50'
+    tips:
+      click-to-previous: "&e Click &7 to view previous page."
+      click-to-next: "&e Click &7 to view next page."
+      click-to-change: "&e Click &7 to change."
+  island:
+    starting-hologram: "&aWelcome to ChunkBlock\n&eBreak This Block to Begin"
