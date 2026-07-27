@@ -23,6 +23,10 @@ public class AdminCommand extends DefaultAdminCommand {
         new AdminSanityCheck(this);
         // Phase order editor
         new AdminPhasesCommand(this);
+        // Chunk count support tool
+        new AdminChunksCommand(this);
+        // Chunk lock bypass toggle
+        new AdminBypassCommand(this);
     }
 
 }

@@ -31,6 +31,8 @@ public class PlayerCommand extends DefaultPlayerCommand {
         new IslandSetCountCommand(this,
                 settings.getSetCountCommand().split(" ")[0],
                 settings.getSetCountCommand().split(" "));
+        // Chunk territory info and map
+        new IslandChunksCommand(this, "chunks", new String[] {"chunks"});
         // Force block respawn
         new IslandRespawnBlockCommand(this,
                 settings.getRespawnBlockCommand().split(" ")[0],

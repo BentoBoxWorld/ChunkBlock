@@ -13,7 +13,6 @@ import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
-import world.bentobox.chunkblock.Settings;
 
 /**
  * The chunk gating heart of ChunkBlock. Chunks unlock in a deterministic clockwise
@@ -34,7 +33,13 @@ public class ChunkManager {
     /**
      * Permission that exempts moderators from chunk locking entirely.
      */
-    public static final String BYPASS_PERMISSION = "chunkblock.mod.bypasslock";
+    public static final String BYPASS_PERMISSION = "chunkblock.mod.bypasschunks";
+
+    /**
+     * Block offset within a chunk that marks its center (both axes). Island centers are
+     * always placed here (see Settings offset handling).
+     */
+    public static final int CHUNK_CENTER = 8;
 
     private final ChunkBlock addon;
     /**
@@ -248,7 +253,7 @@ public class ChunkManager {
      * @return the maximum ring radius, &gt;= 0
      */
     public int maxRingRadius(Island island) {
-        return Math.max(0, (island.getProtectionRange() - Settings.CHUNK_CENTER) / 16);
+        return Math.max(0, (island.getProtectionRange() - CHUNK_CENTER) / 16);
     }
 
     /**

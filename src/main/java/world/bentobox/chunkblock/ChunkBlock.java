@@ -13,6 +13,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import world.bentobox.chunkblock.chunks.BorderDisplay;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.commands.admin.AdminCommand;
 import world.bentobox.chunkblock.commands.island.PlayerCommand;
@@ -28,6 +29,7 @@ import world.bentobox.chunkblock.listeners.InfoListener;
 import world.bentobox.chunkblock.listeners.CraftEngineListener;
 import world.bentobox.chunkblock.listeners.ItemsAdderListener;
 import world.bentobox.chunkblock.listeners.JoinLeaveListener;
+import world.bentobox.chunkblock.listeners.LevelListener;
 import world.bentobox.chunkblock.listeners.NexoListener;
 import world.bentobox.chunkblock.listeners.NoBlockHandler;
 import world.bentobox.chunkblock.listeners.StartSafetyListener;
@@ -75,6 +77,8 @@ public class ChunkBlock extends GameModeAddon {
     private BlockListener blockListener;
     /** The listener that keeps players out of locked chunks */
     private ChunkGuardListener chunkGuardListener;
+    /** The locked-chunk border visuals */
+    private BorderDisplay borderDisplay;
     /** The manager for OneBlock phases and blocks */
     private OneBlocksManager oneBlockManager;
     /** The manager for chunk locking and the unlock spiral */
@@ -207,6 +211,10 @@ public class ChunkBlock extends GameModeAddon {
         chunkGuardListener = new ChunkGuardListener(this);
         registerListener(chunkGuardListener);
         registerListener(new LockedChunkProtect(this));
+        registerListener(new LevelListener(this));
+        borderDisplay = new BorderDisplay(this);
+        registerListener(borderDisplay);
+        borderDisplay.start();
         registerListener(new NoBlockHandler(this));
         registerListener(new BlockProtect(this));
         registerListener(new JoinLeaveListener(this));
@@ -254,6 +262,11 @@ public class ChunkBlock extends GameModeAddon {
             blockListener.saveCache();
         }
 
+        // Stop border rendering and restore client-side blocks
+        if (borderDisplay != null) {
+            borderDisplay.stop();
+        }
+
         // Clear holograms
         if (holoListener != null) {
             holoListener.onDisable();
@@ -290,6 +303,28 @@ public class ChunkBlock extends GameModeAddon {
      */
     public ChunkGuardListener getChunkGuardListener() {
         return chunkGuardListener;
+    }
+
+    /**
+     * @return the locked-chunk border display, or null before the addon is enabled
+     */
+    public BorderDisplay getBorderDisplay() {
+        return borderDisplay;
+    }
+
+    /**
+     * Reads the island's level from the Level addon.
+     *
+     * @param island the island
+     * @return the island level, or 0 if the Level addon or island owner is missing
+     */
+    public long getIslandLevel(@NonNull Island island) {
+        return getPlugin().getAddonsManager().getAddonByName("Level")
+                .filter(world.bentobox.level.Level.class::isInstance)
+                .map(world.bentobox.level.Level.class::cast)
+                .filter(l -> island.getOwner() != null)
+                .map(l -> l.getManager().getIslandLevel(island.getWorld(), island.getOwner()))
+                .orElse(0L);
     }
 
     @Override

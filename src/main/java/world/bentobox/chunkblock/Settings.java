@@ -37,11 +37,6 @@ import world.bentobox.bentobox.database.objects.adapters.FlagBooleanSerializer;
 @ConfigComment("ChunkBlock Configuration [version]")
 public class Settings implements WorldSettings {
 
-    /**
-     * Block offset within a chunk that marks its center (both axes).
-     */
-    public static final int CHUNK_CENTER = 8;
-
     /* Commands */
     @ConfigComment("Player command. What command users will run to access their island.")
     @ConfigComment("To define alias, just separate commands with white space.")
@@ -768,7 +763,7 @@ public class Settings implements WorldSettings {
      */
     @Override
     public int getIslandXOffset() {
-        return Math.floorMod(CHUNK_CENTER - islandStartX, 16);
+        return Math.floorMod(8 - islandStartX, 16);
     }
 
     /**
@@ -778,7 +773,7 @@ public class Settings implements WorldSettings {
      */
     @Override
     public int getIslandZOffset() {
-        return Math.floorMod(CHUNK_CENTER - islandStartZ, 16);
+        return Math.floorMod(8 - islandStartZ, 16);
     }
 
     /**

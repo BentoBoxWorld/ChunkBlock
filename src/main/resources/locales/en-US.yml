@@ -62,7 +62,19 @@ chunkblock:
     status: "&a Phase: &b [phase-name] &d | &a Blocks: &b [done] &d / &b [total] &d | &a Progression: &b [percent-done]"
     not-active: "&c Action Bar is not active for this island"
   commands:
+    chunks:
+      description: "show your unlocked chunks and a map of your territory"
     admin:
+      chunks:
+        parameters: "<player> [set <count> | recalc]"
+        description: "inspect, set or recalculate a player's unlocked chunks"
+        info: "&a [name] has &b [number] &a of &b [max] &a chunks unlocked."
+        set: "&a [name]'s unlocked chunks set to &b [number]&a."
+        recalc: "&a [name]'s unlocked chunks recalculated from their island level: &b [number]&a."
+      bypass:
+        description: "toggle chunk lock enforcement for yourself"
+        "on": "&a You now bypass chunk locks. Border visuals are hidden for you."
+        "off": "&a Chunk locks apply to you again."
       setcount:
         parameters: "<name> <count> [lifetime]"
         description: "set player's block count"

@@ -8,6 +8,9 @@ repository: "BentoBoxWorld/ChunkBlock"
 
 authors: tastybento
 
+depend: Level
+softdepend: Border
+
 permissions:
 # Non-command permissions
   chunkblock.island.lock:
@@ -36,6 +39,9 @@ permissions:
     default: op
   chunkblock.mod.bypasslock:
     description: Bypasses an island lock
+    default: op
+  chunkblock.mod.bypasschunks:
+    description: Exempts the holder from chunk locking entirely; also allows '/cbadmin bypass' to toggle it
     default: op
   chunkblock.mod.bypassban:
     description: Bypasses island ban
@@ -322,4 +328,10 @@ permissions:
     default: OP
   chunkblock.admin.phases:
     description: Allow use of '/cbadmin phases' command - open the phase order editor
+    default: OP
+  chunkblock.island.chunks:
+    description: Allow use of '/cb chunks' command - show your unlocked chunks and territory map
+    default: TRUE
+  chunkblock.admin.chunks:
+    description: Allow use of '/cbadmin chunks' command - inspect, set or recalculate a player's unlocked chunks
     default: OP 
