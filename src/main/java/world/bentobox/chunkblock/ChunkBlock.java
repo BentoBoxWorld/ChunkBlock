@@ -20,6 +20,8 @@ import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.generators.ChunkGeneratorWorld;
 import world.bentobox.chunkblock.listeners.BlockListener;
 import world.bentobox.chunkblock.listeners.BlockProtect;
+import world.bentobox.chunkblock.listeners.ChunkGuardListener;
+import world.bentobox.chunkblock.listeners.LockedChunkProtect;
 import world.bentobox.chunkblock.listeners.BossBarListener;
 import world.bentobox.chunkblock.listeners.HoloListener;
 import world.bentobox.chunkblock.listeners.InfoListener;
@@ -71,6 +73,8 @@ public class ChunkBlock extends GameModeAddon {
     private final Config<Settings> configObject = new Config<>(this, Settings.class);
     /** The listener for block-related events */
     private BlockListener blockListener;
+    /** The listener that keeps players out of locked chunks */
+    private ChunkGuardListener chunkGuardListener;
     /** The manager for OneBlock phases and blocks */
     private OneBlocksManager oneBlockManager;
     /** The manager for chunk locking and the unlock spiral */
@@ -200,6 +204,9 @@ public class ChunkBlock extends GameModeAddon {
         // Initialize and register listeners
         blockListener = new BlockListener(this);
         registerListener(blockListener);
+        chunkGuardListener = new ChunkGuardListener(this);
+        registerListener(chunkGuardListener);
+        registerListener(new LockedChunkProtect(this));
         registerListener(new NoBlockHandler(this));
         registerListener(new BlockProtect(this));
         registerListener(new JoinLeaveListener(this));
@@ -276,6 +283,13 @@ public class ChunkBlock extends GameModeAddon {
      */
     public ChunkManager getChunkManager() {
         return chunkManager;
+    }
+
+    /**
+     * @return the chunk guard listener (containment and backtracking)
+     */
+    public ChunkGuardListener getChunkGuardListener() {
+        return chunkGuardListener;
     }
 
     @Override

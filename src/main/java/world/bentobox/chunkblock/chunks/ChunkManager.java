@@ -1,9 +1,14 @@
 package world.bentobox.chunkblock.chunks;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.database.objects.Island;
@@ -26,10 +31,47 @@ import world.bentobox.chunkblock.Settings;
  */
 public class ChunkManager {
 
+    /**
+     * Permission that exempts moderators from chunk locking entirely.
+     */
+    public static final String BYPASS_PERMISSION = "chunkblock.mod.bypasslock";
+
     private final ChunkBlock addon;
+    /**
+     * Players holding {@link #BYPASS_PERMISSION} who have switched enforcement back on for
+     * themselves with the admin bypass command.
+     */
+    private final Set<UUID> bypassSwitchedOff = new HashSet<>();
 
     public ChunkManager(ChunkBlock addon) {
         this.addon = addon;
+    }
+
+    /**
+     * Checks whether a player is exempt from chunk locking: spectators always are, and
+     * holders of {@link #BYPASS_PERMISSION} are unless they toggled enforcement back on
+     * with the admin bypass command.
+     *
+     * @param player the player
+     * @return true if chunk locks do not apply to this player
+     */
+    public boolean isExempt(Player player) {
+        return player.getGameMode() == GameMode.SPECTATOR
+                || (player.hasPermission(BYPASS_PERMISSION) && !bypassSwitchedOff.contains(player.getUniqueId()));
+    }
+
+    /**
+     * Toggles chunk lock enforcement for a bypass-permission holder.
+     *
+     * @param uuid the player's UUID
+     * @return true if the player is now bypassing locks, false if enforcement was re-enabled
+     */
+    public boolean toggleBypass(UUID uuid) {
+        if (bypassSwitchedOff.remove(uuid)) {
+            return true;
+        }
+        bypassSwitchedOff.add(uuid);
+        return false;
     }
 
     /**
@@ -207,6 +249,41 @@ public class ChunkManager {
      */
     public int maxRingRadius(Island island) {
         return Math.max(0, (island.getProtectionRange() - Settings.CHUNK_CENTER) / 16);
+    }
+
+    /**
+     * Finds the closest position inside the island's unlocked territory to the given
+     * location. Scans every unlocked chunk and clamps the location's x/z into the chunk's
+     * interior (one block in from the edge, so the returned spot is not on the boundary).
+     * The returned location keeps the given y; callers are responsible for making it safe
+     * to stand on.
+     *
+     * @param island the island
+     * @param from the location to move inside from
+     * @return the nearest unlocked position, or the island center if from is degenerate
+     */
+    public Location nearestUnlockedSpot(Island island, Location from) {
+        Location center = island.getCenter();
+        int centerChunkX = center.getBlockX() >> 4;
+        int centerChunkZ = center.getBlockZ() >> 4;
+        int count = getUnlockedChunkCount(island);
+        double bestDist = Double.MAX_VALUE;
+        Location best = center.clone();
+        best.setY(from.getY());
+        for (int i = 0; i < count; i++) {
+            Vector offset = chunkAt(i);
+            int minX = (centerChunkX + offset.getBlockX()) << 4;
+            int minZ = (centerChunkZ + offset.getBlockZ()) << 4;
+            // Clamp one block inside the chunk so the spot is off the locked boundary
+            double x = Math.clamp(from.getX(), minX + 1.5, minX + 14.5);
+            double z = Math.clamp(from.getZ(), minZ + 1.5, minZ + 14.5);
+            double dist = (x - from.getX()) * (x - from.getX()) + (z - from.getZ()) * (z - from.getZ());
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = new Location(from.getWorld(), x, from.getY(), z, from.getYaw(), from.getPitch());
+            }
+        }
+        return best;
     }
 
     /**

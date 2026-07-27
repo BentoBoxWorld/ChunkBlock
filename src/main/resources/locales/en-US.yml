@@ -32,6 +32,22 @@ protection:
         &b in the Action Bar.
 
 chunkblock:
+  chunks:
+    entry-denied: "&c That chunk is still locked! Raise your island level to unlock it."
+    locked: "&c You can't touch that — the chunk is locked."
+    unlocked: "&a &l Chunk unlocked! &r&a Your island grew to [number] chunks."
+    unlocked-multiple: "&a &l [count] chunks unlocked! &r&a Your island grew to [number] chunks."
+    relocked: "&c Your island level dropped — [count] chunk(s) re-locked. Regain the level to get them back!"
+    ejected: "&c The chunk you were in re-locked, so you were moved to safety."
+    max-reached: "&d Your island has reached its maximum size of [number] chunks!"
+    next-unlock: "&a Next chunk unlocks at island level &b [level]&a."
+    sethome-denied: "&c You can't set a home in a locked chunk."
+    info: "&a Chunks: &b [unlocked]&a/&b[max] &a— ring &b [ring]&a. Next chunk at level &b [level]&a."
+    map:
+      title: "&a Your island territory ([unlocked]/[max] chunks):"
+      row: "&a [row]"
+      legend: "&a ■ unlocked &e ▣ next (level [level]) &7 □ locked"
+      you-are-here: "&b You are on the marked chunk."
   bossbar:
     title: "Blocks remaining"
     # status: "&a Phase blocks &b [total]. Blocks left: [todo]"
