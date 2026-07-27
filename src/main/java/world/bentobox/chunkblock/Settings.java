@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bukkit.Color;
 import org.bukkit.Difficulty;
@@ -35,6 +36,11 @@ import world.bentobox.bentobox.database.objects.adapters.FlagBooleanSerializer;
 @StoreAt(filename="config.yml", path="addons/ChunkBlock") // Explicitly call out what name this should have.
 @ConfigComment("ChunkBlock Configuration [version]")
 public class Settings implements WorldSettings {
+
+    /**
+     * Block offset within a chunk that marks its center (both axes).
+     */
+    public static final int CHUNK_CENTER = 8;
 
     /* Commands */
     @ConfigComment("Player command. What command users will run to access their island.")
@@ -213,14 +219,17 @@ public class Settings implements WorldSettings {
     @ConfigComment("Radius of island in blocks. (So distance between islands is twice this)")
     @ConfigComment("It is the same for every dimension : Overworld, Nether and End.")
     @ConfigComment("This value cannot be changed mid-game and the plugin will not start if it is different.")
+    @ConfigComment("ChunkBlock: must be a multiple of 8 so every island center lands in the middle of a chunk.")
+    @ConfigComment("Values that are not a multiple of 8 are snapped to the nearest multiple on load.")
     @ConfigEntry(path = "world.distance-between-islands", needsReset = true)
-    private int islandDistance = 400;
+    private int islandDistance = 256;
 
     @ConfigComment("Default protection range radius in blocks. Cannot be larger than distance.")
     @ConfigComment("Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>")
     @ConfigComment("or set this permission: chunkblock.island.range.<number>")
+    @ConfigComment("ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).")
     @ConfigEntry(path = "world.protection-range")
-    private int islandProtectionRange = 50;
+    private int islandProtectionRange = 240;
 
     @ConfigComment("Start islands at these coordinates. This is where new islands will start in the")
     @ConfigComment("world. These must be a factor of your island distance, but the plugin will auto")
@@ -233,10 +242,9 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "world.start-z", needsReset = true)
     private int islandStartZ = 0;
 
-    @ConfigEntry(path = "world.offset-x")
-    private int islandXOffset;
-    @ConfigEntry(path = "world.offset-z")
-    private int islandZOffset;
+    // ChunkBlock: island offsets are deliberately NOT configurable. They are computed so
+    // that every island center sits at the middle of a chunk (x ≡ 8 and z ≡ 8 mod 16),
+    // which keeps the unlockable chunk rings symmetric around the magic block.
 
     @ConfigComment("Island height - Lowest is 5.")
     @ConfigComment("It is the y coordinate of the bedrock block in the schem.")
@@ -706,19 +714,23 @@ public class Settings implements WorldSettings {
     }
 
     /**
+     * ChunkBlock computes this value; it is not configurable. The offset compensates for
+     * start-x so that every island center is at the middle of a chunk (x ≡ 8 mod 16).
      * @return the islandXOffset
      */
     @Override
     public int getIslandXOffset() {
-        return islandXOffset;
+        return Math.floorMod(CHUNK_CENTER - islandStartX, 16);
     }
 
     /**
+     * ChunkBlock computes this value; it is not configurable. The offset compensates for
+     * start-z so that every island center is at the middle of a chunk (z ≡ 8 mod 16).
      * @return the islandZOffset
      */
     @Override
     public int getIslandZOffset() {
-        return islandZOffset;
+        return Math.floorMod(CHUNK_CENTER - islandStartZ, 16);
     }
 
     /**
@@ -1129,10 +1141,20 @@ public class Settings implements WorldSettings {
     }
 
     /**
+     * Sets the island distance, snapped to the nearest multiple of 8 (minimum 8).
+     * The grid spacing between island centers is twice the distance, so a multiple of 8
+     * guarantees a whole number of chunks between centers and keeps every island center
+     * at a chunk middle.
      * @param islandDistance the islandDistance to set
      */
     public void setIslandDistance(int islandDistance) {
-        this.islandDistance = islandDistance;
+        int snapped = Math.max(8, Math.round(islandDistance / 8F) * 8);
+        if (snapped != islandDistance) {
+            Logger.getLogger("ChunkBlock").warning(
+                    "distance-between-islands must be a multiple of 8 for ChunkBlock; adjusted from "
+                            + islandDistance + " to " + snapped);
+        }
+        this.islandDistance = snapped;
     }
 
     /**
@@ -1157,17 +1179,19 @@ public class Settings implements WorldSettings {
     }
 
     /**
-     * @param islandXOffset the islandXOffset to set
+     * ChunkBlock manages island offsets itself; this setter is ignored.
+     * @param islandXOffset ignored
      */
     public void setIslandXOffset(int islandXOffset) {
-        this.islandXOffset = islandXOffset;
+        // Computed from start-x in getIslandXOffset(); never stored.
     }
 
     /**
-     * @param islandZOffset the islandZOffset to set
+     * ChunkBlock manages island offsets itself; this setter is ignored.
+     * @param islandZOffset ignored
      */
     public void setIslandZOffset(int islandZOffset) {
-        this.islandZOffset = islandZOffset;
+        // Computed from start-z in getIslandZOffset(); never stored.
     }
 
     /**

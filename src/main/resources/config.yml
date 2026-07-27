@@ -135,11 +135,14 @@ world:
   # It is the same for every dimension : Overworld, Nether and End.
   # This value cannot be changed mid-game and the plugin will not start if it is different.
   # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
-  distance-between-islands: 400
+  # ChunkBlock: must be a multiple of 8 so every island center lands in the middle of a chunk.
+  # Values that are not a multiple of 8 are snapped to the nearest multiple on load.
+  distance-between-islands: 256
   # Default protection range radius in blocks. Cannot be larger than distance.
   # Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>
   # or set this permission: chunkblock.island.range.<number>
-  protection-range: 50
+  # ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).
+  protection-range: 240
   # Start islands at these coordinates. This is where new islands will start in the
   # world. These must be a factor of your island distance, but the plugin will auto
   # calculate the closest location on the grid. Islands develop around this location
@@ -149,8 +152,9 @@ world:
   start-x: 0
   # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
   start-z: 0
-  offset-x: 0
-  offset-z: 0
+  # NOTE: there are deliberately no offset-x/offset-z settings in ChunkBlock.
+  # The addon manages island offsets internally so the magic block always sits
+  # at the center of a chunk.
   # Island height - Lowest is 5.
   # It is the y coordinate of the bedrock block in the schem.
   island-height: 80
