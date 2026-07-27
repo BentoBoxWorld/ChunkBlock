@@ -1,7 +1,5 @@
 package world.bentobox.chunkblock.listeners;
 
-import java.util.Optional;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Directional;
@@ -27,7 +25,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
 
 /**
@@ -230,18 +227,5 @@ public class LockedChunkProtect implements Listener {
                 && isLocked(e.getLocation())) {
             e.setCancelled(true);
         }
-    }
-
-    /**
-     * Homes may not be set in locked chunks; used by the sethome gate.
-     *
-     * @param player the player setting a home
-     * @param location the intended home location
-     * @return true if the location is locked for that player
-     */
-    public boolean denySetHome(Player player, Location location) {
-        Optional<Island> island = addon.getIslands().getIslandAt(location);
-        return island.isPresent() && !addon.getChunkManager().isExempt(player)
-                && addon.getChunkManager().isLocked(island.get(), location);
     }
 }

@@ -61,6 +61,60 @@ public class ChunkBlockPlaceholders {
                 this::getPhaseBlocksNamesByLocation);
         placeholdersManager.registerPlaceholder(addon, "my_island_phase_block_list", this::getPhaseBlocksNames);
 
+        // Chunk territory placeholders
+        placeholdersManager.registerPlaceholder(addon, "island_chunks", this::getIslandChunks);
+        placeholdersManager.registerPlaceholder(addon, "island_max_chunks", this::getIslandMaxChunks);
+        placeholdersManager.registerPlaceholder(addon, "island_next_chunk_level", this::getIslandNextChunkLevel);
+        placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
+    }
+
+    /**
+     * @param user user
+     * @return number of chunks the user's island has unlocked
+     */
+    public String getIslandChunks(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user)
+                .map(i -> String.valueOf(addon.getChunkManager().getUnlockedChunkCount(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return maximum number of chunks the user's island can unlock
+     */
+    public String getIslandMaxChunks(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().getMaxChunks(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return island level required for the user's island to unlock its next chunk
+     */
+    public String getIslandNextChunkLevel(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(
+                addon.getChunkManager().levelForChunkNumber(addon.getChunkManager().getUnlockedChunkCount(i) + 1)))
+                .orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return ring number of the user's island's outermost unlocked chunk
+     */
+    public String getIslandRing(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(
+                world.bentobox.chunkblock.chunks.ChunkManager.ringOf(addon.getChunkManager().getUnlockedChunkCount(i) - 1)))
+                .orElse("");
     }
 
     /**

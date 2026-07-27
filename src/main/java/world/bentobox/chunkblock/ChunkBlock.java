@@ -39,6 +39,7 @@ import world.bentobox.chunkblock.oneblocks.customblock.CraftEngineCustomBlock;
 import world.bentobox.chunkblock.oneblocks.customblock.ItemsAdderCustomBlock;
 import world.bentobox.chunkblock.oneblocks.customblock.NexoCustomBlock;
 import world.bentobox.chunkblock.requests.IslandStatsHandler;
+import world.bentobox.chunkblock.requests.UnlockedChunksHandler;
 import world.bentobox.chunkblock.requests.LocationStatsHandler;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.configuration.Config;
@@ -228,6 +229,7 @@ public class ChunkBlock extends GameModeAddon {
         // Register request handlers
         registerRequestHandler(new IslandStatsHandler(this));
         registerRequestHandler(new LocationStatsHandler(this));
+        registerRequestHandler(new UnlockedChunksHandler(this));
 
         // Register Holograms
         holoListener = new HoloListener(this);
@@ -437,6 +439,13 @@ public class ChunkBlock extends GameModeAddon {
     public void allLoaded() {
         // save settings. This will occur after all addons have loaded
         this.saveWorldSettings();
+        // The Border addon draws one rectangle per island; ChunkBlock's frontier is a
+        // ragged ring of chunks, so the two cannot both be right. Warn admins clearly.
+        if (getPlugin().getAddonsManager().getAddonByName("Border").isPresent()) {
+            logWarning("The Border addon is installed. Border cannot draw ChunkBlock's chunk-by-chunk frontier");
+            logWarning("and its wall will not match the unlocked area. Please add '" + getDescription().getName()
+                    + "' to Border's disabled-gamemodes list in its config.yml. ChunkBlock draws its own border.");
+        }
     }
 
     /**
