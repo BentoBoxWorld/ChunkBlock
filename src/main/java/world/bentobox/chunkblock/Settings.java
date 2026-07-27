@@ -113,6 +113,54 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.placeholders.scale-symbol") // , since = "1.9.0")
     private String percentCompleteSymbol = "■";
 
+    /*      CHUNKS      */
+    @ConfigComment("How many island levels are needed to unlock each chunk. Minimum 1.")
+    @ConfigComment("With the default of 1, a fresh island (level 0) has just the center chunk,")
+    @ConfigComment("and every level gained unlocks the next chunk in the spiral.")
+    @ConfigEntry(path = "chunkblock.levels-per-chunk")
+    private int levelsPerChunk = 1;
+
+    @ConfigComment("Maximum number of chunks an island can unlock, including the center chunk.")
+    @ConfigComment("441 chunks is a full 10-ring square (21 x 21 chunks). Use -1 for no limit beyond")
+    @ConfigComment("what the island protection range can hold. The effective maximum is always")
+    @ConfigComment("capped so the outermost ring fits inside the protection range.")
+    @ConfigEntry(path = "chunkblock.max-chunks")
+    private int maxChunks = 441;
+
+    @ConfigComment("If true, losing island levels re-locks chunks in reverse unlock order (the")
+    @ConfigComment("most recently earned chunks are lost first). Builds inside re-locked chunks are")
+    @ConfigComment("untouched but cannot be reached until the level is regained.")
+    @ConfigComment("If false ('ratchet mode'), chunks never re-lock once unlocked.")
+    @ConfigEntry(path = "chunkblock.relock-on-level-loss")
+    private boolean relockOnLevelLoss = true;
+
+    @ConfigComment("If true, players standing in a chunk when it re-locks are moved to the nearest")
+    @ConfigComment("unlocked spot. If false they may walk out but not back in.")
+    @ConfigEntry(path = "chunkblock.eject-players-on-relock")
+    private boolean ejectPlayersOnRelock = true;
+
+    @ConfigComment("Cancel natural mob spawning inside locked chunks.")
+    @ConfigEntry(path = "chunkblock.deny-mob-spawns-in-locked")
+    private boolean denyMobSpawnsInLocked = true;
+
+    @ConfigComment("Bounce dropped items back when they cross into a locked chunk so players")
+    @ConfigComment("cannot lose their stuff to the forbidden zone.")
+    @ConfigEntry(path = "chunkblock.bounce-back-items")
+    private boolean bounceBackItems = true;
+
+    @ConfigComment("Show a particle curtain on the faces of locked chunks near players.")
+    @ConfigEntry(path = "chunkblock.border.show-particles")
+    private boolean borderShowParticles = true;
+
+    @ConfigComment("Color of the locked-chunk border particles.")
+    @ConfigEntry(path = "chunkblock.border.particle-color")
+    private Color borderParticleColor = Color.RED;
+
+    @ConfigComment("Also send client-side barrier blocks on locked-chunk faces near players.")
+    @ConfigComment("Purely visual on the client; the world is never modified.")
+    @ConfigEntry(path = "chunkblock.border.client-side-barrier-blocks")
+    private boolean borderBarrierBlocks = false;
+
     /*      WORLD       */
     @ConfigComment("Friendly name for this world. Used in admin commands. Must be a single word")
     @ConfigEntry(path = "world.friendly-name")
@@ -307,7 +355,7 @@ public class Settings implements WorldSettings {
     @ConfigComment("Note that with a standard nether all players arrive at the same portal and entering a")
     @ConfigComment("portal will return them back to their islands.")
     @ConfigEntry(path = "world.nether.generate")
-    private boolean netherGenerate = true;
+    private boolean netherGenerate = false;
 
     @ConfigComment("Islands in Nether. Change to false for standard vanilla nether.")
     @ConfigComment("Note that there is currently no magic block in the Nether")
@@ -2495,6 +2543,132 @@ public class Settings implements WorldSettings {
             case UNCOMMON -> getChestColorUncommon();
             default -> getChestColorUncommon();
         };
+    }
+
+    /**
+     * @return island levels needed to unlock each chunk, never less than 1
+     */
+    public int getLevelsPerChunk() {
+        return Math.max(1, levelsPerChunk);
+    }
+
+    /**
+     * @param levelsPerChunk the levelsPerChunk to set
+     */
+    public void setLevelsPerChunk(int levelsPerChunk) {
+        this.levelsPerChunk = levelsPerChunk;
+    }
+
+    /**
+     * @return the configured maximum number of unlockable chunks including the center; -1 means unlimited
+     */
+    public int getMaxChunks() {
+        return maxChunks;
+    }
+
+    /**
+     * @param maxChunks the maxChunks to set
+     */
+    public void setMaxChunks(int maxChunks) {
+        this.maxChunks = maxChunks;
+    }
+
+    /**
+     * @return true if chunks re-lock when island level drops
+     */
+    public boolean isRelockOnLevelLoss() {
+        return relockOnLevelLoss;
+    }
+
+    /**
+     * @param relockOnLevelLoss the relockOnLevelLoss to set
+     */
+    public void setRelockOnLevelLoss(boolean relockOnLevelLoss) {
+        this.relockOnLevelLoss = relockOnLevelLoss;
+    }
+
+    /**
+     * @return true if players are moved out of chunks that re-lock
+     */
+    public boolean isEjectPlayersOnRelock() {
+        return ejectPlayersOnRelock;
+    }
+
+    /**
+     * @param ejectPlayersOnRelock the ejectPlayersOnRelock to set
+     */
+    public void setEjectPlayersOnRelock(boolean ejectPlayersOnRelock) {
+        this.ejectPlayersOnRelock = ejectPlayersOnRelock;
+    }
+
+    /**
+     * @return true if natural mob spawns are cancelled in locked chunks
+     */
+    public boolean isDenyMobSpawnsInLocked() {
+        return denyMobSpawnsInLocked;
+    }
+
+    /**
+     * @param denyMobSpawnsInLocked the denyMobSpawnsInLocked to set
+     */
+    public void setDenyMobSpawnsInLocked(boolean denyMobSpawnsInLocked) {
+        this.denyMobSpawnsInLocked = denyMobSpawnsInLocked;
+    }
+
+    /**
+     * @return true if dropped items bounce back from locked chunks
+     */
+    public boolean isBounceBackItems() {
+        return bounceBackItems;
+    }
+
+    /**
+     * @param bounceBackItems the bounceBackItems to set
+     */
+    public void setBounceBackItems(boolean bounceBackItems) {
+        this.bounceBackItems = bounceBackItems;
+    }
+
+    /**
+     * @return true if the locked-chunk border particle curtain is shown
+     */
+    public boolean isBorderShowParticles() {
+        return borderShowParticles;
+    }
+
+    /**
+     * @param borderShowParticles the borderShowParticles to set
+     */
+    public void setBorderShowParticles(boolean borderShowParticles) {
+        this.borderShowParticles = borderShowParticles;
+    }
+
+    /**
+     * @return the color of border particles
+     */
+    public Color getBorderParticleColor() {
+        return borderParticleColor == null ? Color.RED : borderParticleColor;
+    }
+
+    /**
+     * @param borderParticleColor the borderParticleColor to set
+     */
+    public void setBorderParticleColor(Color borderParticleColor) {
+        this.borderParticleColor = borderParticleColor;
+    }
+
+    /**
+     * @return true if client-side barrier blocks are sent on locked-chunk faces
+     */
+    public boolean isBorderBarrierBlocks() {
+        return borderBarrierBlocks;
+    }
+
+    /**
+     * @param borderBarrierBlocks the borderBarrierBlocks to set
+     */
+    public void setBorderBarrierBlocks(boolean borderBarrierBlocks) {
+        this.borderBarrierBlocks = borderBarrierBlocks;
     }
 
 }

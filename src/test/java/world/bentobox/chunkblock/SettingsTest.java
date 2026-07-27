@@ -160,7 +160,8 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testIsNetherGenerate() {
-        assertTrue(s.isNetherGenerate());
+        // ChunkBlock ships with the nether disabled by default
+        assertFalse(s.isNetherGenerate());
     }
 
     /**

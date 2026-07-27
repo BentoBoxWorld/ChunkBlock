@@ -13,6 +13,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.commands.admin.AdminCommand;
 import world.bentobox.chunkblock.commands.island.PlayerCommand;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
@@ -72,6 +73,8 @@ public class ChunkBlock extends GameModeAddon {
     private BlockListener blockListener;
     /** The manager for OneBlock phases and blocks */
     private OneBlocksManager oneBlockManager;
+    /** The manager for chunk locking and the unlock spiral */
+    private ChunkManager chunkManager;
     /** The placeholder manager for ChunkBlock */
     private ChunkBlockPlaceholders phManager;
     /** The listener for hologram-related events */
@@ -187,6 +190,8 @@ public class ChunkBlock extends GameModeAddon {
     public void onEnable() {
         // Initialize the OneBlock manager
         oneBlockManager = new OneBlocksManager(this);
+        // Initialize the chunk lock manager
+        chunkManager = new ChunkManager(this);
         // Load phase data
         if (loadData()) {
             // Failed to load - don't register anything
@@ -264,6 +269,13 @@ public class ChunkBlock extends GameModeAddon {
      */
     public Settings getSettings() {
         return settings;
+    }
+
+    /**
+     * @return the chunk lock manager
+     */
+    public ChunkManager getChunkManager() {
+        return chunkManager;
     }
 
     @Override

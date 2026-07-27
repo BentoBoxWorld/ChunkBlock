@@ -17,7 +17,7 @@ import world.bentobox.bentobox.database.objects.Table;
 /**
  * @author tastybento
  */
-@Table(name = "OneBlockIslands")
+@Table(name = "ChunkBlockIslands")
 public class OneBlockIslands implements DataObject {
 
     @Expose
@@ -50,6 +50,14 @@ public class OneBlockIslands implements DataObject {
     @Expose
     private long lastPhaseChangeTime = 0;
 
+    /**
+     * Number of unlocked chunks including the free center chunk. Cached so chunk
+     * enforcement works immediately after a restart, before the first level
+     * recalculation; recomputed from the Level addon whenever levels change.
+     */
+    @Expose
+    private int unlockedChunkCount = 1;
+
     private Queue<OneBlockObject> queue = new LinkedList<>();
 
     /**
@@ -69,6 +77,20 @@ public class OneBlockIslands implements DataObject {
 
     public OneBlockIslands(String uniqueId) {
         this.uniqueId = uniqueId;
+    }
+
+    /**
+     * @return the number of unlocked chunks, never less than 1 (the center chunk cannot lock)
+     */
+    public int getUnlockedChunkCount() {
+        return Math.max(1, unlockedChunkCount);
+    }
+
+    /**
+     * @param unlockedChunkCount the unlockedChunkCount to set; values below 1 clamp to 1
+     */
+    public void setUnlockedChunkCount(int unlockedChunkCount) {
+        this.unlockedChunkCount = Math.max(1, unlockedChunkCount);
     }
 
     /**

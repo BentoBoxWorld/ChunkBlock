@@ -196,7 +196,9 @@ world:
     # Note: Some default challenges will not be possible if there is no nether.
     # Note that with a standard nether all players arrive at the same portal and entering a
     # portal will return them to their islands.
-    generate: true
+    # ChunkBlock: disabled by default. If enabled, the nether gets its own center chunk
+    # and the same chunk unlocking rules, driven by the same island level.
+    generate: false
     # Islands in Nether. Change to false for standard vanilla nether.
     # Note that there is currently no magic block in the Nether
     # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
@@ -218,7 +220,8 @@ world:
   end:
     # End Nether - if this is false, the end world will not be made and access to
     # the end will not occur. Other plugins may still enable portal usage.
-    generate: true
+    # ChunkBlock: disabled by default (see nether note above).
+    generate: false
     # Islands in The End. Change to false for standard vanilla end.
     # Note that there is currently no magic block in the End
     # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
