@@ -56,7 +56,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetWorldName() {
-        assertEquals("oneblock_world", s.getWorldName());
+        assertEquals("chunkblock_world", s.getWorldName());
     }
 
     /**
