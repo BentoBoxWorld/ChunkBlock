@@ -210,8 +210,9 @@ public class ChunkBlockTest extends CommonTestSetup {
         addon.onLoad();
         addon.createWorlds();
         verify(plugin).log("[chunkblock] Creating ChunkBlock world ...");
-        verify(plugin).log("[chunkblock] Creating ChunkBlock's Nether...");
-        verify(plugin).log("[chunkblock] Creating ChunkBlock's End World...");
+        // Nether and end are disabled by default in ChunkBlock
+        verify(plugin, Mockito.never()).log("[chunkblock] Creating ChunkBlock's Nether...");
+        verify(plugin, Mockito.never()).log("[chunkblock] Creating ChunkBlock's End World...");
 
     }
 

@@ -1,5 +1,14 @@
 # ChunkBlock — Design & Implementation Plan
 
+> **DESIGN CHANGE (2026-07-27), supersedes §6/§7 below:** the automatic spiral unlock was
+> replaced after implementation review. Levels are now spendable credit: the island owner
+> claims a chunk by hitting the border in the direction they want to expand (any
+> direction, adjacent chunks only, up to the protection range). The unlock order is
+> recorded per island; level loss re-locks the most recently claimed chunks first. The
+> Border addon is allowed (it shows the protection limit; ChunkBlock draws the chunk
+> frontier itself), so the startup conflict warning was removed. Everything else
+> (enforcement, placement, visuals, engine copy) stands as written.
+
 A BentoBox gamemode addon. Like OneBlock, but the world around you is a forbidden zone:
 you start confined to a single chunk containing the magic block, and you unlock the
 surrounding chunks — one chunk per island level — in concentric rings around the center.

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bukkit.Color;
 import org.bukkit.Difficulty;
@@ -106,6 +107,55 @@ public class Settings implements WorldSettings {
     @ConfigComment("Symbol for the percentage completed scale bar")
     @ConfigEntry(path = "chunkblock.placeholders.scale-symbol") // , since = "1.9.0")
     private String percentCompleteSymbol = "■";
+
+    /*      CHUNKS      */
+    @ConfigComment("How many island levels one chunk costs to claim. Minimum 1.")
+    @ConfigComment("Island levels are chunk currency: credit = island level minus levels already")
+    @ConfigComment("spent. The island owner spends credit by hitting the border where they want")
+    @ConfigComment("to expand.")
+    @ConfigEntry(path = "chunkblock.levels-per-chunk")
+    private int levelsPerChunk = 1;
+
+    @ConfigComment("Maximum number of chunks an island can claim, including the center chunk.")
+    @ConfigComment("441 chunks is a full 21 x 21 chunk square. Use -1 for no limit beyond what the")
+    @ConfigComment("island protection range can hold. The effective maximum is always capped so")
+    @ConfigComment("claimed chunks fit inside the protection range.")
+    @ConfigEntry(path = "chunkblock.max-chunks")
+    private int maxChunks = 441;
+
+    @ConfigComment("If true, losing island levels below what has been spent re-locks chunks in")
+    @ConfigComment("reverse claim order (the most recently claimed chunks are lost first). Builds")
+    @ConfigComment("inside re-locked chunks are untouched but cannot be reached until the levels")
+    @ConfigComment("are regained. If false ('ratchet mode'), chunks never re-lock once claimed.")
+    @ConfigEntry(path = "chunkblock.relock-on-level-loss")
+    private boolean relockOnLevelLoss = true;
+
+    @ConfigComment("If true, players standing in a chunk when it re-locks are moved to the nearest")
+    @ConfigComment("unlocked spot. If false they may walk out but not back in.")
+    @ConfigEntry(path = "chunkblock.eject-players-on-relock")
+    private boolean ejectPlayersOnRelock = true;
+
+    @ConfigComment("Cancel natural mob spawning inside locked chunks.")
+    @ConfigEntry(path = "chunkblock.deny-mob-spawns-in-locked")
+    private boolean denyMobSpawnsInLocked = true;
+
+    @ConfigComment("Bounce dropped items back when they cross into a locked chunk so players")
+    @ConfigComment("cannot lose their stuff to the forbidden zone.")
+    @ConfigEntry(path = "chunkblock.bounce-back-items")
+    private boolean bounceBackItems = true;
+
+    @ConfigComment("Show a particle curtain on the faces of locked chunks near players.")
+    @ConfigEntry(path = "chunkblock.border.show-particles")
+    private boolean borderShowParticles = true;
+
+    @ConfigComment("Color of the locked-chunk border particles.")
+    @ConfigEntry(path = "chunkblock.border.particle-color")
+    private Color borderParticleColor = Color.RED;
+
+    @ConfigComment("Also send client-side barrier blocks on locked-chunk faces near players.")
+    @ConfigComment("Purely visual on the client; the world is never modified.")
+    @ConfigEntry(path = "chunkblock.border.client-side-barrier-blocks")
+    private boolean borderBarrierBlocks = false;
 
     /*      WORLD       */
     @ConfigComment("Friendly name for this world. Used in admin commands. Must be a single word")
@@ -213,14 +263,17 @@ public class Settings implements WorldSettings {
     @ConfigComment("Radius of island in blocks. (So distance between islands is twice this)")
     @ConfigComment("It is the same for every dimension : Overworld, Nether and End.")
     @ConfigComment("This value cannot be changed mid-game and the plugin will not start if it is different.")
+    @ConfigComment("ChunkBlock: must be a multiple of 8 so every island center lands in the middle of a chunk.")
+    @ConfigComment("Values that are not a multiple of 8 are snapped to the nearest multiple on load.")
     @ConfigEntry(path = "world.distance-between-islands", needsReset = true)
-    private int islandDistance = 400;
+    private int islandDistance = 256;
 
     @ConfigComment("Default protection range radius in blocks. Cannot be larger than distance.")
     @ConfigComment("Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>")
     @ConfigComment("or set this permission: chunkblock.island.range.<number>")
+    @ConfigComment("ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).")
     @ConfigEntry(path = "world.protection-range")
-    private int islandProtectionRange = 50;
+    private int islandProtectionRange = 240;
 
     @ConfigComment("Start islands at these coordinates. This is where new islands will start in the")
     @ConfigComment("world. These must be a factor of your island distance, but the plugin will auto")
@@ -233,10 +286,9 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "world.start-z", needsReset = true)
     private int islandStartZ = 0;
 
-    @ConfigEntry(path = "world.offset-x")
-    private int islandXOffset;
-    @ConfigEntry(path = "world.offset-z")
-    private int islandZOffset;
+    // ChunkBlock: island offsets are deliberately NOT configurable. They are computed so
+    // that every island center sits at the middle of a chunk (x ≡ 8 and z ≡ 8 mod 16),
+    // which keeps the unlockable chunk rings symmetric around the magic block.
 
     @ConfigComment("Island height - Lowest is 5.")
     @ConfigComment("It is the y coordinate of the bedrock block in the schem.")
@@ -299,7 +351,7 @@ public class Settings implements WorldSettings {
     @ConfigComment("Note that with a standard nether all players arrive at the same portal and entering a")
     @ConfigComment("portal will return them back to their islands.")
     @ConfigEntry(path = "world.nether.generate")
-    private boolean netherGenerate = true;
+    private boolean netherGenerate = false;
 
     @ConfigComment("Islands in Nether. Change to false for standard vanilla nether.")
     @ConfigComment("Note that there is currently no magic block in the Nether")
@@ -706,19 +758,23 @@ public class Settings implements WorldSettings {
     }
 
     /**
+     * ChunkBlock computes this value; it is not configurable. The offset compensates for
+     * start-x so that every island center is at the middle of a chunk (x ≡ 8 mod 16).
      * @return the islandXOffset
      */
     @Override
     public int getIslandXOffset() {
-        return islandXOffset;
+        return Math.floorMod(8 - islandStartX, 16);
     }
 
     /**
+     * ChunkBlock computes this value; it is not configurable. The offset compensates for
+     * start-z so that every island center is at the middle of a chunk (z ≡ 8 mod 16).
      * @return the islandZOffset
      */
     @Override
     public int getIslandZOffset() {
-        return islandZOffset;
+        return Math.floorMod(8 - islandStartZ, 16);
     }
 
     /**
@@ -1129,10 +1185,20 @@ public class Settings implements WorldSettings {
     }
 
     /**
+     * Sets the island distance, snapped to the nearest multiple of 8 (minimum 8).
+     * The grid spacing between island centers is twice the distance, so a multiple of 8
+     * guarantees a whole number of chunks between centers and keeps every island center
+     * at a chunk middle.
      * @param islandDistance the islandDistance to set
      */
     public void setIslandDistance(int islandDistance) {
-        this.islandDistance = islandDistance;
+        int snapped = Math.max(8, Math.round(islandDistance / 8F) * 8);
+        if (snapped != islandDistance) {
+            Logger.getLogger("ChunkBlock").warning(
+                    "distance-between-islands must be a multiple of 8 for ChunkBlock; adjusted from "
+                            + islandDistance + " to " + snapped);
+        }
+        this.islandDistance = snapped;
     }
 
     /**
@@ -1157,17 +1223,19 @@ public class Settings implements WorldSettings {
     }
 
     /**
-     * @param islandXOffset the islandXOffset to set
+     * ChunkBlock manages island offsets itself; this setter is ignored.
+     * @param islandXOffset ignored
      */
     public void setIslandXOffset(int islandXOffset) {
-        this.islandXOffset = islandXOffset;
+        // Computed from start-x in getIslandXOffset(); never stored.
     }
 
     /**
-     * @param islandZOffset the islandZOffset to set
+     * ChunkBlock manages island offsets itself; this setter is ignored.
+     * @param islandZOffset ignored
      */
     public void setIslandZOffset(int islandZOffset) {
-        this.islandZOffset = islandZOffset;
+        // Computed from start-z in getIslandZOffset(); never stored.
     }
 
     /**
@@ -2471,6 +2539,132 @@ public class Settings implements WorldSettings {
             case UNCOMMON -> getChestColorUncommon();
             default -> getChestColorUncommon();
         };
+    }
+
+    /**
+     * @return island levels needed to unlock each chunk, never less than 1
+     */
+    public int getLevelsPerChunk() {
+        return Math.max(1, levelsPerChunk);
+    }
+
+    /**
+     * @param levelsPerChunk the levelsPerChunk to set
+     */
+    public void setLevelsPerChunk(int levelsPerChunk) {
+        this.levelsPerChunk = levelsPerChunk;
+    }
+
+    /**
+     * @return the configured maximum number of unlockable chunks including the center; -1 means unlimited
+     */
+    public int getMaxChunks() {
+        return maxChunks;
+    }
+
+    /**
+     * @param maxChunks the maxChunks to set
+     */
+    public void setMaxChunks(int maxChunks) {
+        this.maxChunks = maxChunks;
+    }
+
+    /**
+     * @return true if chunks re-lock when island level drops
+     */
+    public boolean isRelockOnLevelLoss() {
+        return relockOnLevelLoss;
+    }
+
+    /**
+     * @param relockOnLevelLoss the relockOnLevelLoss to set
+     */
+    public void setRelockOnLevelLoss(boolean relockOnLevelLoss) {
+        this.relockOnLevelLoss = relockOnLevelLoss;
+    }
+
+    /**
+     * @return true if players are moved out of chunks that re-lock
+     */
+    public boolean isEjectPlayersOnRelock() {
+        return ejectPlayersOnRelock;
+    }
+
+    /**
+     * @param ejectPlayersOnRelock the ejectPlayersOnRelock to set
+     */
+    public void setEjectPlayersOnRelock(boolean ejectPlayersOnRelock) {
+        this.ejectPlayersOnRelock = ejectPlayersOnRelock;
+    }
+
+    /**
+     * @return true if natural mob spawns are cancelled in locked chunks
+     */
+    public boolean isDenyMobSpawnsInLocked() {
+        return denyMobSpawnsInLocked;
+    }
+
+    /**
+     * @param denyMobSpawnsInLocked the denyMobSpawnsInLocked to set
+     */
+    public void setDenyMobSpawnsInLocked(boolean denyMobSpawnsInLocked) {
+        this.denyMobSpawnsInLocked = denyMobSpawnsInLocked;
+    }
+
+    /**
+     * @return true if dropped items bounce back from locked chunks
+     */
+    public boolean isBounceBackItems() {
+        return bounceBackItems;
+    }
+
+    /**
+     * @param bounceBackItems the bounceBackItems to set
+     */
+    public void setBounceBackItems(boolean bounceBackItems) {
+        this.bounceBackItems = bounceBackItems;
+    }
+
+    /**
+     * @return true if the locked-chunk border particle curtain is shown
+     */
+    public boolean isBorderShowParticles() {
+        return borderShowParticles;
+    }
+
+    /**
+     * @param borderShowParticles the borderShowParticles to set
+     */
+    public void setBorderShowParticles(boolean borderShowParticles) {
+        this.borderShowParticles = borderShowParticles;
+    }
+
+    /**
+     * @return the color of border particles
+     */
+    public Color getBorderParticleColor() {
+        return borderParticleColor == null ? Color.RED : borderParticleColor;
+    }
+
+    /**
+     * @param borderParticleColor the borderParticleColor to set
+     */
+    public void setBorderParticleColor(Color borderParticleColor) {
+        this.borderParticleColor = borderParticleColor;
+    }
+
+    /**
+     * @return true if client-side barrier blocks are sent on locked-chunk faces
+     */
+    public boolean isBorderBarrierBlocks() {
+        return borderBarrierBlocks;
+    }
+
+    /**
+     * @param borderBarrierBlocks the borderBarrierBlocks to set
+     */
+    public void setBorderBarrierBlocks(boolean borderBarrierBlocks) {
+        this.borderBarrierBlocks = borderBarrierBlocks;
     }
 
 }

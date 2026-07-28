@@ -47,6 +47,41 @@ chunkblock:
     # Placeholder customization
     # Symbol for the percentage completed scale bar
     scale-symbol: ■
+  # How many island levels one chunk costs to claim. Minimum 1.
+  # Island levels are chunk currency: credit = island level minus levels already
+  # spent. The island owner spends credit by hitting the border where they want to expand.
+  levels-per-chunk: 1
+  # Maximum number of chunks an island can claim, including the center chunk.
+  # 441 chunks is a full 21 x 21 chunk square. Use -1 for no limit beyond what the
+  # island protection range can hold. The effective maximum is always capped so
+  # claimed chunks fit inside the protection range.
+  max-chunks: 441
+  # If true, losing island levels below what has been spent re-locks chunks in
+  # reverse claim order (the most recently claimed chunks are lost first). Builds
+  # inside re-locked chunks are untouched but cannot be reached until the levels
+  # are regained. If false ('ratchet mode'), chunks never re-lock once claimed.
+  relock-on-level-loss: true
+  # If true, players standing in a chunk when it re-locks are moved to the nearest
+  # unlocked spot. If false they may walk out but not back in.
+  eject-players-on-relock: true
+  # Cancel natural mob spawning inside locked chunks.
+  deny-mob-spawns-in-locked: true
+  # Bounce dropped items back when they cross into a locked chunk so players
+  # cannot lose their stuff to the forbidden zone.
+  bounce-back-items: true
+  border:
+    # Show a particle curtain on the faces of locked chunks near players.
+    show-particles: true
+    # Color of the locked-chunk border particles.
+    particle-color:
+      ==: Color
+      ALPHA: 255
+      RED: 255
+      GREEN: 0
+      BLUE: 0
+    # Also send client-side barrier blocks on locked-chunk faces near players.
+    # Purely visual on the client; the world is never modified.
+    client-side-barrier-blocks: false
 world:
   # Friendly name for this world. Used in admin commands. Must be a single word
   friendly-name: ChunkBlock
@@ -135,11 +170,14 @@ world:
   # It is the same for every dimension : Overworld, Nether and End.
   # This value cannot be changed mid-game and the plugin will not start if it is different.
   # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
-  distance-between-islands: 400
+  # ChunkBlock: must be a multiple of 8 so every island center lands in the middle of a chunk.
+  # Values that are not a multiple of 8 are snapped to the nearest multiple on load.
+  distance-between-islands: 256
   # Default protection range radius in blocks. Cannot be larger than distance.
   # Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>
   # or set this permission: chunkblock.island.range.<number>
-  protection-range: 50
+  # ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).
+  protection-range: 240
   # Start islands at these coordinates. This is where new islands will start in the
   # world. These must be a factor of your island distance, but the plugin will auto
   # calculate the closest location on the grid. Islands develop around this location
@@ -149,8 +187,9 @@ world:
   start-x: 0
   # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
   start-z: 0
-  offset-x: 0
-  offset-z: 0
+  # NOTE: there are deliberately no offset-x/offset-z settings in ChunkBlock.
+  # The addon manages island offsets internally so the magic block always sits
+  # at the center of a chunk.
   # Island height - Lowest is 5.
   # It is the y coordinate of the bedrock block in the schem.
   island-height: 80
@@ -192,7 +231,9 @@ world:
     # Note: Some default challenges will not be possible if there is no nether.
     # Note that with a standard nether all players arrive at the same portal and entering a
     # portal will return them to their islands.
-    generate: true
+    # ChunkBlock: disabled by default. If enabled, the nether gets its own center chunk
+    # and the same chunk unlocking rules, driven by the same island level.
+    generate: false
     # Islands in Nether. Change to false for standard vanilla nether.
     # Note that there is currently no magic block in the Nether
     # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.
@@ -214,7 +255,8 @@ world:
   end:
     # End Nether - if this is false, the end world will not be made and access to
     # the end will not occur. Other plugins may still enable portal usage.
-    generate: true
+    # ChunkBlock: disabled by default (see nether note above).
+    generate: false
     # Islands in The End. Change to false for standard vanilla end.
     # Note that there is currently no magic block in the End
     # /!\ BentoBox currently does not support changing this value mid-game. If you do need to change it, do a full reset of your databases and worlds.

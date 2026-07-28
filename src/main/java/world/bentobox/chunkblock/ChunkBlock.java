@@ -13,18 +13,24 @@ import org.bukkit.generator.ChunkGenerator;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import world.bentobox.chunkblock.chunks.BorderDisplay;
+import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.commands.admin.AdminCommand;
 import world.bentobox.chunkblock.commands.island.PlayerCommand;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.generators.ChunkGeneratorWorld;
 import world.bentobox.chunkblock.listeners.BlockListener;
 import world.bentobox.chunkblock.listeners.BlockProtect;
+import world.bentobox.chunkblock.listeners.ChunkClaimListener;
+import world.bentobox.chunkblock.listeners.ChunkGuardListener;
+import world.bentobox.chunkblock.listeners.LockedChunkProtect;
 import world.bentobox.chunkblock.listeners.BossBarListener;
 import world.bentobox.chunkblock.listeners.HoloListener;
 import world.bentobox.chunkblock.listeners.InfoListener;
 import world.bentobox.chunkblock.listeners.CraftEngineListener;
 import world.bentobox.chunkblock.listeners.ItemsAdderListener;
 import world.bentobox.chunkblock.listeners.JoinLeaveListener;
+import world.bentobox.chunkblock.listeners.LevelListener;
 import world.bentobox.chunkblock.listeners.NexoListener;
 import world.bentobox.chunkblock.listeners.NoBlockHandler;
 import world.bentobox.chunkblock.listeners.StartSafetyListener;
@@ -34,6 +40,7 @@ import world.bentobox.chunkblock.oneblocks.customblock.CraftEngineCustomBlock;
 import world.bentobox.chunkblock.oneblocks.customblock.ItemsAdderCustomBlock;
 import world.bentobox.chunkblock.oneblocks.customblock.NexoCustomBlock;
 import world.bentobox.chunkblock.requests.IslandStatsHandler;
+import world.bentobox.chunkblock.requests.UnlockedChunksHandler;
 import world.bentobox.chunkblock.requests.LocationStatsHandler;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.configuration.Config;
@@ -70,8 +77,16 @@ public class ChunkBlock extends GameModeAddon {
     private final Config<Settings> configObject = new Config<>(this, Settings.class);
     /** The listener for block-related events */
     private BlockListener blockListener;
+    /** The listener that keeps players out of locked chunks */
+    private ChunkGuardListener chunkGuardListener;
+    /** The listener that turns level changes into chunk credit and re-locks */
+    private LevelListener levelListener;
+    /** The locked-chunk border visuals */
+    private BorderDisplay borderDisplay;
     /** The manager for OneBlock phases and blocks */
     private OneBlocksManager oneBlockManager;
+    /** The manager for chunk locking and the unlock spiral */
+    private ChunkManager chunkManager;
     /** The placeholder manager for ChunkBlock */
     private ChunkBlockPlaceholders phManager;
     /** The listener for hologram-related events */
@@ -187,6 +202,8 @@ public class ChunkBlock extends GameModeAddon {
     public void onEnable() {
         // Initialize the OneBlock manager
         oneBlockManager = new OneBlocksManager(this);
+        // Initialize the chunk lock manager
+        chunkManager = new ChunkManager(this);
         // Load phase data
         if (loadData()) {
             // Failed to load - don't register anything
@@ -195,6 +212,15 @@ public class ChunkBlock extends GameModeAddon {
         // Initialize and register listeners
         blockListener = new BlockListener(this);
         registerListener(blockListener);
+        chunkGuardListener = new ChunkGuardListener(this);
+        registerListener(chunkGuardListener);
+        registerListener(new LockedChunkProtect(this));
+        levelListener = new LevelListener(this);
+        registerListener(levelListener);
+        registerListener(new ChunkClaimListener(this));
+        borderDisplay = new BorderDisplay(this);
+        registerListener(borderDisplay);
+        borderDisplay.start();
         registerListener(new NoBlockHandler(this));
         registerListener(new BlockProtect(this));
         registerListener(new JoinLeaveListener(this));
@@ -208,6 +234,7 @@ public class ChunkBlock extends GameModeAddon {
         // Register request handlers
         registerRequestHandler(new IslandStatsHandler(this));
         registerRequestHandler(new LocationStatsHandler(this));
+        registerRequestHandler(new UnlockedChunksHandler(this));
 
         // Register Holograms
         holoListener = new HoloListener(this);
@@ -242,6 +269,11 @@ public class ChunkBlock extends GameModeAddon {
             blockListener.saveCache();
         }
 
+        // Stop border rendering and restore client-side blocks
+        if (borderDisplay != null) {
+            borderDisplay.stop();
+        }
+
         // Clear holograms
         if (holoListener != null) {
             holoListener.onDisable();
@@ -264,6 +296,49 @@ public class ChunkBlock extends GameModeAddon {
      */
     public Settings getSettings() {
         return settings;
+    }
+
+    /**
+     * @return the chunk lock manager
+     */
+    public ChunkManager getChunkManager() {
+        return chunkManager;
+    }
+
+    /**
+     * @return the chunk guard listener (containment and backtracking)
+     */
+    public ChunkGuardListener getChunkGuardListener() {
+        return chunkGuardListener;
+    }
+
+    /**
+     * @return the level listener (chunk credit, claim celebrations and re-locks)
+     */
+    public LevelListener getLevelListener() {
+        return levelListener;
+    }
+
+    /**
+     * @return the locked-chunk border display, or null before the addon is enabled
+     */
+    public BorderDisplay getBorderDisplay() {
+        return borderDisplay;
+    }
+
+    /**
+     * Reads the island's level from the Level addon.
+     *
+     * @param island the island
+     * @return the island level, or 0 if the Level addon or island owner is missing
+     */
+    public long getIslandLevel(@NonNull Island island) {
+        return getPlugin().getAddonsManager().getAddonByName("Level")
+                .filter(world.bentobox.level.Level.class::isInstance)
+                .map(world.bentobox.level.Level.class::cast)
+                .filter(l -> island.getOwner() != null)
+                .map(l -> l.getManager().getIslandLevel(island.getWorld(), island.getOwner()))
+                .orElse(0L);
     }
 
     @Override

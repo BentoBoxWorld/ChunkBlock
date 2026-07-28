@@ -56,7 +56,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetWorldName() {
-        assertEquals("oneblock_world", s.getWorldName());
+        assertEquals("chunkblock_world", s.getWorldName());
     }
 
     /**
@@ -72,7 +72,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetIslandDistance() {
-        assertEquals(400, s.getIslandDistance());
+        assertEquals(256, s.getIslandDistance());
     }
 
     /**
@@ -80,7 +80,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetIslandProtectionRange() {
-        assertEquals(50, s.getIslandProtectionRange());
+        assertEquals(240, s.getIslandProtectionRange());
     }
 
     /**
@@ -104,7 +104,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetIslandXOffset() {
-        assertEquals(0, s.getIslandXOffset());
+        assertEquals(8, s.getIslandXOffset());
     }
 
     /**
@@ -112,7 +112,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetIslandZOffset() {
-        assertEquals(0, s.getIslandZOffset());
+        assertEquals(8, s.getIslandZOffset());
     }
 
     /**
@@ -160,7 +160,8 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testIsNetherGenerate() {
-        assertTrue(s.isNetherGenerate());
+        // ChunkBlock ships with the nether disabled by default
+        assertFalse(s.isNetherGenerate());
     }
 
     /**
@@ -512,8 +513,16 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testSetIslandDistance() {
+        // 12345 is not a multiple of 8; it should snap to the nearest one
         s.setIslandDistance(12345);
-        assertEquals(12345, s.getIslandDistance());
+        assertEquals(12344, s.getIslandDistance());
+        s.setIslandDistance(512);
+        assertEquals(512, s.getIslandDistance());
+        // Tiny and non-positive values snap up to the minimum of 8
+        s.setIslandDistance(3);
+        assertEquals(8, s.getIslandDistance());
+        s.setIslandDistance(-100);
+        assertEquals(8, s.getIslandDistance());
     }
 
     /**
@@ -532,6 +541,8 @@ public class SettingsTest extends CommonTestSetup {
     void testSetIslandStartX() {
         s.setIslandStartX(12345);
         assertEquals(12345, s.getIslandStartX());
+        // The computed offset compensates so the start point stays chunk-centered
+        assertEquals(8, Math.floorMod(s.getIslandStartX() + s.getIslandXOffset(), 16));
     }
 
     /**
@@ -541,6 +552,8 @@ public class SettingsTest extends CommonTestSetup {
     void testSetIslandStartZ() {
         s.setIslandStartZ(12345);
         assertEquals(12345, s.getIslandStartZ());
+        // The computed offset compensates so the start point stays chunk-centered
+        assertEquals(8, Math.floorMod(s.getIslandStartZ() + s.getIslandZOffset(), 16));
     }
 
     /**
@@ -548,8 +561,9 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testSetIslandXOffset() {
+        // Offsets are managed internally and cannot be set
         s.setIslandXOffset(12345);
-        assertEquals(12345, s.getIslandXOffset());
+        assertEquals(8, s.getIslandXOffset());
     }
 
     /**
@@ -557,8 +571,9 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testSetIslandZOffset() {
+        // Offsets are managed internally and cannot be set
         s.setIslandZOffset(12345);
-        assertEquals(12345, s.getIslandZOffset());
+        assertEquals(8, s.getIslandZOffset());
     }
 
     /**

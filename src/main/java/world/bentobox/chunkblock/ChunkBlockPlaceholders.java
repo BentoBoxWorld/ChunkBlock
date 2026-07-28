@@ -61,6 +61,71 @@ public class ChunkBlockPlaceholders {
                 this::getPhaseBlocksNamesByLocation);
         placeholdersManager.registerPlaceholder(addon, "my_island_phase_block_list", this::getPhaseBlocksNames);
 
+        // Chunk territory placeholders
+        placeholdersManager.registerPlaceholder(addon, "island_chunks", this::getIslandChunks);
+        placeholdersManager.registerPlaceholder(addon, "island_max_chunks", this::getIslandMaxChunks);
+        placeholdersManager.registerPlaceholder(addon, "island_next_chunk_level", this::getIslandNextChunkLevel);
+        placeholdersManager.registerPlaceholder(addon, "island_chunk_credit", this::getIslandChunkCredit);
+        placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
+    }
+
+    /**
+     * @param user user
+     * @return number of chunks the user's island has unlocked
+     */
+    public String getIslandChunks(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user)
+                .map(i -> String.valueOf(addon.getChunkManager().getUnlockedChunkCount(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return maximum number of chunks the user's island can unlock
+     */
+    public String getIslandMaxChunks(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().getMaxChunks(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return total island level needed to afford the user's island's next chunk
+     */
+    public String getIslandNextChunkLevel(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(
+                addon.getChunkManager().getSpentLevels(i) + addon.getChunkManager().getChunkCost()))
+                .orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return level credit the user's island has available to spend on chunks
+     */
+    public String getIslandChunkCredit(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user)
+                .map(i -> String.valueOf(Math.max(0, addon.getChunkManager().getCredit(i)))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return ring number of the user's island's outermost unlocked chunk
+     */
+    public String getIslandRing(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().currentRing(i))).orElse("");
     }
 
     /**
