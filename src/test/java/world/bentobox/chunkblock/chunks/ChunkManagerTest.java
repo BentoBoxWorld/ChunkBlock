@@ -2,12 +2,12 @@ package world.bentobox.chunkblock.chunks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -22,16 +22,16 @@ import org.mockito.quality.Strictness;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.Settings;
+import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
+import world.bentobox.chunkblock.listeners.BlockListener;
 
 /**
- * Tests for the spiral math and chunk counting in {@link ChunkManager}.
+ * Tests claiming, credit accounting and LIFO re-locking in {@link ChunkManager}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ChunkManagerTest {
-
-    private static final int EXHAUSTIVE_LIMIT = 10000;
 
     @Mock
     private ChunkBlock addon;
@@ -43,13 +43,17 @@ class ChunkManagerTest {
     private Settings settings;
     private OneBlockIslands data;
     private ChunkManager cm;
+    private long level;
 
     @BeforeEach
     void setUp() {
         settings = new Settings();
         data = new OneBlockIslands("test");
+        level = 0;
         when(addon.getSettings()).thenReturn(settings);
         when(addon.getOneBlocksIsland(island)).thenReturn(data);
+        when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        when(addon.getIslandLevel(island)).thenAnswer(i -> level);
         // Island center chunk-centered at chunk (0, 0)
         when(center.getBlockX()).thenReturn(8);
         when(center.getBlockZ()).thenReturn(8);
@@ -58,151 +62,172 @@ class ChunkManagerTest {
         cm = new ChunkManager(addon);
     }
 
-    /**
-     * spiralIndex and chunkAt must be exact inverses over the whole tested range.
-     */
     @Test
-    void testSpiralRoundTripExhaustive() {
-        for (int i = 0; i < EXHAUSTIVE_LIMIT; i++) {
-            Vector v = ChunkManager.chunkAt(i);
-            assertEquals(i, ChunkManager.spiralIndex(v.getBlockX(), v.getBlockZ()),
-                    "chunkAt(" + i + ") = " + v + " does not map back");
-        }
-    }
-
-    /**
-     * Every offset in a large square must map to a unique index, and the index must be in
-     * range for the square's rings.
-     */
-    @Test
-    void testSpiralIndexUniqueAndComplete() {
-        int radius = 49; // (2*49+1)^2 = 9801 indices
-        Set<Integer> seen = new HashSet<>();
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dz = -radius; dz <= radius; dz++) {
-                int index = ChunkManager.spiralIndex(dx, dz);
-                assertTrue(index >= 0 && index < (2 * radius + 1) * (2 * radius + 1),
-                        "index out of range at " + dx + "," + dz);
-                assertTrue(seen.add(index), "duplicate index " + index + " at " + dx + "," + dz);
-            }
-        }
-        assertEquals((2 * radius + 1) * (2 * radius + 1), seen.size());
-    }
-
-    /**
-     * The spiral must fill rings completely before starting the next one, and the index of
-     * any chunk on ring r must be at least the index of every chunk on rings inside r.
-     */
-    @Test
-    void testRingsFillInOrder() {
-        for (int i = 1; i < EXHAUSTIVE_LIMIT; i++) {
-            Vector v = ChunkManager.chunkAt(i);
-            int r = Math.max(Math.abs(v.getBlockX()), Math.abs(v.getBlockZ()));
-            assertEquals(r, ChunkManager.ringOf(i));
-            // All indices in [(2r-1)^2, (2r+1)^2) are exactly ring r
-            assertTrue(i >= (2 * r - 1) * (2 * r - 1), "index " + i + " below its ring band");
-            assertTrue(i < (2 * r + 1) * (2 * r + 1), "index " + i + " above its ring band");
-        }
-    }
-
-    @Test
-    void testCenterIsIndexZero() {
-        assertEquals(0, ChunkManager.spiralIndex(0, 0));
-        assertEquals(new Vector(0, 0, 0), ChunkManager.chunkAt(0));
-        // Ring 1 anchor is due north of the center
-        assertEquals(new Vector(0, 0, -1), ChunkManager.chunkAt(1));
-    }
-
-    @Test
-    void testIsUnlockedFreshIsland() {
-        // Fresh island: only the center chunk (containing block 8,8 → chunk 0,0)
+    void testFreshIslandHasOnlyCenterChunk() {
+        assertEquals(1, cm.getUnlockedChunkCount(island));
         assertTrue(cm.isUnlocked(island, 0, 0));
-        assertFalse(cm.isUnlocked(island, 0, -1));
         assertFalse(cm.isUnlocked(island, 1, 0));
-        assertFalse(cm.isUnlocked(island, 1000, 1000));
+        assertFalse(cm.isUnlocked(island, 0, -1));
+        assertEquals(0, cm.getSpentLevels(island));
+        assertEquals(0, cm.currentRing(island));
     }
 
     @Test
-    void testIsUnlockedAfterUnlocks() {
-        data.setUnlockedChunkCount(9); // full ring 1
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                assertTrue(cm.isUnlocked(island, dx, dz), "ring-1 chunk " + dx + "," + dz);
-            }
+    void testClaimAdjacentChunkWithCredit() {
+        level = 1;
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
+        assertTrue(cm.isUnlocked(island, 1, 0));
+        assertEquals(2, cm.getUnlockedChunkCount(island));
+        assertEquals(1, cm.getSpentLevels(island));
+        assertEquals(0, cm.getCredit(island));
+    }
+
+    @Test
+    void testClaimAnyDirection() {
+        level = 4;
+        assertEquals(ClaimResult.OK, cm.claim(island, 0, -1)); // north
+        assertEquals(ClaimResult.OK, cm.claim(island, 0, -2)); // further north
+        assertEquals(ClaimResult.OK, cm.claim(island, -1, 0)); // west
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0)); // east
+        assertEquals(5, cm.getUnlockedChunkCount(island));
+        // A long arm north means ring 2 even though most rings are unclaimed
+        assertEquals(2, cm.currentRing(island));
+    }
+
+    @Test
+    void testClaimWithoutCreditDenied() {
+        assertEquals(ClaimResult.NO_CREDIT, cm.claim(island, 1, 0));
+        assertFalse(cm.isUnlocked(island, 1, 0));
+        // Credit spent on one chunk cannot be spent on a second
+        level = 1;
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
+        assertEquals(ClaimResult.NO_CREDIT, cm.claim(island, -1, 0));
+    }
+
+    @Test
+    void testClaimNotAdjacentDenied() {
+        level = 100;
+        assertEquals(ClaimResult.NOT_ADJACENT, cm.claim(island, 2, 0));
+        // Diagonal-only contact is not adjacency
+        assertEquals(ClaimResult.NOT_ADJACENT, cm.claim(island, 1, 1));
+        // But once the gap chunk is claimed, both become claimable
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
+        assertEquals(ClaimResult.OK, cm.claim(island, 2, 0));
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 1));
+    }
+
+    @Test
+    void testClaimAlreadyUnlockedDenied() {
+        level = 100;
+        assertEquals(ClaimResult.ALREADY_UNLOCKED, cm.claim(island, 0, 0));
+    }
+
+    @Test
+    void testClaimBeyondProtectionRangeDenied() {
+        level = 100000;
+        when(island.getProtectionRange()).thenReturn(50);
+        // Radius (50-8)/16 = 2: chunk offset 3 is out of bounds
+        for (int d = 1; d <= 2; d++) {
+            assertEquals(ClaimResult.OK, cm.claim(island, d, 0), "offset " + d);
         }
-        assertFalse(cm.isUnlocked(island, 2, 0));
-        assertFalse(cm.isUnlocked(island, -2, -2));
+        assertEquals(ClaimResult.BEYOND_LIMIT, cm.claim(island, 3, 0));
     }
 
     @Test
-    void testComputeUnlockedCount() {
-        assertEquals(1, cm.computeUnlockedCount(island, 0));
-        assertEquals(1, cm.computeUnlockedCount(island, -50));
-        assertEquals(2, cm.computeUnlockedCount(island, 1));
-        assertEquals(101, cm.computeUnlockedCount(island, 100));
-        // Caps at max-chunks (441 by default)
-        assertEquals(441, cm.computeUnlockedCount(island, 100000));
+    void testClaimBeyondMaxChunksDenied() {
+        level = 100000;
+        settings.setMaxChunks(3);
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
+        assertEquals(ClaimResult.OK, cm.claim(island, -1, 0));
+        assertEquals(ClaimResult.BEYOND_LIMIT, cm.claim(island, 0, 1));
     }
 
     @Test
-    void testComputeUnlockedCountLevelsPerChunk() {
+    void testLevelsPerChunkCost() {
         settings.setLevelsPerChunk(10);
-        assertEquals(1, cm.computeUnlockedCount(island, 9));
-        assertEquals(2, cm.computeUnlockedCount(island, 10));
-        assertEquals(3, cm.computeUnlockedCount(island, 25));
+        level = 19;
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
+        // 19 - 10 spent = 9 credit; next chunk costs 10
+        assertEquals(9, cm.getCredit(island));
+        assertEquals(ClaimResult.NO_CREDIT, cm.claim(island, -1, 0));
+    }
+
+    @Test
+    void testRelockToBudgetIsLifo() {
+        level = 3;
+        cm.claim(island, 1, 0);
+        cm.claim(island, 2, 0);
+        cm.claim(island, 3, 0);
+        // Level drops to 1: two most recent claims are lost, newest first
+        List<Vector> removed = cm.relockToBudget(island, 1);
+        assertEquals(2, removed.size());
+        assertEquals(new Vector(3, 0, 0), removed.get(0));
+        assertEquals(new Vector(2, 0, 0), removed.get(1));
+        assertTrue(cm.isUnlocked(island, 1, 0));
+        assertFalse(cm.isUnlocked(island, 2, 0));
+        assertFalse(cm.isUnlocked(island, 3, 0));
+    }
+
+    @Test
+    void testRelockNeverRemovesCenterChunk() {
+        level = 2;
+        cm.claim(island, 1, 0);
+        cm.claim(island, -1, 0);
+        List<Vector> removed = cm.relockToBudget(island, -50);
+        assertEquals(2, removed.size());
+        assertEquals(1, cm.getUnlockedChunkCount(island));
+        assertTrue(cm.isUnlocked(island, 0, 0));
+        assertNull(data.removeLastUnlockedChunk());
+    }
+
+    @Test
+    void testRelockNoopWhenWithinBudget() {
+        level = 5;
+        cm.claim(island, 1, 0);
+        assertTrue(cm.relockToBudget(island, 5).isEmpty());
+        assertTrue(cm.relockToBudget(island, 1).isEmpty());
+    }
+
+    @Test
+    void testUnlockOrderIsRecorded() {
+        level = 3;
+        cm.claim(island, 0, -1);
+        cm.claim(island, 1, 0);
+        cm.claim(island, 1, -1);
+        assertEquals(List.of("0,0", "0,-1", "1,0", "1,-1"), data.getUnlockedChunks());
+    }
+
+    @Test
+    void testOffsetIslandCenter() {
+        // Island centered at chunk (32, -16)
+        when(center.getBlockX()).thenReturn(32 * 16 + 8);
+        when(center.getBlockZ()).thenReturn(-16 * 16 + 8);
+        level = 1;
+        assertTrue(cm.isUnlocked(island, 32, -16));
+        assertFalse(cm.isUnlocked(island, 33, -16));
+        assertEquals(ClaimResult.OK, cm.claim(island, 33, -16));
+        assertTrue(cm.isUnlocked(island, 33, -16));
     }
 
     @Test
     void testMaxChunksCappedByProtectionRange() {
-        // Protection range 240 → ring radius (240-8)/16 = 14 → cap 841; config 441 wins
         assertEquals(441, cm.getMaxChunks(island));
-        // Small protection range caps below config: 50 → radius 2 → 25 chunks
         when(island.getProtectionRange()).thenReturn(50);
         assertEquals(25, cm.getMaxChunks(island));
-        // Unlimited config uses the range cap alone
         settings.setMaxChunks(-1);
         when(island.getProtectionRange()).thenReturn(240);
         assertEquals(841, cm.getMaxChunks(island));
     }
 
     @Test
-    void testMaxRingRadius() {
-        when(island.getProtectionRange()).thenReturn(240);
-        assertEquals(14, cm.maxRingRadius(island));
-        when(island.getProtectionRange()).thenReturn(168);
-        assertEquals(10, cm.maxRingRadius(island));
-        when(island.getProtectionRange()).thenReturn(8);
-        assertEquals(0, cm.maxRingRadius(island));
-    }
-
-    @Test
-    void testLevelForChunkNumber() {
-        assertEquals(0, cm.levelForChunkNumber(1));
-        assertEquals(1, cm.levelForChunkNumber(2));
-        settings.setLevelsPerChunk(5);
-        assertEquals(5, cm.levelForChunkNumber(2));
-        assertEquals(50, cm.levelForChunkNumber(11));
-    }
-
-    @Test
-    void testChunksBetween() {
-        List<Vector> gained = cm.chunksBetween(1, 9);
-        assertEquals(8, gained.size());
-        assertEquals(new Vector(0, 0, -1), gained.get(0));
-        // Re-lock order is just the reverse view of the same list
-        assertTrue(cm.chunksBetween(5, 5).isEmpty());
-        assertTrue(cm.chunksBetween(9, 5).isEmpty());
-    }
-
-    @Test
-    void testIsUnlockedOffsetIslandCenter() {
-        // Island centered at chunk (32, -16): block coords 32*16+8, -16*16+8
-        when(center.getBlockX()).thenReturn(32 * 16 + 8);
-        when(center.getBlockZ()).thenReturn(-16 * 16 + 8);
-        assertTrue(cm.isUnlocked(island, 32, -16));
-        assertFalse(cm.isUnlocked(island, 33, -16));
-        data.setUnlockedChunkCount(2);
-        // Index 1 is due north of the center
-        assertTrue(cm.isUnlocked(island, 32, -17));
+    void testGetUnlockedOffsets() {
+        level = 2;
+        cm.claim(island, 1, 0);
+        cm.claim(island, 1, 1);
+        List<Vector> offsets = cm.getUnlockedOffsets(island);
+        assertEquals(3, offsets.size());
+        assertEquals(new Vector(0, 0, 0), offsets.get(0));
+        assertEquals(new Vector(1, 0, 0), offsets.get(1));
+        assertEquals(new Vector(1, 0, 1), offsets.get(2));
     }
 }

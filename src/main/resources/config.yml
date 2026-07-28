@@ -47,6 +47,41 @@ chunkblock:
     # Placeholder customization
     # Symbol for the percentage completed scale bar
     scale-symbol: ■
+  # How many island levels one chunk costs to claim. Minimum 1.
+  # Island levels are chunk currency: credit = island level minus levels already
+  # spent. The island owner spends credit by hitting the border where they want to expand.
+  levels-per-chunk: 1
+  # Maximum number of chunks an island can claim, including the center chunk.
+  # 441 chunks is a full 21 x 21 chunk square. Use -1 for no limit beyond what the
+  # island protection range can hold. The effective maximum is always capped so
+  # claimed chunks fit inside the protection range.
+  max-chunks: 441
+  # If true, losing island levels below what has been spent re-locks chunks in
+  # reverse claim order (the most recently claimed chunks are lost first). Builds
+  # inside re-locked chunks are untouched but cannot be reached until the levels
+  # are regained. If false ('ratchet mode'), chunks never re-lock once claimed.
+  relock-on-level-loss: true
+  # If true, players standing in a chunk when it re-locks are moved to the nearest
+  # unlocked spot. If false they may walk out but not back in.
+  eject-players-on-relock: true
+  # Cancel natural mob spawning inside locked chunks.
+  deny-mob-spawns-in-locked: true
+  # Bounce dropped items back when they cross into a locked chunk so players
+  # cannot lose their stuff to the forbidden zone.
+  bounce-back-items: true
+  border:
+    # Show a particle curtain on the faces of locked chunks near players.
+    show-particles: true
+    # Color of the locked-chunk border particles.
+    particle-color:
+      ==: Color
+      ALPHA: 255
+      RED: 255
+      GREEN: 0
+      BLUE: 0
+    # Also send client-side barrier blocks on locked-chunk faces near players.
+    # Purely visual on the client; the world is never modified.
+    client-side-barrier-blocks: false
 world:
   # Friendly name for this world. Used in admin commands. Must be a single word
   friendly-name: ChunkBlock

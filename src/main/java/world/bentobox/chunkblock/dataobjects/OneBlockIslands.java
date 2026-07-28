@@ -1,8 +1,11 @@
 package world.bentobox.chunkblock.dataobjects;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import org.bukkit.entity.EntityType;
 import org.eclipse.jdt.annotation.NonNull;
@@ -51,14 +54,130 @@ public class OneBlockIslands implements DataObject {
     private long lastPhaseChangeTime = 0;
 
     /**
-     * Number of unlocked chunks including the free center chunk. Cached so chunk
-     * enforcement works immediately after a restart, before the first level
-     * recalculation; recomputed from the Level addon whenever levels change.
+     * The chunks this island has unlocked, in the order they were unlocked, as "dx,dz"
+     * offsets relative to the island's center chunk. The center chunk "0,0" is always
+     * first and can never be removed. When levels are lost, chunks re-lock from the end
+     * of this list — last unlocked, first locked.
      */
     @Expose
-    private int unlockedChunkCount = 1;
+    private List<String> unlockedChunks = new ArrayList<>();
+
+    /**
+     * The island level last seen from the Level addon, used to detect when new chunk
+     * credit becomes available.
+     */
+    @Expose
+    private long lastKnownLevel = 0;
+
+    /** Fast membership view of {@link #unlockedChunks}; rebuilt lazily after loads/edits */
+    private transient Set<Long> unlockedSet;
 
     private Queue<OneBlockObject> queue = new LinkedList<>();
+
+    private static long chunkKey(int dx, int dz) {
+        return (((long) dx) << 32) | (dz & 0xFFFFFFFFL);
+    }
+
+    /**
+     * @return the ordered unlocked chunk list ("dx,dz" strings), never null, always
+     *         starting with the center chunk "0,0"
+     */
+    @NonNull
+    public List<String> getUnlockedChunks() {
+        if (unlockedChunks == null) {
+            unlockedChunks = new ArrayList<>();
+        }
+        if (unlockedChunks.isEmpty()) {
+            unlockedChunks.add("0,0");
+            unlockedSet = null;
+        }
+        return unlockedChunks;
+    }
+
+    private Set<Long> getUnlockedSet() {
+        if (unlockedSet == null) {
+            // Materialize the list first: getUnlockedChunks() seeds the center entry and
+            // clears the set field while doing so
+            List<String> list = getUnlockedChunks();
+            Set<Long> set = new HashSet<>();
+            for (String entry : list) {
+                int comma = entry.indexOf(',');
+                set.add(chunkKey(Integer.parseInt(entry.substring(0, comma)),
+                        Integer.parseInt(entry.substring(comma + 1))));
+            }
+            unlockedSet = set;
+        }
+        return unlockedSet;
+    }
+
+    /**
+     * @param dx chunk x offset relative to the center chunk
+     * @param dz chunk z offset relative to the center chunk
+     * @return true if this chunk has been unlocked
+     */
+    public boolean isChunkUnlocked(int dx, int dz) {
+        return getUnlockedSet().contains(chunkKey(dx, dz));
+    }
+
+    /**
+     * Records a chunk as unlocked (appended to the unlock order). Does nothing if it is
+     * already unlocked.
+     *
+     * @param dx chunk x offset relative to the center chunk
+     * @param dz chunk z offset relative to the center chunk
+     */
+    public void addUnlockedChunk(int dx, int dz) {
+        if (!isChunkUnlocked(dx, dz)) {
+            getUnlockedChunks().add(dx + "," + dz);
+            getUnlockedSet().add(chunkKey(dx, dz));
+        }
+    }
+
+    /**
+     * Re-locks the most recently unlocked chunk. The center chunk is never removed.
+     *
+     * @return the removed offset as {dx, dz}, or null if only the center chunk is left
+     */
+    public int[] removeLastUnlockedChunk() {
+        List<String> list = getUnlockedChunks();
+        if (list.size() <= 1) {
+            return null;
+        }
+        String entry = list.remove(list.size() - 1);
+        unlockedSet = null;
+        int comma = entry.indexOf(',');
+        return new int[] { Integer.parseInt(entry.substring(0, comma)),
+                Integer.parseInt(entry.substring(comma + 1)) };
+    }
+
+    /**
+     * Re-locks everything except the center chunk.
+     */
+    public void resetUnlockedChunks() {
+        getUnlockedChunks().subList(1, getUnlockedChunks().size()).clear();
+        unlockedSet = null;
+    }
+
+    /**
+     * @return the number of unlocked chunks including the center chunk, always &gt;= 1
+     */
+    public int getUnlockedChunkCount() {
+        return getUnlockedChunks().size();
+    }
+
+    /**
+     * @return the island level last seen from the Level addon
+     */
+    public long getLastKnownLevel() {
+        return lastKnownLevel;
+    }
+
+    /**
+     * @param lastKnownLevel the last seen island level
+     */
+    public void setLastKnownLevel(long lastKnownLevel) {
+        this.lastKnownLevel = lastKnownLevel;
+    }
 
     /**
      * @return the phaseName
@@ -77,20 +196,6 @@ public class OneBlockIslands implements DataObject {
 
     public OneBlockIslands(String uniqueId) {
         this.uniqueId = uniqueId;
-    }
-
-    /**
-     * @return the number of unlocked chunks, never less than 1 (the center chunk cannot lock)
-     */
-    public int getUnlockedChunkCount() {
-        return Math.max(1, unlockedChunkCount);
-    }
-
-    /**
-     * @param unlockedChunkCount the unlockedChunkCount to set; values below 1 clamp to 1
-     */
-    public void setUnlockedChunkCount(int unlockedChunkCount) {
-        this.unlockedChunkCount = Math.max(1, unlockedChunkCount);
     }
 
     /**

@@ -139,7 +139,7 @@ class LockedChunkProtectTest extends CommonTestSetup {
 
     @Test
     void testUnlockingChunkAllowsBuilding() {
-        data.setUnlockedChunkCount(9); // ring 1 unlocked; block at x=20 is in chunk (1,0)
+        data.addUnlockedChunk(1, 0); // block at x=20 is in chunk (1,0)
         BlockBreakEvent e = new BlockBreakEvent(lockedBlock, mockPlayer);
         listener.onBlockBreak(e);
         assertFalse(e.isCancelled());

@@ -1,6 +1,7 @@
 package world.bentobox.chunkblock.listeners;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -17,13 +18,14 @@ import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
 import world.bentobox.chunkblock.chunks.ChunkManager;
+import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.events.ChunkRelockEvent;
 import world.bentobox.chunkblock.events.ChunkUnlockEvent;
-import world.bentobox.chunkblock.listeners.BlockListener;
 
 /**
- * Tests the unlock and re-lock flows in {@link LevelListener}.
+ * Tests the credit-announcement and LIFO re-lock flows in {@link LevelListener} and the
+ * claim celebration wiring.
  */
 class LevelListenerTest extends CommonTestSetup {
 
@@ -31,6 +33,8 @@ class LevelListenerTest extends CommonTestSetup {
     private LevelListener listener;
     private OneBlockIslands data;
     private Settings settings;
+    private ChunkManager cm;
+    private long level;
 
     @Override
     @BeforeEach
@@ -42,80 +46,110 @@ class LevelListenerTest extends CommonTestSetup {
         when(addon.getIslands()).thenReturn(im);
         settings = new Settings();
         when(addon.getSettings()).thenReturn(settings);
-        ChunkManager cm = new ChunkManager(addon);
+        cm = new ChunkManager(addon);
         when(addon.getChunkManager()).thenReturn(cm);
         data = new OneBlockIslands("test");
         when(addon.getOneBlocksIsland(island)).thenReturn(data);
         when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        level = 0;
+        when(addon.getIslandLevel(island)).thenAnswer(i -> level);
 
         when(island.getCenter()).thenReturn(location);
+        when(location.getBlockX()).thenReturn(8);
+        when(location.getBlockZ()).thenReturn(8);
         when(island.getProtectionRange()).thenReturn(240);
         when(island.getWorld()).thenReturn(world);
         when(world.getPlayers()).thenReturn(Collections.emptyList());
 
         listener = new LevelListener(addon);
+        when(addon.getLevelListener()).thenReturn(listener);
     }
 
     @Test
-    void testLevelGainUnlocksChunks() {
+    void testLevelGainDoesNotAutoUnlock() {
+        level = 5;
         listener.applyLevel(island, 5);
-        assertEquals(6, data.getUnlockedChunkCount());
-        verify(pim, times(5)).callEvent(any(ChunkUnlockEvent.class));
-        verify(pim, never()).callEvent(any(ChunkRelockEvent.class));
-    }
-
-    @Test
-    void testNoChangeNoEvents() {
-        data.setUnlockedChunkCount(6);
-        listener.applyLevel(island, 5);
-        assertEquals(6, data.getUnlockedChunkCount());
-        verify(pim, never()).callEvent(any());
-    }
-
-    @Test
-    void testLevelLossRelocksChunks() {
-        data.setUnlockedChunkCount(10);
-        listener.applyLevel(island, 4);
-        assertEquals(5, data.getUnlockedChunkCount());
-        verify(pim, times(5)).callEvent(any(ChunkRelockEvent.class));
+        // Levels are credit, not automatic chunks
+        assertEquals(1, data.getUnlockedChunkCount());
+        assertEquals(5, cm.getCredit(island));
         verify(pim, never()).callEvent(any(ChunkUnlockEvent.class));
     }
 
     @Test
+    void testLastKnownLevelIsTracked() {
+        listener.applyLevel(island, 7);
+        assertEquals(7, data.getLastKnownLevel());
+        listener.applyLevel(island, 3);
+        assertEquals(3, data.getLastKnownLevel());
+    }
+
+    @Test
+    void testLevelLossRelocksNewestClaimsFirst() {
+        level = 3;
+        cm.claim(island, 1, 0);
+        cm.claim(island, 2, 0);
+        cm.claim(island, 3, 0);
+        level = 1;
+        listener.applyLevel(island, 1);
+        assertEquals(2, data.getUnlockedChunkCount());
+        assertTrue(data.isChunkUnlocked(1, 0));
+        verify(pim, times(2)).callEvent(any(ChunkRelockEvent.class));
+    }
+
+    @Test
     void testCenterChunkNeverLocks() {
-        data.setUnlockedChunkCount(3);
+        level = 2;
+        cm.claim(island, 1, 0);
+        cm.claim(island, -1, 0);
+        level = -100;
         listener.applyLevel(island, -100);
         assertEquals(1, data.getUnlockedChunkCount());
+        assertTrue(data.isChunkUnlocked(0, 0));
     }
 
     @Test
     void testRatchetModeNeverRelocks() {
         settings.setRelockOnLevelLoss(false);
-        data.setUnlockedChunkCount(10);
+        level = 2;
+        cm.claim(island, 1, 0);
+        cm.claim(island, -1, 0);
+        level = 0;
         listener.applyLevel(island, 0);
-        assertEquals(10, data.getUnlockedChunkCount());
-        verify(pim, never()).callEvent(any());
+        assertEquals(3, data.getUnlockedChunkCount());
+        verify(pim, never()).callEvent(any(ChunkRelockEvent.class));
+        // And no new claims until the level recovers past what was spent
+        assertEquals(ClaimResult.NO_CREDIT, cm.claim(island, 0, 1));
     }
 
     @Test
-    void testLevelsPerChunkScaling() {
-        settings.setLevelsPerChunk(10);
-        listener.applyLevel(island, 35);
-        assertEquals(4, data.getUnlockedChunkCount());
+    void testLevelLossWithinCreditDoesNotRelock() {
+        level = 5;
+        cm.claim(island, 1, 0);
+        // Level falls but stays at or above the 1 level spent
+        level = 2;
+        listener.applyLevel(island, 2);
+        assertEquals(2, data.getUnlockedChunkCount());
+        verify(pim, never()).callEvent(any(ChunkRelockEvent.class));
     }
 
     @Test
-    void testCapAtMaxChunks() {
-        listener.applyLevel(island, 1_000_000);
-        assertEquals(441, data.getUnlockedChunkCount());
-        verify(pim, times(440)).callEvent(any(ChunkUnlockEvent.class));
+    void testCelebrateClaimFiresUnlockEvent() {
+        level = 1;
+        cm.claim(island, 1, 0);
+        listener.celebrateClaim(island, 1, 0);
+        verify(pim).callEvent(any(ChunkUnlockEvent.class));
     }
 
     @Test
-    void testSmallProtectionRangeCapsUnlocks() {
-        when(island.getProtectionRange()).thenReturn(50);
-        // Radius (50-8)/16 = 2 → 5x5 = 25 chunks max
-        listener.applyLevel(island, 1000);
-        assertEquals(25, data.getUnlockedChunkCount());
+    void testIslandResetClearsClaimsAndLevel() {
+        level = 3;
+        cm.claim(island, 1, 0);
+        cm.claim(island, 2, 0);
+        data.setLastKnownLevel(3);
+        // Simulate what the island reset handler does
+        data.resetUnlockedChunks();
+        data.setLastKnownLevel(0);
+        assertEquals(1, data.getUnlockedChunkCount());
+        assertEquals(0, data.getLastKnownLevel());
     }
 }

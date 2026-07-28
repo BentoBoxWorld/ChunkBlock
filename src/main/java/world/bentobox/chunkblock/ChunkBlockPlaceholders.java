@@ -65,6 +65,7 @@ public class ChunkBlockPlaceholders {
         placeholdersManager.registerPlaceholder(addon, "island_chunks", this::getIslandChunks);
         placeholdersManager.registerPlaceholder(addon, "island_max_chunks", this::getIslandMaxChunks);
         placeholdersManager.registerPlaceholder(addon, "island_next_chunk_level", this::getIslandNextChunkLevel);
+        placeholdersManager.registerPlaceholder(addon, "island_chunk_credit", this::getIslandChunkCredit);
         placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
     }
 
@@ -93,15 +94,27 @@ public class ChunkBlockPlaceholders {
 
     /**
      * @param user user
-     * @return island level required for the user's island to unlock its next chunk
+     * @return total island level needed to afford the user's island's next chunk
      */
     public String getIslandNextChunkLevel(User user) {
         if (user == null || user.getUniqueId() == null) {
             return "";
         }
         return getUsersIsland(user).map(i -> String.valueOf(
-                addon.getChunkManager().levelForChunkNumber(addon.getChunkManager().getUnlockedChunkCount(i) + 1)))
+                addon.getChunkManager().getSpentLevels(i) + addon.getChunkManager().getChunkCost()))
                 .orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return level credit the user's island has available to spend on chunks
+     */
+    public String getIslandChunkCredit(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user)
+                .map(i -> String.valueOf(Math.max(0, addon.getChunkManager().getCredit(i)))).orElse("");
     }
 
     /**
@@ -112,9 +125,7 @@ public class ChunkBlockPlaceholders {
         if (user == null || user.getUniqueId() == null) {
             return "";
         }
-        return getUsersIsland(user).map(i -> String.valueOf(
-                world.bentobox.chunkblock.chunks.ChunkManager.ringOf(addon.getChunkManager().getUnlockedChunkCount(i) - 1)))
-                .orElse("");
+        return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().currentRing(i))).orElse("");
     }
 
     /**

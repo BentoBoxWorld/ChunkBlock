@@ -11,14 +11,16 @@ A BentoBox gamemode by tastybento. Magic-block engine based on AOneBlock; origin
 
 You start on a single magic block, confined to a single chunk. Everything beyond it is a
 forbidden zone — you literally cannot leave. Mine the magic block, build, and raise your
-island level: **every level unlocks the next chunk** in a spiral of rings around your
-starting chunk. Lose levels (deaths, removing blocks) and your outermost chunks lock
-again — your builds stay, but you can't reach them until you earn the level back.
+island level: **levels are chunk currency**. When you have credit, walk up to the border,
+hit it, and the chunk on the other side opens up — expand in whatever direction you like,
+up to your island's protection range. Lose levels (deaths, removing blocks) and your most
+recently claimed chunks lock again — your builds stay, but you can't reach them until you
+earn the levels back.
 
 - The classic OneBlock loop: 18 phases, thousands of blocks, mobs, and treasure chests.
-- Territory that grows with your island level — one chunk per level by default.
-- A particle curtain shows the frontier; unlocking chunks is celebrated in style.
-- `/cb chunks` shows a live map of your territory in chat.
+- Territory that grows the way *you* choose — punch the border to claim the next chunk.
+- A particle curtain shows the frontier; claiming chunks is celebrated in style.
+- `/cb chunks` shows a live map of your territory and what you can claim next.
 
 ## Installation
 
@@ -37,36 +39,36 @@ The player command is `/cb` (alias `/chunkblock`), the admin command `/cbadmin`
 
 | Command | Description |
 |---|---|
-| `/cb chunks` | Your chunk count, next unlock level, and a chat map of your territory |
+| `/cb chunks` | Your chunk count, spendable credit, and a chat map of your territory |
 | `/cb count` | Magic block count and phase |
-| `/cbadmin chunks <player> [set <n> \| recalc]` | Inspect, set, or recalculate a player's unlocked chunks |
+| `/cbadmin chunks <player> [reset]` | Inspect a player's chunks and credit, or re-lock them back to the start |
 | `/cbadmin bypass` | Toggle chunk-lock enforcement for yourself (needs `chunkblock.mod.bypasschunks`) |
 
-## How unlocking works
+## How claiming works
 
 - A fresh island (level 0) has exactly one chunk — the one with the magic block.
-- `unlocked chunks = 1 + level ÷ levels-per-chunk` (configurable, default 1), capped by
-  `max-chunks` (default 441 — a full 10-ring, 21×21-chunk square) and by the island
-  protection range.
-- Chunks unlock in a fixed clockwise spiral, ring by ring. No choices to make, nothing
-  to buy — just play and grow.
-- If the island level drops, chunks re-lock in exact reverse order. Set
+- Island levels are spendable credit: `credit = island level − levels already spent`.
+  One chunk costs `levels-per-chunk` levels (default 1).
+- The **island owner** expands by walking to the border and hitting it (left- or
+  right-click toward the wall). The chunk on the other side opens if it touches your
+  territory, fits inside the island protection range and `max-chunks` (default 441),
+  and you have the credit. Any direction, your choice.
+- Every claim is recorded in order. If the island level drops below what you have spent,
+  chunks re-lock in exact reverse claim order — last claimed, first lost. Set
   `relock-on-level-loss: false` in the config for "ratchet mode" where territory never
-  shrinks. Note that Level's death penalty settings therefore directly affect territory —
-  a death that costs a level costs a chunk.
+  shrinks. Note that Level's death penalty settings therefore directly affect territory.
 - Players never get stuck: anyone standing in a chunk that re-locks is moved to the
   nearest unlocked spot safely (flight state preserved, no fall damage).
 
 ## Compatibility notes
 
 - **Level** is a hard dependency.
-- **Border** is unsupported in ChunkBlock worlds: its wall is one rectangle per island,
-  which cannot match ChunkBlock's chunk-by-chunk frontier. Add ChunkBlock to Border's
-  `disabled-gamemodes` list; ChunkBlock draws its own frontier.
+- **Border** works fine: it shows the island's overall protection limit. The chunk
+  frontier inside it is drawn by ChunkBlock's own particle curtain.
 - Likes, Warps, Challenges, TopTen, Greenhouses, Biomes and friends work as usual
   (within unlocked chunks).
 - The nether and end are **disabled by default**. If enabled, each dimension gets its own
-  center chunk and the same spiral, driven by the same island level.
+  center chunk and the same claim rules, driven by the same island level.
 - The moderator bypass permission is `chunkblock.mod.bypasschunks` (deliberately not
   `mod.bypasslock`, which is BentoBox core's island *lock* bypass — a different feature).
   It is **not** given to ops by default: grant it explicitly (e.g. via your permissions
@@ -80,14 +82,15 @@ In addition to the phase placeholders inherited from the magic-block engine
 | Placeholder | Value |
 |---|---|
 | `chunkblock_island_chunks` | Unlocked chunk count |
-| `chunkblock_island_max_chunks` | Maximum unlockable chunks |
-| `chunkblock_island_next_chunk_level` | Island level needed for the next chunk |
-| `chunkblock_island_ring` | Ring number of the outermost unlocked chunk |
+| `chunkblock_island_max_chunks` | Maximum claimable chunks |
+| `chunkblock_island_chunk_credit` | Level credit available to spend |
+| `chunkblock_island_next_chunk_level` | Total island level needed to afford the next chunk |
+| `chunkblock_island_ring` | Ring number of the outermost claimed chunk |
 
 ## For developers
 
 - Request handler `unlocked-chunks` (submit `"player"` → UUID; returns `count`, `max`,
-  `ring`, `nextLevel`).
+  `ring`, `spent`, `credit`, and `chunks` — the claim-ordered offset list).
 - Events `ChunkUnlockEvent` and `ChunkRelockEvent` fire once per chunk transition.
 - Phase files are format-compatible with AOneBlock's `oneblocks` YAML, so community
   phase packs work verbatim.
@@ -102,13 +105,14 @@ Lush Caves, Dripstone Caves, Mangrove Swamp, Meadow, Cherry Grove, and Jagged Pe
 
 Q: Why can't I walk past the glowing red wall?
 
-A: That chunk is still locked! Check `/cb chunks` — it shows the level you need for the
-next chunk.
+A: That chunk is still locked! If you're the island owner and have level credit, hit the
+wall to claim the chunk. Check `/cb chunks` to see your credit and what's claimable.
 
-Q: I lost a level and my farm is behind the wall now. Is it gone?
+Q: I lost levels and my farm is behind the wall now. Is it gone?
 
-A: No. Nothing in a re-locked chunk is touched — regain the level and it's all still
-there. (Admins can turn re-locking off entirely with `relock-on-level-loss: false`.)
+A: No. Nothing in a re-locked chunk is touched — regain the levels and claim it back;
+re-locking always takes your newest chunks first. (Admins can turn re-locking off
+entirely with `relock-on-level-loss: false`.)
 
 Q: Why do I keep falling and dying?
 

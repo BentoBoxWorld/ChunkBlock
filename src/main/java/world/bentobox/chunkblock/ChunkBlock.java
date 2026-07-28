@@ -21,6 +21,7 @@ import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.generators.ChunkGeneratorWorld;
 import world.bentobox.chunkblock.listeners.BlockListener;
 import world.bentobox.chunkblock.listeners.BlockProtect;
+import world.bentobox.chunkblock.listeners.ChunkClaimListener;
 import world.bentobox.chunkblock.listeners.ChunkGuardListener;
 import world.bentobox.chunkblock.listeners.LockedChunkProtect;
 import world.bentobox.chunkblock.listeners.BossBarListener;
@@ -78,6 +79,8 @@ public class ChunkBlock extends GameModeAddon {
     private BlockListener blockListener;
     /** The listener that keeps players out of locked chunks */
     private ChunkGuardListener chunkGuardListener;
+    /** The listener that turns level changes into chunk credit and re-locks */
+    private LevelListener levelListener;
     /** The locked-chunk border visuals */
     private BorderDisplay borderDisplay;
     /** The manager for OneBlock phases and blocks */
@@ -212,7 +215,9 @@ public class ChunkBlock extends GameModeAddon {
         chunkGuardListener = new ChunkGuardListener(this);
         registerListener(chunkGuardListener);
         registerListener(new LockedChunkProtect(this));
-        registerListener(new LevelListener(this));
+        levelListener = new LevelListener(this);
+        registerListener(levelListener);
+        registerListener(new ChunkClaimListener(this));
         borderDisplay = new BorderDisplay(this);
         registerListener(borderDisplay);
         borderDisplay.start();
@@ -305,6 +310,13 @@ public class ChunkBlock extends GameModeAddon {
      */
     public ChunkGuardListener getChunkGuardListener() {
         return chunkGuardListener;
+    }
+
+    /**
+     * @return the level listener (chunk credit, claim celebrations and re-locks)
+     */
+    public LevelListener getLevelListener() {
+        return levelListener;
     }
 
     /**
@@ -439,13 +451,6 @@ public class ChunkBlock extends GameModeAddon {
     public void allLoaded() {
         // save settings. This will occur after all addons have loaded
         this.saveWorldSettings();
-        // The Border addon draws one rectangle per island; ChunkBlock's frontier is a
-        // ragged ring of chunks, so the two cannot both be right. Warn admins clearly.
-        if (getPlugin().getAddonsManager().getAddonByName("Border").isPresent()) {
-            logWarning("The Border addon is installed. Border cannot draw ChunkBlock's chunk-by-chunk frontier");
-            logWarning("and its wall will not match the unlocked area. Please add '" + getDescription().getName()
-                    + "' to Border's disabled-gamemodes list in its config.yml. ChunkBlock draws its own border.");
-        }
     }
 
     /**

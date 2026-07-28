@@ -9,7 +9,6 @@ repository: "BentoBoxWorld/ChunkBlock"
 authors: tastybento
 
 depend: Level
-softdepend: Border
 
 permissions:
 # Non-command permissions

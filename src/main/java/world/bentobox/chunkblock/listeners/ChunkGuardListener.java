@@ -120,13 +120,39 @@ public class ChunkGuardListener implements Listener {
             return;
         }
         e.setCancelled(true);
-        User.getInstance(player).notify("chunkblock.chunks.entry-denied");
+        sendBumpMessage(player, to);
         if (!isLocked(from)) {
             teleportBack(player, from);
         } else {
             // Already outside somehow (piston push, re-lock underfoot, stale login spot)
             backtrack(player);
         }
+    }
+
+    /**
+     * Tells a player bumping into the border what to do about it: owners aiming at a
+     * claimable chunk are invited to hit the border (or told how many levels they still
+     * need); everyone else just learns the chunk is locked.
+     */
+    private void sendBumpMessage(Player player, Location to) {
+        User user = User.getInstance(player);
+        Optional<Island> optionalIsland = islandAt(to);
+        if (optionalIsland.isPresent() && player.getUniqueId().equals(optionalIsland.get().getOwner())) {
+            Island island = optionalIsland.get();
+            ChunkManager cm = addon.getChunkManager();
+            if (cm.checkGeometry(island, to.getBlockX() >> 4, to.getBlockZ() >> 4) == ChunkManager.ClaimResult.OK) {
+                long credit = cm.getCredit(island);
+                if (credit >= cm.getChunkCost()) {
+                    user.notify("chunkblock.chunks.claim-hint", "[cost]", String.valueOf(cm.getChunkCost()),
+                            "[credit]", String.valueOf(credit));
+                } else {
+                    user.notify("chunkblock.chunks.no-credit", "[needed]",
+                            String.valueOf(cm.getChunkCost() - credit));
+                }
+                return;
+            }
+        }
+        user.notify("chunkblock.chunks.entry-denied");
     }
 
     /**

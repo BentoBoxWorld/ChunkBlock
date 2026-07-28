@@ -109,23 +109,24 @@ public class Settings implements WorldSettings {
     private String percentCompleteSymbol = "■";
 
     /*      CHUNKS      */
-    @ConfigComment("How many island levels are needed to unlock each chunk. Minimum 1.")
-    @ConfigComment("With the default of 1, a fresh island (level 0) has just the center chunk,")
-    @ConfigComment("and every level gained unlocks the next chunk in the spiral.")
+    @ConfigComment("How many island levels one chunk costs to claim. Minimum 1.")
+    @ConfigComment("Island levels are chunk currency: credit = island level minus levels already")
+    @ConfigComment("spent. The island owner spends credit by hitting the border where they want")
+    @ConfigComment("to expand.")
     @ConfigEntry(path = "chunkblock.levels-per-chunk")
     private int levelsPerChunk = 1;
 
-    @ConfigComment("Maximum number of chunks an island can unlock, including the center chunk.")
-    @ConfigComment("441 chunks is a full 10-ring square (21 x 21 chunks). Use -1 for no limit beyond")
-    @ConfigComment("what the island protection range can hold. The effective maximum is always")
-    @ConfigComment("capped so the outermost ring fits inside the protection range.")
+    @ConfigComment("Maximum number of chunks an island can claim, including the center chunk.")
+    @ConfigComment("441 chunks is a full 21 x 21 chunk square. Use -1 for no limit beyond what the")
+    @ConfigComment("island protection range can hold. The effective maximum is always capped so")
+    @ConfigComment("claimed chunks fit inside the protection range.")
     @ConfigEntry(path = "chunkblock.max-chunks")
     private int maxChunks = 441;
 
-    @ConfigComment("If true, losing island levels re-locks chunks in reverse unlock order (the")
-    @ConfigComment("most recently earned chunks are lost first). Builds inside re-locked chunks are")
-    @ConfigComment("untouched but cannot be reached until the level is regained.")
-    @ConfigComment("If false ('ratchet mode'), chunks never re-lock once unlocked.")
+    @ConfigComment("If true, losing island levels below what has been spent re-locks chunks in")
+    @ConfigComment("reverse claim order (the most recently claimed chunks are lost first). Builds")
+    @ConfigComment("inside re-locked chunks are untouched but cannot be reached until the levels")
+    @ConfigComment("are regained. If false ('ratchet mode'), chunks never re-lock once claimed.")
     @ConfigEntry(path = "chunkblock.relock-on-level-loss")
     private boolean relockOnLevelLoss = true;
 

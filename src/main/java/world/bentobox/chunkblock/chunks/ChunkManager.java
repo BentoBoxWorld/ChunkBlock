@@ -13,18 +13,17 @@ import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
+import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 
 /**
- * The chunk gating heart of ChunkBlock. Chunks unlock in a deterministic clockwise
- * spiral of concentric rings around the island's center chunk. Nothing is stored
- * per-chunk: a chunk at relative offset (dx, dz) is unlocked iff its spiral index is
- * less than the island's unlocked chunk count, which itself derives from the island
- * level. Level loss re-locks from the highest index down, so the most recently earned
- * chunks are always the first to go.
+ * The chunk gating heart of ChunkBlock. Every island starts with just its center chunk.
+ * Island levels are a spendable currency: the owner claims the next chunk by going to the
+ * border and hitting it — any direction they like, as long as the chunk touches their
+ * territory and fits inside the island's protection range. Each claim costs
+ * levels-per-chunk levels of credit (credit = island level minus levels already spent).
  * <p>
- * Spiral layout: index 0 is the center chunk. Ring r (Chebyshev distance r from the
- * center) holds the 8r indices starting at (2r-1)^2, walked clockwise from the ring's
- * anchor chunk due north of the center.
+ * The unlock order is recorded per island. If the island level drops below what has been
+ * spent, chunks re-lock in exact reverse order — last claimed, first lost.
  *
  * @author tastybento
  */
@@ -40,6 +39,22 @@ public class ChunkManager {
      * always placed here (see Settings offset handling).
      */
     public static final int CHUNK_CENTER = 8;
+
+    /**
+     * Why a chunk can or cannot be claimed right now.
+     */
+    public enum ClaimResult {
+        /** The chunk can be (or was) claimed */
+        OK,
+        /** The chunk is already unlocked */
+        ALREADY_UNLOCKED,
+        /** The chunk does not touch the island's unlocked territory */
+        NOT_ADJACENT,
+        /** The chunk is outside the island's protection range or over max-chunks */
+        BEYOND_LIMIT,
+        /** Not enough level credit */
+        NO_CREDIT
+    }
 
     private final ChunkBlock addon;
     /**
@@ -79,80 +94,16 @@ public class ChunkManager {
         return false;
     }
 
-    /**
-     * Returns the spiral index of the chunk at relative chunk offset (dx, dz) from the
-     * center chunk. Index 0 is the center; lower indices unlock first.
-     *
-     * @param dx relative chunk x offset
-     * @param dz relative chunk z offset
-     * @return the spiral index, always &gt;= 0
-     */
-    public static int spiralIndex(int dx, int dz) {
-        int r = Math.max(Math.abs(dx), Math.abs(dz));
-        if (r == 0) {
-            return 0;
-        }
-        // Chunks in all rings closer than r
-        int base = (2 * r - 1) * (2 * r - 1);
-        // Position along ring r's perimeter, walking clockwise from the anchor at (0, -r):
-        // east along the north edge, down the east edge, west along the south edge, up the
-        // west edge, then east back toward the anchor.
-        int p;
-        if (dz == -r && dx >= 0) {
-            p = dx;
-        } else if (dx == r) {
-            p = 2 * r + dz;
-        } else if (dz == r) {
-            p = 4 * r - dx;
-        } else if (dx == -r) {
-            p = 6 * r - dz;
-        } else { // dz == -r && dx < 0
-            p = 8 * r + dx;
-        }
-        return base + p;
+    // ------------------------------------------------------------------
+    // Lock queries
+    // ------------------------------------------------------------------
+
+    private int centerChunkX(Island island) {
+        return island.getCenter().getBlockX() >> 4;
     }
 
-    /**
-     * Returns the relative chunk offset of the chunk with the given spiral index. This is
-     * the exact inverse of {@link #spiralIndex(int, int)}.
-     *
-     * @param index the spiral index, &gt;= 0
-     * @return a vector whose x and z are the relative chunk offsets (y is 0)
-     */
-    public static Vector chunkAt(int index) {
-        if (index <= 0) {
-            return new Vector(0, 0, 0);
-        }
-        // Find the ring: smallest r with index < (2r+1)^2
-        int r = (int) Math.ceil((Math.sqrt(index + 1d) - 1) / 2);
-        int p = index - (2 * r - 1) * (2 * r - 1);
-        if (p <= r) {
-            return new Vector(p, 0, -r);
-        }
-        if (p <= 3 * r) {
-            return new Vector(r, 0, p - 2 * r);
-        }
-        if (p <= 5 * r) {
-            return new Vector(4 * r - p, 0, r);
-        }
-        if (p <= 7 * r) {
-            return new Vector(-r, 0, 6 * r - p);
-        }
-        return new Vector(p - 8 * r, 0, -r);
-    }
-
-    /**
-     * Returns the ring (Chebyshev distance from the center chunk) that the given spiral
-     * index sits on.
-     *
-     * @param index the spiral index, &gt;= 0
-     * @return the ring number; 0 is the center chunk
-     */
-    public static int ringOf(int index) {
-        if (index <= 0) {
-            return 0;
-        }
-        return (int) Math.ceil((Math.sqrt(index + 1d) - 1) / 2);
+    private int centerChunkZ(Island island) {
+        return island.getCenter().getBlockZ() >> 4;
     }
 
     /**
@@ -178,10 +129,8 @@ public class ChunkManager {
      * @return true if the chunk is unlocked
      */
     public boolean isUnlocked(Island island, int chunkX, int chunkZ) {
-        Location center = island.getCenter();
-        int dx = chunkX - (center.getBlockX() >> 4);
-        int dz = chunkZ - (center.getBlockZ() >> 4);
-        return spiralIndex(dx, dz) < getUnlockedChunkCount(island);
+        return addon.getOneBlocksIsland(island).isChunkUnlocked(chunkX - centerChunkX(island),
+                chunkZ - centerChunkZ(island));
     }
 
     /**
@@ -196,54 +145,163 @@ public class ChunkManager {
     }
 
     /**
-     * Returns the island's current unlocked chunk count (cached on the island data
-     * object), clamped to the effective maximum.
-     *
      * @param island the island
      * @return the number of unlocked chunks including the center chunk, always &gt;= 1
      */
     public int getUnlockedChunkCount(Island island) {
-        return Math.min(addon.getOneBlocksIsland(island).getUnlockedChunkCount(), getMaxChunks(island));
+        return addon.getOneBlocksIsland(island).getUnlockedChunkCount();
     }
 
     /**
-     * Computes how many chunks a given island level affords, honoring levels-per-chunk and
-     * the effective maximum. Negative levels clamp to the free center chunk.
+     * @param island the island
+     * @return the ring (Chebyshev distance from the center chunk) of the island's
+     *         outermost unlocked chunk
+     */
+    public int currentRing(Island island) {
+        int ring = 0;
+        for (Vector offset : getUnlockedOffsets(island)) {
+            ring = Math.max(ring, Math.max(Math.abs(offset.getBlockX()), Math.abs(offset.getBlockZ())));
+        }
+        return ring;
+    }
+
+    /**
+     * @param island the island
+     * @return the island's unlocked chunk offsets in unlock order (x and z are chunk
+     *         offsets relative to the center chunk)
+     */
+    public List<Vector> getUnlockedOffsets(Island island) {
+        List<Vector> result = new ArrayList<>();
+        for (String entry : addon.getOneBlocksIsland(island).getUnlockedChunks()) {
+            int comma = entry.indexOf(',');
+            result.add(new Vector(Integer.parseInt(entry.substring(0, comma)), 0,
+                    Integer.parseInt(entry.substring(comma + 1))));
+        }
+        return result;
+    }
+
+    // ------------------------------------------------------------------
+    // Level credit
+    // ------------------------------------------------------------------
+
+    /**
+     * @return how many levels one chunk costs
+     */
+    public int getChunkCost() {
+        return addon.getSettings().getLevelsPerChunk();
+    }
+
+    /**
+     * @param island the island
+     * @return the levels this island has already spent on chunks
+     */
+    public long getSpentLevels(Island island) {
+        return (long) (getUnlockedChunkCount(island) - 1) * getChunkCost();
+    }
+
+    /**
+     * @param island the island
+     * @param level the island's current level
+     * @return the level credit available to spend on chunks (can be negative after level
+     *         loss until chunks re-lock)
+     */
+    public long getCredit(Island island, long level) {
+        return level - getSpentLevels(island);
+    }
+
+    /**
+     * @param island the island
+     * @return the level credit available right now, reading the level from the Level addon
+     */
+    public long getCredit(Island island) {
+        return getCredit(island, addon.getIslandLevel(island));
+    }
+
+    // ------------------------------------------------------------------
+    // Claiming
+    // ------------------------------------------------------------------
+
+    /**
+     * Checks whether the chunk at world chunk coordinates could be claimed by the island,
+     * ignoring level credit — geometry only.
      *
      * @param island the island
-     * @param level the island level from the Level addon
-     * @return the unlocked chunk count the level affords, always &gt;= 1
+     * @param chunkX world chunk x coordinate
+     * @param chunkZ world chunk z coordinate
+     * @return OK, ALREADY_UNLOCKED, NOT_ADJACENT or BEYOND_LIMIT
      */
-    public int computeUnlockedCount(Island island, long level) {
-        long affordable = 1 + Math.max(0, level) / addon.getSettings().getLevelsPerChunk();
-        return (int) Math.min(affordable, getMaxChunks(island));
+    public ClaimResult checkGeometry(Island island, int chunkX, int chunkZ) {
+        int dx = chunkX - centerChunkX(island);
+        int dz = chunkZ - centerChunkZ(island);
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        if (data.isChunkUnlocked(dx, dz)) {
+            return ClaimResult.ALREADY_UNLOCKED;
+        }
+        if (Math.max(Math.abs(dx), Math.abs(dz)) > maxRingRadius(island)
+                || (addon.getSettings().getMaxChunks() >= 0
+                        && data.getUnlockedChunkCount() >= addon.getSettings().getMaxChunks())) {
+            return ClaimResult.BEYOND_LIMIT;
+        }
+        // Must share a face with territory the island already owns
+        if (!data.isChunkUnlocked(dx + 1, dz) && !data.isChunkUnlocked(dx - 1, dz)
+                && !data.isChunkUnlocked(dx, dz + 1) && !data.isChunkUnlocked(dx, dz - 1)) {
+            return ClaimResult.NOT_ADJACENT;
+        }
+        return ClaimResult.OK;
     }
 
     /**
-     * Returns the island level required to unlock the chunk with the given 1-based number
-     * (i.e. an unlocked chunk count of {@code chunkNumber}).
-     *
-     * @param chunkNumber the chunk count to reach, &gt;= 1
-     * @return the required island level
-     */
-    public long levelForChunkNumber(int chunkNumber) {
-        return (long) (chunkNumber - 1) * addon.getSettings().getLevelsPerChunk();
-    }
-
-    /**
-     * Returns the effective maximum number of chunks this island can unlock: the
-     * configured max-chunks, additionally capped so the outermost full ring fits inside
-     * the island's protection range.
+     * Attempts to claim the chunk at world chunk coordinates for the island, spending
+     * level credit. On success the chunk is recorded as unlocked (and saved); the caller
+     * handles celebration and events.
      *
      * @param island the island
-     * @return the maximum unlockable chunk count, always &gt;= 1
+     * @param chunkX world chunk x coordinate
+     * @param chunkZ world chunk z coordinate
+     * @return OK if the chunk was claimed, otherwise the reason it was not
      */
-    public int getMaxChunks(Island island) {
-        int rangeRadius = maxRingRadius(island);
-        int rangeCap = (2 * rangeRadius + 1) * (2 * rangeRadius + 1);
-        int configured = addon.getSettings().getMaxChunks();
-        return Math.max(1, configured < 0 ? rangeCap : Math.min(configured, rangeCap));
+    public ClaimResult claim(Island island, int chunkX, int chunkZ) {
+        ClaimResult geometry = checkGeometry(island, chunkX, chunkZ);
+        if (geometry != ClaimResult.OK) {
+            return geometry;
+        }
+        if (getCredit(island) < getChunkCost()) {
+            return ClaimResult.NO_CREDIT;
+        }
+        addon.getOneBlocksIsland(island).addUnlockedChunk(chunkX - centerChunkX(island),
+                chunkZ - centerChunkZ(island));
+        addon.getBlockListener().saveIsland(island);
+        return ClaimResult.OK;
     }
+
+    /**
+     * Re-locks chunks (last claimed first) until the levels spent fit within the given
+     * island level. Does not eject players or fire events — the caller does that with the
+     * returned offsets.
+     *
+     * @param island the island
+     * @param level the island's new level
+     * @return the re-locked chunk offsets, most recently claimed first
+     */
+    public List<Vector> relockToBudget(Island island, long level) {
+        List<Vector> removed = new ArrayList<>();
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        while (getSpentLevels(island) > Math.max(0, level)) {
+            int[] offset = data.removeLastUnlockedChunk();
+            if (offset == null) {
+                break;
+            }
+            removed.add(new Vector(offset[0], 0, offset[1]));
+        }
+        if (!removed.isEmpty()) {
+            addon.getBlockListener().saveIsland(island);
+        }
+        return removed;
+    }
+
+    // ------------------------------------------------------------------
+    // Limits and geometry helpers
+    // ------------------------------------------------------------------
 
     /**
      * Returns the largest ring radius (in chunks) that fits entirely inside the island's
@@ -254,6 +312,21 @@ public class ChunkManager {
      */
     public int maxRingRadius(Island island) {
         return Math.max(0, (island.getProtectionRange() - CHUNK_CENTER) / 16);
+    }
+
+    /**
+     * Returns the effective maximum number of chunks this island can unlock: the
+     * configured max-chunks, additionally capped by what fits inside the island's
+     * protection range.
+     *
+     * @param island the island
+     * @return the maximum unlockable chunk count, always &gt;= 1
+     */
+    public int getMaxChunks(Island island) {
+        int rangeRadius = maxRingRadius(island);
+        int rangeCap = (2 * rangeRadius + 1) * (2 * rangeRadius + 1);
+        int configured = addon.getSettings().getMaxChunks();
+        return Math.max(1, configured < 0 ? rangeCap : Math.min(configured, rangeCap));
     }
 
     /**
@@ -268,15 +341,12 @@ public class ChunkManager {
      * @return the nearest unlocked position, or the island center if from is degenerate
      */
     public Location nearestUnlockedSpot(Island island, Location from) {
-        Location center = island.getCenter();
-        int centerChunkX = center.getBlockX() >> 4;
-        int centerChunkZ = center.getBlockZ() >> 4;
-        int count = getUnlockedChunkCount(island);
+        int centerChunkX = centerChunkX(island);
+        int centerChunkZ = centerChunkZ(island);
         double bestDist = Double.MAX_VALUE;
-        Location best = center.clone();
+        Location best = island.getCenter().clone();
         best.setY(from.getY());
-        for (int i = 0; i < count; i++) {
-            Vector offset = chunkAt(i);
+        for (Vector offset : getUnlockedOffsets(island)) {
             int minX = (centerChunkX + offset.getBlockX()) << 4;
             int minZ = (centerChunkZ + offset.getBlockZ()) << 4;
             // Clamp one block inside the chunk so the spot is off the locked boundary
@@ -289,22 +359,5 @@ public class ChunkManager {
             }
         }
         return best;
-    }
-
-    /**
-     * Returns the relative chunk offsets of the spiral indices in [oldCount, newCount) —
-     * the chunks gained by an unlock from oldCount to newCount, or (swapped) the chunks
-     * lost by a re-lock. Used for celebration and border effects.
-     *
-     * @param oldCount the lower chunk count
-     * @param newCount the higher chunk count
-     * @return relative chunk offsets in spiral order
-     */
-    public List<Vector> chunksBetween(int oldCount, int newCount) {
-        List<Vector> result = new ArrayList<>();
-        for (int i = Math.max(0, oldCount); i < newCount; i++) {
-            result.add(chunkAt(i));
-        }
-        return result;
     }
 }

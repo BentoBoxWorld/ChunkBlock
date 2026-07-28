@@ -33,20 +33,22 @@ protection:
 
 chunkblock:
   chunks:
-    entry-denied: "&c That chunk is still locked! Raise your island level to unlock it."
+    entry-denied: "&c That chunk is locked."
     locked: "&c You can't touch that — the chunk is locked."
-    unlocked: "&a &l Chunk unlocked! &r&a Your island grew to [number] chunks."
-    unlocked-multiple: "&a &l [count] chunks unlocked! &r&a Your island grew to [number] chunks."
-    relocked: "&c Your island level dropped — [count] chunk(s) re-locked. Regain the level to get them back!"
+    claim-hint: "&e Hit the border to claim this chunk for &b [cost] &e level(s)! You have &b [credit] &e level(s) of credit."
+    no-credit: "&c You need &b [needed] &c more level(s) of credit to claim this chunk."
+    beyond-limit: "&c That chunk is beyond your island's protection area."
+    claimed: "&a &l Chunk claimed! &r&a Your island is now &b [number] &a chunks. Credit left: &b [credit] &a level(s)."
+    credit: "&a You can claim &b [count] &a more chunk(s)! Go to your border and hit it where you want to grow."
+    relocked: "&c Your island level dropped — [count] chunk(s) re-locked, newest first. Regain the levels to claim them back!"
     ejected: "&c The chunk you were in re-locked, so you were moved to safety."
     max-reached: "&d Your island has reached its maximum size of [number] chunks!"
-    next-unlock: "&a Next chunk unlocks at island level &b [level]&a."
     sethome-denied: "&c You can't set a home in a locked chunk."
-    info: "&a Chunks: &b [unlocked]&a/&b[max] &a— ring &b [ring]&a. Next chunk at level &b [level]&a."
+    info: "&a Chunks: &b [unlocked]&a/&b[max]&a. Credit: &b [credit] &a level(s) — a chunk costs &b [cost]&a."
     map:
       title: "&a Your island territory ([unlocked]/[max] chunks):"
       row: "&a [row]"
-      legend: "&a ■ unlocked &e ▣ next (level [level]) &7 □ locked"
+      legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked"
       you-are-here: "&b You are on the marked chunk."
   bossbar:
     title: "Blocks remaining"
@@ -66,11 +68,10 @@ chunkblock:
       description: "show your unlocked chunks and a map of your territory"
     admin:
       chunks:
-        parameters: "<player> [set <count> | recalc]"
-        description: "inspect, set or recalculate a player's unlocked chunks"
-        info: "&a [name] has &b [number] &a of &b [max] &a chunks unlocked."
-        set: "&a [name]'s unlocked chunks set to &b [number]&a."
-        recalc: "&a [name]'s unlocked chunks recalculated from their island level: &b [number]&a."
+        parameters: "<player> [reset]"
+        description: "inspect a player's unlocked chunks or re-lock them back to the start"
+        info: "&a [name]: &b [number]&a/&b[max] &a chunks, &b [spent] &a level(s) spent, &b [credit] &a credit."
+        reset: "&a [name]'s chunks were re-locked back to just the center chunk."
       bypass:
         description: "toggle chunk lock enforcement for yourself"
         "on": "&a You now bypass chunk locks. Border visuals are hidden for you."

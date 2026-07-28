@@ -101,8 +101,8 @@ class ChunkGuardListenerTest extends CommonTestSetup {
 
     @Test
     void testMoveIntoUnlockedNeighborAllowedAfterUnlock() {
-        // Unlock ring 1: the east neighbor chunk becomes reachable
-        data.setUnlockedChunkCount(9);
+        // Claim the east neighbor chunk: it becomes reachable
+        data.addUnlockedChunk(1, 0);
         PlayerMoveEvent e = new PlayerMoveEvent(mockPlayer, location, lockedTo);
         listener.onPlayerMove(e);
         assertFalse(e.isCancelled());

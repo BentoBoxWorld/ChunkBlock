@@ -1,6 +1,7 @@
 package world.bentobox.chunkblock.requests;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +18,9 @@ import world.bentobox.chunkblock.chunks.ChunkManager;
  * <ul><li>"count" - Integer number of unlocked chunks including the center</li>
  * <li>"max" - Integer maximum unlockable chunks for the island</li>
  * <li>"ring" - Integer ring number of the outermost unlocked chunk</li>
- * <li>"nextLevel" - Long island level needed for the next chunk</li></ul>
+ * <li>"spent" - Long levels already spent on chunks</li>
+ * <li>"credit" - Long level credit available to spend</li>
+ * <li>"chunks" - List&lt;String&gt; unlocked chunk offsets ("dx,dz") in claim order</li></ul>
  *
  * @author tastybento
  */
@@ -42,12 +45,13 @@ public class UnlockedChunksHandler extends AddonRequestHandler {
             return Collections.emptyMap();
         }
         ChunkManager cm = addon.getChunkManager();
-        int count = cm.getUnlockedChunkCount(island);
         Map<String, Object> result = new HashMap<>();
-        result.put("count", count);
+        result.put("count", cm.getUnlockedChunkCount(island));
         result.put("max", cm.getMaxChunks(island));
-        result.put("ring", ChunkManager.ringOf(count - 1));
-        result.put("nextLevel", cm.levelForChunkNumber(count + 1));
+        result.put("ring", cm.currentRing(island));
+        result.put("spent", cm.getSpentLevels(island));
+        result.put("credit", cm.getCredit(island));
+        result.put("chunks", List.copyOf(addon.getOneBlocksIsland(island).getUnlockedChunks()));
         return result;
     }
 }

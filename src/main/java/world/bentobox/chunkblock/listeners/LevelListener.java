@@ -23,9 +23,10 @@ import world.bentobox.chunkblock.events.ChunkUnlockEvent;
 import world.bentobox.level.events.IslandLevelCalculatedEvent;
 
 /**
- * The unlock trigger: turns island level changes from the Level addon into chunk unlock
- * and re-lock flows. This is the only place the unlocked chunk count is ever changed
- * (besides island creation/reset, handled here too).
+ * Watches island level changes from the Level addon. Levels are chunk currency here:
+ * gaining levels earns credit the owner can spend at the border (announced when new
+ * credit becomes available); losing levels below what has been spent re-locks the most
+ * recently claimed chunks, in reverse claim order.
  *
  * @author tastybento
  */
@@ -50,12 +51,12 @@ public class LevelListener implements Listener {
     }
 
     /**
-     * A brand-new island starts with just the center chunk.
+     * A brand-new island starts with just the center chunk and no spending history.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onIslandCreated(IslandCreatedEvent e) {
         if (addon.inWorld(e.getIsland().getWorld())) {
-            addon.getOneBlocksIsland(e.getIsland()).setUnlockedChunkCount(1);
+            resetIsland(e.getIsland());
         }
     }
 
@@ -65,74 +66,59 @@ public class LevelListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onIslandResetted(IslandResettedEvent e) {
         if (addon.inWorld(e.getIsland().getWorld())) {
-            addon.getOneBlocksIsland(e.getIsland()).setUnlockedChunkCount(1);
+            resetIsland(e.getIsland());
         }
     }
 
+    private void resetIsland(Island island) {
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        data.resetUnlockedChunks();
+        data.setLastKnownLevel(0);
+    }
+
     /**
-     * Recomputes the unlocked chunk count for a level and runs the unlock or re-lock flow
-     * if it changed.
+     * Handles a level change: re-locks over-spent chunks and announces newly available
+     * chunk credit.
      *
      * @param island the island
-     * @param level the island's level
+     * @param level the island's new level
      */
     public void applyLevel(Island island, long level) {
         ChunkManager cm = addon.getChunkManager();
         OneBlockIslands data = addon.getOneBlocksIsland(island);
-        int oldCount = Math.min(data.getUnlockedChunkCount(), cm.getMaxChunks(island));
-        int newCount = cm.computeUnlockedCount(island, level);
-        if (!addon.getSettings().isRelockOnLevelLoss()) {
-            // Ratchet mode: territory never shrinks
-            newCount = Math.max(oldCount, newCount);
-        }
-        if (newCount == oldCount) {
+        long oldLevel = data.getLastKnownLevel();
+        data.setLastKnownLevel(level);
+        addon.getBlockListener().saveIsland(island);
+        // Level dropped below what has been spent → the most recent claims are lost
+        if (addon.getSettings().isRelockOnLevelLoss() && cm.getSpentLevels(island) > Math.max(0, level)) {
+            relock(island, level);
             return;
         }
-        data.setUnlockedChunkCount(newCount);
-        addon.getBlockListener().saveIsland(island);
-        if (newCount > oldCount) {
-            onUnlock(island, oldCount, newCount);
-        } else {
-            onRelock(island, newCount, oldCount);
+        // Announce newly affordable chunks — the fun "go spend it!" moment
+        long cost = cm.getChunkCost();
+        long oldClaimable = Math.max(0, cm.getCredit(island, oldLevel)) / cost;
+        long newClaimable = Math.max(0, cm.getCredit(island, level)) / cost;
+        if (newClaimable > oldClaimable && cm.getUnlockedChunkCount(island) < cm.getMaxChunks(island)) {
+            island.getMemberSet().forEach(uuid -> {
+                User user = User.getInstance(uuid);
+                if (user.isOnline() && addon.inWorld(user.getWorld())) {
+                    user.sendMessage("chunkblock.chunks.credit", "[count]", String.valueOf(newClaimable));
+                    user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1.2F);
+                }
+            });
         }
     }
 
-    private void onUnlock(Island island, int oldCount, int newCount) {
+    private void relock(Island island, long level) {
         ChunkManager cm = addon.getChunkManager();
-        List<Vector> gained = cm.chunksBetween(oldCount, newCount);
-        for (int i = 0; i < gained.size(); i++) {
-            Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, gained.get(i), oldCount + i));
+        int countBefore = cm.getUnlockedChunkCount(island);
+        List<Vector> lost = cm.relockToBudget(island, level);
+        if (lost.isEmpty()) {
+            return;
         }
-        int count = gained.size();
-        island.getMemberSet().forEach(uuid -> {
-            User user = User.getInstance(uuid);
-            if (user.isOnline() && addon.inWorld(user.getWorld())) {
-                if (count == 1) {
-                    user.sendMessage("chunkblock.chunks.unlocked", "[number]", String.valueOf(newCount));
-                } else {
-                    user.sendMessage("chunkblock.chunks.unlocked-multiple", "[count]", String.valueOf(count),
-                            "[number]", String.valueOf(newCount));
-                }
-                if (newCount >= cm.getMaxChunks(island)) {
-                    user.sendMessage("chunkblock.chunks.max-reached", "[number]", String.valueOf(newCount));
-                } else {
-                    user.sendMessage("chunkblock.chunks.next-unlock", "[level]",
-                            String.valueOf(cm.levelForChunkNumber(newCount + 1)));
-                }
-                user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-            }
-        });
-        // Celebration particles along the freshly unlocked chunks
-        if (addon.getBorderDisplay() != null) {
-            addon.getBorderDisplay().celebrate(island, gained);
-        }
-    }
-
-    private void onRelock(Island island, int newCount, int oldCount) {
-        List<Vector> lost = addon.getChunkManager().chunksBetween(newCount, oldCount);
-        // Highest index re-locks first: reverse order for the events
-        for (int i = lost.size() - 1; i >= 0; i--) {
-            Bukkit.getPluginManager().callEvent(new ChunkRelockEvent(island, lost.get(i), newCount + i));
+        // Most recently claimed chunk first: indices count down from the end of the list
+        for (int i = 0; i < lost.size(); i++) {
+            Bukkit.getPluginManager().callEvent(new ChunkRelockEvent(island, lost.get(i), countBefore - 1 - i));
         }
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);
@@ -143,6 +129,37 @@ public class LevelListener implements Listener {
         });
         if (addon.getSettings().isEjectPlayersOnRelock()) {
             ejectPlayers(island);
+        }
+    }
+
+    /**
+     * Fires the unlock event and celebrates a freshly claimed chunk. Called by the claim
+     * listener after a successful claim.
+     *
+     * @param island the island
+     * @param chunkX claimed world chunk x
+     * @param chunkZ claimed world chunk z
+     */
+    public void celebrateClaim(Island island, int chunkX, int chunkZ) {
+        ChunkManager cm = addon.getChunkManager();
+        int count = cm.getUnlockedChunkCount(island);
+        Vector offset = new Vector(chunkX - (island.getCenter().getBlockX() >> 4), 0,
+                chunkZ - (island.getCenter().getBlockZ() >> 4));
+        Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, offset, count - 1));
+        long creditLeft = Math.max(0, cm.getCredit(island));
+        island.getMemberSet().forEach(uuid -> {
+            User user = User.getInstance(uuid);
+            if (user.isOnline() && addon.inWorld(user.getWorld())) {
+                user.sendMessage("chunkblock.chunks.claimed", "[number]", String.valueOf(count),
+                        "[credit]", String.valueOf(creditLeft));
+                if (count >= cm.getMaxChunks(island)) {
+                    user.sendMessage("chunkblock.chunks.max-reached", "[number]", String.valueOf(count));
+                }
+                user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
+            }
+        });
+        if (addon.getBorderDisplay() != null) {
+            addon.getBorderDisplay().celebrate(island, List.of(offset));
         }
     }
 

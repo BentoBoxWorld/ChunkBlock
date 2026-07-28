@@ -11,12 +11,11 @@ import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
-import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
+import world.bentobox.chunkblock.chunks.ChunkManager;
 
 /**
- * /cbadmin chunks &lt;player&gt; [set &lt;n&gt; | recalc] — support and debug tool: shows a
- * player's unlocked chunk count, sets it directly, or recalculates it from their island
- * level.
+ * /cbadmin chunks &lt;player&gt; [reset] — support and debug tool: shows a player's
+ * unlocked chunks, spending and credit, or re-locks everything back to the center chunk.
  *
  * @author tastybento
  */
@@ -38,7 +37,7 @@ public class AdminChunksCommand extends CompositeCommand {
 
     @Override
     public boolean canExecute(User user, String label, List<String> args) {
-        if (args.isEmpty() || args.size() > 3) {
+        if (args.isEmpty() || args.size() > 2) {
             showHelp(this, user);
             return false;
         }
@@ -57,33 +56,19 @@ public class AdminChunksCommand extends CompositeCommand {
             user.sendMessage("general.errors.player-has-no-island");
             return false;
         }
-        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        ChunkManager cm = addon.getChunkManager();
         if (args.size() == 1) {
             user.sendMessage("chunkblock.commands.admin.chunks.info", TextVariables.NAME, args.get(0),
-                    TextVariables.NUMBER, String.valueOf(addon.getChunkManager().getUnlockedChunkCount(island)),
-                    "[max]", String.valueOf(addon.getChunkManager().getMaxChunks(island)));
+                    TextVariables.NUMBER, String.valueOf(cm.getUnlockedChunkCount(island)),
+                    "[max]", String.valueOf(cm.getMaxChunks(island)),
+                    "[spent]", String.valueOf(cm.getSpentLevels(island)),
+                    "[credit]", String.valueOf(cm.getCredit(island)));
             return true;
         }
-        String action = args.get(1).toLowerCase(Locale.ENGLISH);
-        if ("set".equals(action) && args.size() == 3) {
-            Optional<Integer> count = Optional.of(args.get(2)).filter(a -> Util.isInteger(a, true))
-                    .map(Integer::parseInt);
-            if (count.isEmpty() || count.get() < 1) {
-                user.sendMessage("general.errors.must-be-positive-number", TextVariables.NUMBER, args.get(2));
-                return false;
-            }
-            data.setUnlockedChunkCount(Math.min(count.get(), addon.getChunkManager().getMaxChunks(island)));
+        if ("reset".equals(args.get(1).toLowerCase(Locale.ENGLISH))) {
+            addon.getOneBlocksIsland(island).resetUnlockedChunks();
             addon.getBlockListener().saveIsland(island);
-            user.sendMessage("chunkblock.commands.admin.chunks.set", TextVariables.NAME, args.get(0),
-                    TextVariables.NUMBER, String.valueOf(data.getUnlockedChunkCount()));
-            return true;
-        }
-        if ("recalc".equals(action) && args.size() == 2) {
-            long level = addon.getIslandLevel(island);
-            data.setUnlockedChunkCount(addon.getChunkManager().computeUnlockedCount(island, level));
-            addon.getBlockListener().saveIsland(island);
-            user.sendMessage("chunkblock.commands.admin.chunks.recalc", TextVariables.NAME, args.get(0),
-                    TextVariables.NUMBER, String.valueOf(data.getUnlockedChunkCount()));
+            user.sendMessage("chunkblock.commands.admin.chunks.reset", TextVariables.NAME, args.get(0));
             return true;
         }
         showHelp(this, user);
@@ -96,7 +81,7 @@ public class AdminChunksCommand extends CompositeCommand {
             return Optional.of(Util.getOnlinePlayerList(user));
         }
         if (args.size() == 3) {
-            return Optional.of(List.of("set", "recalc"));
+            return Optional.of(List.of("reset"));
         }
         return Optional.empty();
     }

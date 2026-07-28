@@ -10,10 +10,11 @@ import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
+import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 
 /**
- * /cb chunks — shows how big your island is, what unlocks next, and a little chat map of
- * your territory.
+ * /cb chunks — shows how big your island is, how much level credit you can spend, and a
+ * little chat map of your territory with the chunks you could claim next.
  *
  * @author tastybento
  */
@@ -56,36 +57,35 @@ public class IslandChunksCommand extends CompositeCommand {
         ChunkManager cm = addon.getChunkManager();
         int unlocked = cm.getUnlockedChunkCount(island);
         int max = cm.getMaxChunks(island);
-        int ring = ChunkManager.ringOf(unlocked - 1);
-        long nextLevel = cm.levelForChunkNumber(unlocked + 1);
+        long credit = Math.max(0, cm.getCredit(island));
         user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
-                String.valueOf(max), "[ring]", String.valueOf(ring), "[level]", String.valueOf(nextLevel));
+                String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
+                String.valueOf(cm.getChunkCost()));
         showMap(user, island, unlocked, max);
         return true;
     }
 
     /**
-     * Renders the territory as rows of colored glyphs: unlocked chunks, the next chunk the
-     * spiral will unlock, locked chunks, and the chunk the player is standing on.
+     * Renders the territory as rows of colored glyphs: unlocked chunks, the frontier
+     * chunks that could be claimed next, locked chunks, and the chunk the player is
+     * standing on.
      */
     private void showMap(User user, Island island, int unlocked, int max) {
         ChunkManager cm = addon.getChunkManager();
-        int radius = Math.min(MAX_MAP_RADIUS, ChunkManager.ringOf(unlocked - 1) + 1);
+        int radius = Math.min(MAX_MAP_RADIUS, cm.currentRing(island) + 1);
         int centerChunkX = island.getCenter().getBlockX() >> 4;
         int centerChunkZ = island.getCenter().getBlockZ() >> 4;
         int playerDx = (user.getLocation().getBlockX() >> 4) - centerChunkX;
         int playerDz = (user.getLocation().getBlockZ() >> 4) - centerChunkZ;
-        int nextIndex = unlocked < max ? unlocked : -1;
         user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max));
         for (int dz = -radius; dz <= radius; dz++) {
             StringBuilder row = new StringBuilder();
             for (int dx = -radius; dx <= radius; dx++) {
-                int index = ChunkManager.spiralIndex(dx, dz);
                 boolean here = dx == playerDx && dz == playerDz;
-                if (index < unlocked) {
+                if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
                     row.append(here ? "&b◆" : "&a■");
-                } else if (index == nextIndex) {
+                } else if (cm.checkGeometry(island, centerChunkX + dx, centerChunkZ + dz) == ClaimResult.OK) {
                     row.append(here ? "&b◆" : "&e▣");
                 } else {
                     row.append(here ? "&b◇" : "&7□");
@@ -93,7 +93,6 @@ public class IslandChunksCommand extends CompositeCommand {
             }
             user.sendMessage("chunkblock.chunks.map.row", "[row]", row.toString());
         }
-        user.sendMessage("chunkblock.chunks.map.legend", "[level]",
-                String.valueOf(cm.levelForChunkNumber(unlocked + 1)));
+        user.sendMessage("chunkblock.chunks.map.legend", "[cost]", String.valueOf(cm.getChunkCost()));
     }
 }

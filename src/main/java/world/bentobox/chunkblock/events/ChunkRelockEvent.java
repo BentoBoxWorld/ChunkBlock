@@ -20,17 +20,17 @@ public class ChunkRelockEvent extends BentoBoxEvent {
 
     private final Island island;
     private final Vector chunkOffset;
-    private final int spiralIndex;
+    private final int unlockIndex;
 
     /**
      * @param island the island that lost the chunk
      * @param chunkOffset the chunk offset relative to the island's center chunk (x and z)
-     * @param spiralIndex the chunk's index in the unlock spiral
+     * @param unlockIndex the chunk's position in the island's unlock order
      */
-    public ChunkRelockEvent(@NonNull Island island, @NonNull Vector chunkOffset, int spiralIndex) {
+    public ChunkRelockEvent(@NonNull Island island, @NonNull Vector chunkOffset, int unlockIndex) {
         this.island = island;
         this.chunkOffset = chunkOffset;
-        this.spiralIndex = spiralIndex;
+        this.unlockIndex = unlockIndex;
     }
 
     @Override
@@ -59,9 +59,9 @@ public class ChunkRelockEvent extends BentoBoxEvent {
     }
 
     /**
-     * @return the chunk's index in the unlock spiral (0 is the center chunk)
+     * @return the chunk's position in the island's unlock order (0 is the center chunk)
      */
-    public int getSpiralIndex() {
-        return spiralIndex;
+    public int getUnlockIndex() {
+        return unlockIndex;
     }
 }
