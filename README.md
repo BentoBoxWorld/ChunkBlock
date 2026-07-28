@@ -69,6 +69,8 @@ The player command is `/cb` (alias `/chunkblock`), the admin command `/cbadmin`
   center chunk and the same spiral, driven by the same island level.
 - The moderator bypass permission is `chunkblock.mod.bypasschunks` (deliberately not
   `mod.bypasslock`, which is BentoBox core's island *lock* bypass — a different feature).
+  It is **not** given to ops by default: grant it explicitly (e.g. via your permissions
+  plugin) so staff play by the same rules until they opt in.
 
 ## Placeholders
 

@@ -41,8 +41,8 @@ permissions:
     description: Bypasses an island lock
     default: op
   chunkblock.mod.bypasschunks:
-    description: Exempts the holder from chunk locking entirely; also allows '/cbadmin bypass' to toggle it
-    default: op
+    description: Exempts the holder from chunk locking entirely; also allows '/cbadmin bypass' to toggle it. Not given to ops by default - it must be granted explicitly so staff play by the same rules until they opt in.
+    default: false
   chunkblock.mod.bypassban:
     description: Bypasses island ban
     default: op
