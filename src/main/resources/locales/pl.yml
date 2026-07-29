@@ -7,7 +7,7 @@ protection:
         &b magiczny blok, jeśli
         &b może niszczyć bloki.
       hint: "&c Twoja ranga nie może zniszczyć magicznego bloku!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Bezpieczeństwo Początkowe
       description: |-
         &b Zapobiega poruszaniu się
@@ -15,12 +15,12 @@ protection:
         &b aby nie spadli.
       hint: "&c Ruch zablokowany ze względów bezpieczeństwa na kolejne [number] sekund!"
       free-to-move: "&a Możesz się swobodnie poruszać. Bądź ostrożny!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Pasek Bossa
         description: |-
           &b Pokazuje pasek statusu
           &b dla każdej fazy.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Pasek Akcji
       description: |-
         &b Pokazuje status

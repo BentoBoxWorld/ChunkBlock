@@ -92,7 +92,7 @@ public class BossBarListenerTest extends CommonTestSetup {
      */
     @Test
     void testActionBarShownWhenEnabled() {
-        when(island.isAllowed(addon.ONEBLOCK_ACTIONBAR)).thenReturn(true);
+        when(island.isAllowed(addon.CHUNKBLOCK_ACTIONBAR)).thenReturn(true);
         fireMagicBlockEvent();
         verify(mockPlayer).sendActionBar(any(Component.class));
     }
@@ -105,7 +105,7 @@ public class BossBarListenerTest extends CommonTestSetup {
     @Test
     void testActionBarNotShownWhenDisabledInConfig() {
         settings.setActionBar(false);
-        when(island.isAllowed(addon.ONEBLOCK_ACTIONBAR)).thenReturn(true);
+        when(island.isAllowed(addon.CHUNKBLOCK_ACTIONBAR)).thenReturn(true);
         fireMagicBlockEvent();
         verify(mockPlayer, never()).sendActionBar(any(Component.class));
     }
@@ -125,7 +125,7 @@ public class BossBarListenerTest extends CommonTestSetup {
      */
     @Test
     void testBossBarShownWhenEnabled() {
-        when(island.isAllowed(addon.ONEBLOCK_BOSSBAR)).thenReturn(true);
+        when(island.isAllowed(addon.CHUNKBLOCK_BOSSBAR)).thenReturn(true);
         fireMagicBlockEvent();
         verify(bossBar).addPlayer(mockPlayer);
     }
@@ -136,7 +136,7 @@ public class BossBarListenerTest extends CommonTestSetup {
     @Test
     void testBossBarNotShownWhenDisabledInConfig() {
         settings.setBossBar(false);
-        when(island.isAllowed(addon.ONEBLOCK_BOSSBAR)).thenReturn(true);
+        when(island.isAllowed(addon.CHUNKBLOCK_BOSSBAR)).thenReturn(true);
         fireMagicBlockEvent();
         mockedBukkit.verify(() -> Bukkit.createBossBar(anyString(), any(), any()), never());
         verify(bossBar, never()).addPlayer(any());

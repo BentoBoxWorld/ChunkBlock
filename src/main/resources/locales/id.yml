@@ -7,7 +7,7 @@ protection:
         &b menghancurkan blok ajaib
         &b jika mereka dapat menghancurkan blok.
       hint: "&c Pangkatmu tidak dapat menghancurkan blok ajaib!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Keamanan Awal
       description: |-
         &b Mencegah pemain baru
@@ -15,12 +15,12 @@ protection:
         &b agar mereka tidak jatuh.
       hint: "&c Pergerakan diblokir untuk keselamatan selama [number] detik lagi!"
       free-to-move: "&a Anda bebas bergerak. Hati-hati!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Bar
         description: |-
           &b Menampilkan bilah status
           &b untuk setiap fase.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Action Bar
       description: |-
         &b Menampilkan status

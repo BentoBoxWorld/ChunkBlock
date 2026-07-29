@@ -29,13 +29,13 @@ public class IslandActionBarCommand extends CompositeCommand {
     @Override
     public boolean execute(User user, String label, List<String> args) {
         getIslands().getIslandAt(user.getLocation()).ifPresent(i -> {
-            if (!i.isAllowed(addon.ONEBLOCK_ACTIONBAR)) {
+            if (!i.isAllowed(addon.CHUNKBLOCK_ACTIONBAR)) {
                 user.sendMessage("chunkblock.actionbar.not-active");
             }
         });
         // Toggle state
-        boolean newState = !user.getMetaData(BossBarListener.AONEBLOCK_ACTIONBAR).map(MetaDataValue::asBoolean).orElse(true);
-        user.putMetaData(BossBarListener.AONEBLOCK_ACTIONBAR, new MetaDataValue(newState));
+        boolean newState = !user.getMetaData(BossBarListener.ACTIONBAR_METADATA).map(MetaDataValue::asBoolean).orElse(true);
+        user.putMetaData(BossBarListener.ACTIONBAR_METADATA, new MetaDataValue(newState));
         if (newState) {
              user.sendMessage("chunkblock.commands.island.actionbar.status_on");
         } else {

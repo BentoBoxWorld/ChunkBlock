@@ -95,7 +95,7 @@ public class ChunkBlock extends GameModeAddon {
     /**
      * Flag to enable or disable start safety for players.
      */
-    public final Flag START_SAFETY = new Flag.Builder("START_SAFETY", Material.BAMBOO_BLOCK)
+    public final Flag CHUNKBLOCK_START_SAFETY = new Flag.Builder("CHUNKBLOCK_START_SAFETY", Material.BAMBOO_BLOCK)
             .mode(Mode.BASIC)
             .type(Type.WORLD_SETTING)
             .listener(new StartSafetyListener(this))
@@ -106,7 +106,7 @@ public class ChunkBlock extends GameModeAddon {
     /**
      * Flag to enable or disable the OneBlock boss bar.
      */
-    public final Flag ONEBLOCK_BOSSBAR = new Flag.Builder("ONEBLOCK_BOSSBAR", Material.DRAGON_HEAD)
+    public final Flag CHUNKBLOCK_BOSSBAR = new Flag.Builder("CHUNKBLOCK_BOSSBAR", Material.DRAGON_HEAD)
             .mode(Mode.BASIC)
             .type(Type.SETTING)
             .listener(bossBar)
@@ -115,7 +115,7 @@ public class ChunkBlock extends GameModeAddon {
     /**
      * Flag to enable or disable the OneBlock action bar.
      */
-    public final Flag ONEBLOCK_ACTIONBAR = new Flag.Builder("ONEBLOCK_ACTIONBAR", Material.IRON_BARS)
+    public final Flag CHUNKBLOCK_ACTIONBAR = new Flag.Builder("CHUNKBLOCK_ACTIONBAR", Material.IRON_BARS)
             .mode(Mode.BASIC)
             .type(Type.SETTING)
             .listener(bossBar)
@@ -165,14 +165,14 @@ public class ChunkBlock extends GameModeAddon {
             adminCommand = new AdminCommand(this);
             // Register flag with BentoBox
             // Register protection flag with BentoBox
-            getPlugin().getFlagsManager().registerFlag(this, START_SAFETY);
+            getPlugin().getFlagsManager().registerFlag(this, CHUNKBLOCK_START_SAFETY);
             // Bossbar
             if (getSettings().isBossBar()) {
-                getPlugin().getFlagsManager().registerFlag(this, this.ONEBLOCK_BOSSBAR);
+                getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_BOSSBAR);
             }
             // Actionbar
             if (getSettings().isActionBar()) {
-                getPlugin().getFlagsManager().registerFlag(this, this.ONEBLOCK_ACTIONBAR);
+                getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_ACTIONBAR);
             }
             // Magic Block protection
             getPlugin().getFlagsManager().registerFlag(this, this.MAGIC_BLOCK);
@@ -226,7 +226,7 @@ public class ChunkBlock extends GameModeAddon {
         registerListener(new JoinLeaveListener(this));
         registerListener(new InfoListener(this));
         // Note: bossBar is registered as a listener by the FlagsManager when the
-        // ONEBLOCK_BOSSBAR or ONEBLOCK_ACTIONBAR flag is registered in onLoad, so it
+        // CHUNKBLOCK_BOSSBAR or CHUNKBLOCK_ACTIONBAR flag is registered in onLoad, so it
         // must not be registered here too or events would be handled twice
         // Register placeholders
         phManager = new ChunkBlockPlaceholders(this, getPlugin().getPlaceholdersManager());

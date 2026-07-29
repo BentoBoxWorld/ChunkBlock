@@ -75,7 +75,7 @@ public class StartSafetyListenerTest extends CommonTestSetup {
 
         when(location2.getX()).thenReturn(0.5D);
 
-        addon.START_SAFETY.setSetting(world, true);
+        addon.CHUNKBLOCK_START_SAFETY.setSetting(world, true);
 
         ssl = new StartSafetyListener(addon);
     }

@@ -7,7 +7,7 @@ protection:
         &b magični blok, ako
         &b može razbiti blokove.
       hint: "&c Vaš rang ne može razbiti magični blok!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Početna Sigurnost
       description: |-
         &b Sprječava nove igrače
@@ -15,12 +15,12 @@ protection:
         &b da ne padnu.
       hint: "&c Kretanje je blokirano iz sigurnosnih razloga još [number] sekundi!"
       free-to-move: "&a Slobodni ste za kretanje. Budite oprezni!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Traka
         description: |-
           &b Prikazuje statusnu traku
           &b za svaku fazu.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Traka Akcije
       description: |-
         &b Prikazuje status

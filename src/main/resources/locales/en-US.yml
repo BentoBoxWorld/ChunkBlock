@@ -11,7 +11,7 @@ protection:
         &b Rank that can break the magic
         &b block if they can break blocks.
       hint: "&c Your rank cannot break the magic block!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Starting Safety
       description: |-
         &b Prevents new players
@@ -19,12 +19,12 @@ protection:
         &b so they don't fall off.
       hint: "&c Movement blocked for safety for [number] more seconds!"
       free-to-move: "&a You are free to move. Be careful!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Bar
         description: |-
           &b Shows a status bar
           &b for each phase.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Action Bar
       description: |-
         &b Shows a status

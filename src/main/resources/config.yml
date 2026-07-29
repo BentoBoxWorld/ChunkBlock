@@ -290,7 +290,7 @@ world:
     CLEAN_SUPER_FLAT: false
     CHEST_DAMAGE: false
     PREVENT_TELEPORT_WHEN_FALLING: false
-    START_SAFETY: false
+    CHUNKBLOCK_START_SAFETY: false
     ENTER_EXIT_MESSAGES: true
     ALLOW_MOVE_BOX: true
     ENDERMAN_DEATH_DROP: true
@@ -421,7 +421,7 @@ world:
     TNT_DAMAGE: true
     MONSTER_SPAWNERS_SPAWN: true
     FIRE_IGNITE: true
-    ONEBLOCK_BOSSBAR: true
+    CHUNKBLOCK_BOSSBAR: true
     BLOCK_EXPLODE_DAMAGE: true
     ANIMAL_SPAWNERS_SPAWN: true
   # These settings/flags are hidden from users

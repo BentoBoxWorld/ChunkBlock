@@ -37,7 +37,12 @@ public class StartSafetyListener implements Listener {
     }
 
     private void store(World world, UUID playerUUID) {
-        if (addon.inWorld(world) && addon.START_SAFETY.isSetForWorld(world) && !newIslands.containsKey(playerUUID)) {
+        // This listener is registered with the CHUNKBLOCK_START_SAFETY flag in onLoad, so it can
+        // outlive an addon that never enabled (e.g. missing dependency) and has no world
+        if (addon.getOverWorld() == null) {
+            return;
+        }
+        if (addon.inWorld(world) && addon.CHUNKBLOCK_START_SAFETY.isSetForWorld(world) && !newIslands.containsKey(playerUUID)) {
             long time = addon.getSettings().getStartingSafetyDuration();
             if (time < 0) {
                 time = 10; // 10 seconds
@@ -45,7 +50,7 @@ public class StartSafetyListener implements Listener {
             newIslands.put(playerUUID, System.currentTimeMillis() + (time * 1000));
             Bukkit.getScheduler().runTaskLater(addon.getPlugin(), () -> {
                 newIslands.remove(playerUUID);
-                User.getInstance(playerUUID).sendMessage("protection.flags.START_SAFETY.free-to-move");
+                User.getInstance(playerUUID).sendMessage("protection.flags.CHUNKBLOCK_START_SAFETY.free-to-move");
             }, time);
         }
 
@@ -58,7 +63,8 @@ public class StartSafetyListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent e) {
-        if (addon.inWorld(e.getPlayer().getWorld()) && newIslands.containsKey(e.getPlayer().getUniqueId())
+        if (addon.getOverWorld() != null && addon.inWorld(e.getPlayer().getWorld())
+                && newIslands.containsKey(e.getPlayer().getUniqueId())
                 && !e.getPlayer().isSneaking()
                 && (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ())) {
             // Do not allow x or z movement
@@ -66,7 +72,7 @@ public class StartSafetyListener implements Listener {
                     e.getTo().getYaw(), e.getTo().getPitch()));
             String waitTime = String
                     .valueOf((int) ((newIslands.get(e.getPlayer().getUniqueId()) - System.currentTimeMillis()) / 1000));
-            User.getInstance(e.getPlayer()).notify(addon.START_SAFETY.getHintReference(), TextVariables.NUMBER,
+            User.getInstance(e.getPlayer()).notify(addon.CHUNKBLOCK_START_SAFETY.getHintReference(), TextVariables.NUMBER,
                     waitTime);
         }
     }

@@ -7,7 +7,7 @@ protection:
         &b büyülü bloğu kırabilecek
         &b rütbe.
       hint: "&c Rütbeniz büyülü bloğu kıramaz!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Başlangıç Güvenliği
       description: |-
         &b Yeni oyuncuların 1 dakika
@@ -15,12 +15,12 @@ protection:
         &b engelleyerek düşmelerini önler.
       hint: "&c Güvenlik için hareket [number] saniye daha engellendi!"
       free-to-move: "&a Serbestçe hareket edebilirsiniz. Dikkatli olun!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Çubuğu
         description: |-
           &b Her aşama için bir
           &b durum çubuğu gösterir.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Eylem Çubuğu (Action Bar)
       description: |-
         &b Her aşama için bir
