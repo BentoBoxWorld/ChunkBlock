@@ -41,6 +41,7 @@ import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
@@ -185,8 +186,12 @@ public class ChunkGuardListener implements Listener {
         if (optionalIsland.isEmpty()) {
             optionalIsland = Optional.ofNullable(addon.getIslands().getIsland(loc.getWorld(), User.getInstance(player)));
         }
-        if (optionalIsland.isEmpty()) {
-            // Not on any island grid and no island of their own: home teleport is all we can do
+        // Only relocate a player within an island they actually belong to. Anyone else
+        // (e.g. a respawn that landed on a stranger's or abandoned island) goes to their
+        // own island home instead — never dropped, with a landing block, onto an island
+        // that is not theirs.
+        if (optionalIsland.isEmpty()
+                || !optionalIsland.get().getMemberSet(RanksManager.COOP_RANK).contains(player.getUniqueId())) {
             addon.getIslands().homeTeleportAsync(Objects.requireNonNull(loc.getWorld()), player);
             return;
         }

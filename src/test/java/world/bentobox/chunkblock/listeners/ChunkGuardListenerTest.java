@@ -23,6 +23,9 @@ import org.bukkit.util.Vector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableSet;
+
+import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
@@ -183,5 +186,26 @@ class ChunkGuardListenerTest extends CommonTestSetup {
         PlayerMoveEvent e = new PlayerMoveEvent(mockPlayer, location, highTo);
         listener.onPlayerMove(e);
         assertTrue(e.isCancelled());
+    }
+
+    @Test
+    void testBacktrackNonMemberSentHomeNotEjectedLocally() {
+        // Player is inside a locked chunk of an island they have no rank on (e.g. a
+        // respawn that landed on a stranger's or abandoned island)
+        when(mockPlayer.getLocation()).thenReturn(lockedTo);
+        when(island.getMemberSet(RanksManager.COOP_RANK)).thenReturn(ImmutableSet.of());
+        listener.backtrack(mockPlayer);
+        verify(im).homeTeleportAsync(world, mockPlayer);
+        mockedUtil.verify(() -> Util.teleportAsync(any(Player.class), any(Location.class)), never());
+    }
+
+    @Test
+    void testBacktrackMemberEjectedWithinIsland() {
+        when(mockPlayer.getLocation()).thenReturn(lockedTo);
+        when(island.getMemberSet(RanksManager.COOP_RANK)).thenReturn(ImmutableSet.of(uuid));
+        when(im.isSafeLocation(any())).thenReturn(true);
+        listener.backtrack(mockPlayer);
+        verify(im, never()).homeTeleportAsync(any(), any(Player.class));
+        mockedUtil.verify(() -> Util.teleportAsync(any(Player.class), any(Location.class)));
     }
 }
