@@ -100,7 +100,7 @@ chunkblock:
     my-island-phase-default: Tidak diketahui
   gui:
     titles:
-      phases: OneBlock Phases
+      phases: ChunkBlock Phases
     buttons:
       previous:
         name: '&f&l  halaman sebelumnya'

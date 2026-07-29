@@ -132,7 +132,7 @@ chunkblock:
       count: "&a Island is on block &b [number] &a in the &b [name] &a phase. Lifetime count &b [lifetime] &a."
     phases:
       description: show a list of all the phases
-      title: "&2 OneBlock Phases"
+      title: "&2 ChunkBlock Phases"
       name-syntax: "&a [name]"
       description-syntax: "&b [number] blocks"
     island:
@@ -164,7 +164,7 @@ chunkblock:
     my-island-phase-default: Unknown
   gui:
     titles:
-      phases: '&0&l OneBlock Phases'
+      phases: '&0&l ChunkBlock Phases'
     # This section contains all button names and lore (description)
     buttons:
       # List of buttons in GUI's
