@@ -1,9 +1,13 @@
 package world.bentobox.chunkblock.listeners;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,8 +36,11 @@ public class ChunkClaimListener implements Listener {
     private static final double REACH = 5.0;
     /** Ray step size in blocks */
     private static final double STEP = 0.25;
+    /** Minimum time between failure nags per player, so mining swings can't spam */
+    private static final long FEEDBACK_COOLDOWN_MS = 2000;
 
     private final ChunkBlock addon;
+    private final Map<UUID, Long> lastFeedback = new HashMap<>();
 
     public ChunkClaimListener(ChunkBlock addon) {
         this.addon = addon;
@@ -69,7 +76,20 @@ public class ChunkClaimListener implements Listener {
         if (cm.isLocked(island, player.getLocation())) {
             return;
         }
-        int[] target = findTargetLockedChunk(player, island);
+        // A click on a block inside unlocked territory is ordinary interaction (mining a
+        // generator, pressing a button...), never a claim gesture — regardless of where
+        // the aim line would end up beyond it.
+        Block clicked = e.getClickedBlock();
+        if (clicked != null && cm.isUnlocked(island, clicked.getX() >> 4, clicked.getZ() >> 4)) {
+            return;
+        }
+        int[] target;
+        if (clicked != null) {
+            // The clicked block is itself in a locked chunk: that chunk is the target
+            target = new int[] { clicked.getX() >> 4, clicked.getZ() >> 4 };
+        } else {
+            target = findTargetLockedChunk(player, island);
+        }
         if (target == null) {
             return;
         }
@@ -91,11 +111,16 @@ public class ChunkClaimListener implements Listener {
         }
         ChunkManager cm = addon.getChunkManager();
         for (double d = STEP; d <= REACH; d += STEP) {
-            Location point = eye.clone().add(direction.getX() * d, 0, direction.getZ() * d);
+            Location point = eye.clone().add(direction.getX() * d, direction.getY() * d, direction.getZ() * d);
             int chunkX = point.getBlockX() >> 4;
             int chunkZ = point.getBlockZ() >> 4;
             if (!cm.isUnlocked(island, chunkX, chunkZ)) {
                 return new int[] { chunkX, chunkZ };
+            }
+            Block block = point.getBlock();
+            if (block != null && !block.isPassable()) {
+                // The aim line is blocked by the player's own blocks before the border
+                return null;
             }
         }
         return null;
@@ -115,14 +140,34 @@ public class ChunkClaimListener implements Listener {
         switch (result) {
         case OK -> addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ);
         case NO_CREDIT -> {
-            long needed = cm.getChunkCost() - cm.getCredit(island);
-            user.notify("chunkblock.chunks.no-credit", "[needed]", String.valueOf(needed));
-            user.getPlayer().playSound(user.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 0.6F);
+            if (feedbackReady(user.getUniqueId())) {
+                long needed = cm.getChunkCost() - cm.getCredit(island);
+                user.notify("chunkblock.chunks.no-credit", "[needed]", String.valueOf(needed));
+                user.getPlayer().playSound(user.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 0.6F);
+            }
         }
-        case BEYOND_LIMIT -> user.notify("chunkblock.chunks.beyond-limit");
+        case BEYOND_LIMIT -> {
+            if (feedbackReady(user.getUniqueId())) {
+                user.notify("chunkblock.chunks.beyond-limit");
+            }
+        }
         case NOT_ADJACENT, ALREADY_UNLOCKED -> {
             // Aiming at a diagonal corner or a chunk already owned: no claim, no nag
         }
         }
+    }
+
+    /**
+     * Rate-limits failure feedback: repeated swings while mining should not turn every
+     * failed claim probe into a chat message and a sound.
+     */
+    private boolean feedbackReady(UUID uuid) {
+        long now = System.currentTimeMillis();
+        Long last = lastFeedback.get(uuid);
+        if (last != null && now - last < FEEDBACK_COOLDOWN_MS) {
+            return false;
+        }
+        lastFeedback.put(uuid, now);
+        return true;
     }
 }
