@@ -3,10 +3,10 @@ chunkblock:
   command:
     # Player command. What command users will run to access their island.
     # To define alias, just separate commands with white space.
-    island: cb chunkblock
+    island: ch chunkblock
     # The admin command.
     # To define alias, just separate commands with white space.
-    admin: cbadmin chunkblockadmin cba
+    admin: chadmin chunkblockadmin cha
     # The default action for new player command call.
     # Sub-command of main player command that will be run on first player command call.
     # By default, it is sub-command 'create'.
@@ -174,7 +174,7 @@ world:
   # Values that are not a multiple of 8 are snapped to the nearest multiple on load.
   distance-between-islands: 256
   # Default protection range radius in blocks. Cannot be larger than distance.
-  # Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>
+  # Admins can change protection sizes for players individually using /chadmin range set <player> <new range>
   # or set this permission: chunkblock.island.range.<number>
   # ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).
   protection-range: 240
@@ -461,7 +461,7 @@ island:
   # Accessed via /is sethome <number> or /is go <number>
   max-homes: 1
   reset:
-    # How many resets a player is allowed (manage with /cbadmin reset add/remove/reset/set command)
+    # How many resets a player is allowed (manage with /chadmin reset add/remove/reset/set command)
     # Value of -1 means unlimited, 0 means hardcore - no resets.
     # Example, 2 resets means they get 2 resets or 3 islands lifetime
     reset-limit: -1
@@ -560,7 +560,7 @@ island:
     # 
     # Here are some examples of valid commands to execute:
     #    * "[SUDO] bbox version"
-    #    * "cbadmin deaths set [player] 0"
+    #    * "chadmin deaths set [player] 0"
     on-join: []
     # List of commands to run when a player leaves an island, resets his island or gets kicked from it.
     # These commands are run by the console, unless otherwise stated using the [SUDO] prefix,
@@ -571,7 +571,7 @@ island:
     # 
     # Here are some examples of valid commands to execute:
     #    * '[SUDO] bbox version'
-    #    * 'cbadmin deaths set [player] 0'
+    #    * 'chadmin deaths set [player] 0'
     # 
     # Note that player-executed commands might not work, as these commands can be run with said player being offline.
     on-leave: []
@@ -584,7 +584,7 @@ island:
     # 
     # Here are some examples of valid commands to execute:
     #    * '[SUDO] bbox version'
-    #    * 'cbadmin deaths set [player] 0'
+    #    * 'chadmin deaths set [player] 0'
     # 
     # Note that player-executed commands might not work, as these commands can be run with said player being offline.
     on-respawn: []

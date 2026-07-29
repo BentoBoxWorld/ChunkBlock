@@ -13,7 +13,7 @@ import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 
 /**
- * /cb chunks — shows how big your island is, how much level credit you can spend, and a
+ * /ch chunks — shows how big your island is, how much level credit you can spend, and a
  * little chat map of your territory with the chunks you could claim next.
  *
  * @author tastybento

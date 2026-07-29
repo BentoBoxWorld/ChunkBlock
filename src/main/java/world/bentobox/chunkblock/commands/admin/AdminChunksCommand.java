@@ -14,7 +14,7 @@ import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 
 /**
- * /cbadmin chunks &lt;player&gt; [reset] — support and debug tool: shows a player's
+ * /chadmin chunks &lt;player&gt; [reset] — support and debug tool: shows a player's
  * unlocked chunks, spending and credit, or re-locks everything back to the center chunk.
  *
  * @author tastybento

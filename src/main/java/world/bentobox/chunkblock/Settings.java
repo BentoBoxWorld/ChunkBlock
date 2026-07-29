@@ -41,12 +41,12 @@ public class Settings implements WorldSettings {
     @ConfigComment("Player command. What command users will run to access their island.")
     @ConfigComment("To define alias, just separate commands with white space.")
     @ConfigEntry(path = "chunkblock.command.island") //, since = "1.3.0")
-    private String playerCommandAliases = "cb chunkblock";
+    private String playerCommandAliases = "ch chunkblock";
 
     @ConfigComment("The admin command.")
     @ConfigComment("To define alias, just separate commands with white space.")
     @ConfigEntry(path = "chunkblock.command.admin") // , since = "1.3.0")
-    private String adminCommandAliases = "cbadmin chunkblockadmin cba";
+    private String adminCommandAliases = "chadmin chunkblockadmin cha";
 
     @ConfigComment("The default action for new player command call.")
     @ConfigComment("Sub-command of main player command that will be run on first player command call.")
@@ -269,7 +269,7 @@ public class Settings implements WorldSettings {
     private int islandDistance = 256;
 
     @ConfigComment("Default protection range radius in blocks. Cannot be larger than distance.")
-    @ConfigComment("Admins can change protection sizes for players individually using /cbadmin range set <player> <new range>")
+    @ConfigComment("Admins can change protection sizes for players individually using /chadmin range set <player> <new range>")
     @ConfigComment("or set this permission: chunkblock.island.range.<number>")
     @ConfigComment("ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).")
     @ConfigEntry(path = "world.protection-range")
@@ -475,7 +475,7 @@ public class Settings implements WorldSettings {
     private int maxHomes = 5;
 
     // Reset
-    @ConfigComment("How many resets a player is allowed (manage with /cbadmin reset add/remove/reset/set command)")
+    @ConfigComment("How many resets a player is allowed (manage with /chadmin reset add/remove/reset/set command)")
     @ConfigComment("Value of -1 means unlimited, 0 means hardcore - no resets.")
     @ConfigComment("Example, 2 resets means they get 2 resets or 3 islands lifetime")
     @ConfigEntry(path = "island.reset.reset-limit")
@@ -612,7 +612,7 @@ public class Settings implements WorldSettings {
     @ConfigComment("")
     @ConfigComment("Here are some examples of valid commands to execute:")
     @ConfigComment("   * \"[SUDO] bbox version\"")
-    @ConfigComment("   * \"cbadmin deaths set [player] 0\"")
+    @ConfigComment("   * \"chadmin deaths set [player] 0\"")
     @ConfigEntry(path = "island.commands.on-join") // , since = "1.8.0")
     private List<String> onJoinCommands = new ArrayList<>();
 
@@ -625,7 +625,7 @@ public class Settings implements WorldSettings {
     @ConfigComment("")
     @ConfigComment("Here are some examples of valid commands to execute:")
     @ConfigComment("   * '[SUDO] bbox version'")
-    @ConfigComment("   * 'cbadmin deaths set [player] 0'")
+    @ConfigComment("   * 'chadmin deaths set [player] 0'")
     @ConfigComment("")
     @ConfigComment("Note that player-executed commands might not work, as these commands can be run with said player being offline.")
     @ConfigEntry(path = "island.commands.on-leave") // , since = "1.8.0")
@@ -640,7 +640,7 @@ public class Settings implements WorldSettings {
     @ConfigComment("")
     @ConfigComment("Here are some examples of valid commands to execute:")
     @ConfigComment("   * '[SUDO] bbox version'")
-    @ConfigComment("   * 'cbadmin deaths set [player] 0'")
+    @ConfigComment("   * 'chadmin deaths set [player] 0'")
     @ConfigComment("")
     @ConfigComment("Note that player-executed commands might not work, as these commands can be run with said player being offline.")
     @ConfigEntry(path = "island.commands.on-respawn") // , since = "1.14.0")

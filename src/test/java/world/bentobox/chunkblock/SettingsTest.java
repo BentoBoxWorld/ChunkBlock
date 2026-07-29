@@ -1059,7 +1059,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetPlayerCommandAliases() {
-        assertEquals("cb chunkblock",s.getPlayerCommandAliases());
+        assertEquals("ch chunkblock",s.getPlayerCommandAliases());
     }
 
     /**
@@ -1067,7 +1067,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testSetPlayerCommandAliases() {
-        assertEquals("cb chunkblock",s.getPlayerCommandAliases());
+        assertEquals("ch chunkblock",s.getPlayerCommandAliases());
         s.setPlayerCommandAliases("aliases");
         assertEquals("aliases",s.getPlayerCommandAliases());
     }
@@ -1077,7 +1077,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetAdminCommandAliases() {
-        assertEquals("cbadmin chunkblockadmin cba",s.getAdminCommandAliases());
+        assertEquals("chadmin chunkblockadmin cha",s.getAdminCommandAliases());
     }
 
     /**
@@ -1085,7 +1085,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testSetAdminCommandAliases() {
-        assertEquals("cbadmin chunkblockadmin cba",s.getAdminCommandAliases());
+        assertEquals("chadmin chunkblockadmin cha",s.getAdminCommandAliases());
         s.setAdminCommandAliases("aliases");
         assertEquals("aliases",s.getAdminCommandAliases());
     }
