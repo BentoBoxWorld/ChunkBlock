@@ -50,8 +50,21 @@ public class BossBarListener implements Listener {
     // Store a boss bar for each player (using their UUID)
     private final Map<Island, BossBar> islandBossBars = new HashMap<>();
 
+    /**
+     * This listener is registered with the flags in onLoad, so it can outlive an addon
+     * that never enabled (e.g. missing dependency) and therefore has no worlds. Every
+     * event handler must bail out via this check before touching addon state.
+     * @return true if the addon is running with its world available
+     */
+    private boolean ready() {
+        return addon.getOverWorld() != null;
+    }
+
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onBreakBlockEvent(MagicBlockEvent e) {
+        if (!ready()) {
+            return;
+        }
         // Update boss bar
         tryToShowBossBar(e.getPlayerUUID(), e.getIsland());
         tryToShowActionBar(e.getPlayerUUID(), e.getIsland());
@@ -59,9 +72,7 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEnterIsland(IslandEnterEvent event) {
-        // getOverWorld() is null when the addon never enabled (missing dependency);
-        // this listener outlives that because it is registered with the flags in onLoad
-        if (addon.getOverWorld() != null && addon.inWorld(event.getIsland().getWorld())) {
+        if (ready() && addon.inWorld(event.getIsland().getWorld())) {
             tryToShowBossBar(event.getPlayerUUID(), event.getIsland());
             tryToShowActionBar(event.getPlayerUUID(), event.getIsland());
         }
@@ -69,6 +80,9 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onFlagChange(FlagSettingChangeEvent e) {
+        if (!ready()) {
+            return;
+        }
         if (e.getEditedFlag() == addon.CHUNKBLOCK_BOSSBAR) {
             // Show to players on island. If it isn't allowed then this will clean up the boss bar too
             e.getIsland().getPlayersOnIsland().stream().map(Player::getUniqueId)
@@ -215,6 +229,9 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onExitIsland(IslandExitEvent event) {
+        if (!ready()) {
+            return;
+        }
         User user = User.getInstance(event.getPlayerUUID());
         removeBar(user, event.getIsland());
     }
@@ -223,7 +240,7 @@ public class BossBarListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         // If the player is on an island then show the bar
         Location playerLoc = e.getPlayer().getLocation();
-        if (addon.getOverWorld() == null || playerLoc == null || !addon.inWorld(playerLoc)) {
+        if (!ready() || playerLoc == null || !addon.inWorld(playerLoc)) {
             return;
         }
         addon.getIslands().getIslandAt(playerLoc)

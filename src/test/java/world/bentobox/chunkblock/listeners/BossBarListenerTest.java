@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -15,12 +16,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BossBar;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import net.kyori.adventure.text.Component;
+import world.bentobox.bentobox.api.events.flags.FlagSettingChangeEvent;
+import world.bentobox.bentobox.api.events.island.IslandEnterEvent;
+import world.bentobox.bentobox.api.events.island.IslandExitEvent;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
@@ -60,6 +65,8 @@ public class BossBarListenerTest extends CommonTestSetup {
         doNothing().when(addon).logError(anyString());
         doReturn(obm).when(addon).getOneBlockManager();
         doReturn(obi).when(addon).getOneBlocksIsland(any());
+        // The addon enabled normally and has its world
+        doReturn(world).when(addon).getOverWorld();
 
         // Phase progress
         when(obi.getPhaseName()).thenReturn("Plains");
@@ -140,5 +147,36 @@ public class BossBarListenerTest extends CommonTestSetup {
         fireMagicBlockEvent();
         mockedBukkit.verify(() -> Bukkit.createBossBar(anyString(), any(), any()), never());
         verify(bossBar, never()).addPlayer(any());
+    }
+
+    /**
+     * Every handler must be inert when the addon never enabled and has no worlds — the
+     * listener is registered with the flags in onLoad, so it outlives a load failure
+     * (e.g. Level missing) and global events keep reaching it. No handler may throw.
+     */
+    @Test
+    void testAllHandlersInertWhenAddonNeverEnabled() {
+        doReturn(null).when(addon).getOverWorld();
+        when(island.isAllowed(addon.CHUNKBLOCK_BOSSBAR)).thenReturn(true);
+
+        fireMagicBlockEvent();
+
+        IslandEnterEvent enter = mock(IslandEnterEvent.class);
+        bbl.onEnterIsland(enter);
+
+        IslandExitEvent exit = mock(IslandExitEvent.class);
+        bbl.onExitIsland(exit);
+
+        FlagSettingChangeEvent flagChange = mock(FlagSettingChangeEvent.class);
+        bbl.onFlagChange(flagChange);
+
+        PlayerJoinEvent join = mock(PlayerJoinEvent.class);
+        when(join.getPlayer()).thenReturn(mockPlayer);
+        bbl.onJoin(join);
+
+        // Nothing happened
+        mockedBukkit.verify(() -> Bukkit.createBossBar(anyString(), any(), any()), never());
+        verify(bossBar, never()).addPlayer(any());
+        verify(bossBar, never()).removePlayer(any());
     }
 }
