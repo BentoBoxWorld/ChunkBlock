@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.jar.JarEntry;
@@ -34,6 +35,7 @@ import org.mockito.Mockito;
 
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.bentobox.Settings;
+import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.addons.Addon.State;
 import world.bentobox.bentobox.api.addons.AddonDescription;
 import world.bentobox.bentobox.api.user.User;
@@ -138,9 +140,10 @@ public class ChunkBlockTest extends CommonTestSetup {
         AddonDescription desc = new AddonDescription.Builder("bentobox", "chunkblock", "1.3").description("test")
                 .authors("tasty").build();
         addon.setDescription(desc);
-        // Addons manager
+        // Addons manager - the Level addon is present by default
         AddonsManager am = mock(AddonsManager.class);
         when(plugin.getAddonsManager()).thenReturn(am);
+        when(am.getAddonByName("Level")).thenReturn(Optional.of(mock(Addon.class)));
 
         // Flags manager
         when(plugin.getFlagsManager()).thenReturn(fm);
@@ -173,6 +176,23 @@ public class ChunkBlockTest extends CommonTestSetup {
         assertNotNull(addon.getBlockListener());
         assertNotNull(addon.getOneBlockManager());
 
+    }
+
+    /**
+     * Test that ChunkBlock disables itself, and takes its flags with it, when the
+     * Level addon is not on the server.
+     */
+    @Test
+    void testOnEnableNoLevelAddonDisables() {
+        testOnLoad();
+        addon.setState(State.ENABLED);
+        when(plugin.getAddonsManager().getAddonByName("Level")).thenReturn(Optional.empty());
+        addon.onEnable();
+        assertEquals(State.DISABLED, addon.getState());
+        // The flags registered in onLoad must be unregistered so no listeners linger
+        verify(fm).unregister(addon);
+        // Nothing else was initialized
+        assertNull(addon.getBlockListener());
     }
 
     /**

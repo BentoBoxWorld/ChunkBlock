@@ -8,7 +8,7 @@ protection:
         &b blokkot, ha tud blokkokat
         &b rombolni.
       hint: "&c A rangod nem törheti szét a mágikus blokkot!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Kezdő Biztonság
       description: |-
         &b Megakadályozza az új játékosokat
@@ -16,12 +16,12 @@ protection:
         &b hogy ne essenek le.
       hint: "&c Mozgás blokkolva biztonsági okokból még [number] másodpercig!"
       free-to-move: "&a Szabadon mozoghatsz. Légy óvatos!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Bar
         description: |-
           &b Állapotjelző sávot
           &b mutat minden fázishoz.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Műveleti Sáv (Action Bar)
       description: |-
         &b Állapotot mutat

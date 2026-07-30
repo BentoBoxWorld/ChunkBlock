@@ -32,8 +32,8 @@ import world.bentobox.bentobox.database.objects.Island;
 
 public class BossBarListener implements Listener {
 
-    private static final String AONEBLOCK_BOSSBAR = "chunkblock.bossbar";
-    public static final String AONEBLOCK_ACTIONBAR = "chunkblock.actionbar";
+    private static final String BOSSBAR_METADATA = "chunkblock.bossbar";
+    public static final String ACTIONBAR_METADATA = "chunkblock.actionbar";
 
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.builder()
             .character('&')
@@ -50,8 +50,21 @@ public class BossBarListener implements Listener {
     // Store a boss bar for each player (using their UUID)
     private final Map<Island, BossBar> islandBossBars = new HashMap<>();
 
+    /**
+     * This listener is registered with the flags in onLoad, so it can outlive an addon
+     * that never enabled (e.g. missing dependency) and therefore has no worlds. Every
+     * event handler must bail out via this check before touching addon state.
+     * @return true if the addon is running with its world available
+     */
+    private boolean ready() {
+        return addon.getOverWorld() != null;
+    }
+
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onBreakBlockEvent(MagicBlockEvent e) {
+        if (!ready()) {
+            return;
+        }
         // Update boss bar
         tryToShowBossBar(e.getPlayerUUID(), e.getIsland());
         tryToShowActionBar(e.getPlayerUUID(), e.getIsland());
@@ -59,7 +72,7 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEnterIsland(IslandEnterEvent event) {
-        if (addon.inWorld(event.getIsland().getWorld())) {
+        if (ready() && addon.inWorld(event.getIsland().getWorld())) {
             tryToShowBossBar(event.getPlayerUUID(), event.getIsland());
             tryToShowActionBar(event.getPlayerUUID(), event.getIsland());
         }
@@ -67,7 +80,10 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onFlagChange(FlagSettingChangeEvent e) {
-        if (e.getEditedFlag() == addon.ONEBLOCK_BOSSBAR) {
+        if (!ready()) {
+            return;
+        }
+        if (e.getEditedFlag() == addon.CHUNKBLOCK_BOSSBAR) {
             // Show to players on island. If it isn't allowed then this will clean up the boss bar too
             e.getIsland().getPlayersOnIsland().stream().map(Player::getUniqueId)
             .forEach(uuid -> {
@@ -100,11 +116,11 @@ public class BossBarListener implements Listener {
         Player player = Bukkit.getPlayer(uuid);
 
         // Only show if enabled for island
-        if (!island.isAllowed(addon.ONEBLOCK_ACTIONBAR)) {
+        if (!island.isAllowed(addon.CHUNKBLOCK_ACTIONBAR)) {
             return;
         }
         // Default to showing action bar unless it is explicitly turned off
-        if (!user.getMetaData(AONEBLOCK_ACTIONBAR).map(MetaDataValue::asBoolean).orElse(true)) {
+        if (!user.getMetaData(ACTIONBAR_METADATA).map(MetaDataValue::asBoolean).orElse(true)) {
             // Do not show an action bar
             return;
         }        
@@ -138,7 +154,7 @@ public class BossBarListener implements Listener {
         User user = User.getInstance(uuid);
 
         // Only show if enabled for island
-        if (!island.isAllowed(addon.ONEBLOCK_BOSSBAR)) {
+        if (!island.isAllowed(addon.CHUNKBLOCK_BOSSBAR)) {
             BossBar removed = islandBossBars.remove(island);
             if (removed != null) {
                 // Remove all players from the boss bar
@@ -147,7 +163,7 @@ public class BossBarListener implements Listener {
             return;
         }
         // Default to showing boss bar unless it is explicitly turned off
-        if (!user.getMetaData(AONEBLOCK_BOSSBAR).map(MetaDataValue::asBoolean).orElse(true)) {
+        if (!user.getMetaData(BOSSBAR_METADATA).map(MetaDataValue::asBoolean).orElse(true)) {
             // Remove any boss bar from user if they are in the world
             removeBar(user, island);
             // Do not show a boss bar
@@ -213,6 +229,9 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onExitIsland(IslandExitEvent event) {
+        if (!ready()) {
+            return;
+        }
         User user = User.getInstance(event.getPlayerUUID());
         removeBar(user, event.getIsland());
     }
@@ -221,7 +240,7 @@ public class BossBarListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         // If the player is on an island then show the bar
         Location playerLoc = e.getPlayer().getLocation();
-        if (playerLoc == null || !addon.inWorld(playerLoc)) {
+        if (!ready() || playerLoc == null || !addon.inWorld(playerLoc)) {
             return;
         }
         addon.getIslands().getIslandAt(playerLoc)
@@ -240,8 +259,8 @@ public class BossBarListener implements Listener {
      * @param user user to toggle
      */
     public void toggleUser(User user) {
-        boolean newState = !user.getMetaData(AONEBLOCK_BOSSBAR).map(MetaDataValue::asBoolean).orElse(true);
-        user.putMetaData(AONEBLOCK_BOSSBAR, new MetaDataValue(newState));
+        boolean newState = !user.getMetaData(BOSSBAR_METADATA).map(MetaDataValue::asBoolean).orElse(true);
+        user.putMetaData(BOSSBAR_METADATA, new MetaDataValue(newState));
         if (newState) {
             // If the player is on an island then show the bar
             addon.getIslands().getIslandAt(user.getLocation()).filter(is -> addon.inWorld(is.getWorld()))

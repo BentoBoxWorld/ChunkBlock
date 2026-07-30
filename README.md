@@ -20,7 +20,7 @@ earn the levels back.
 - The classic OneBlock loop: 18 phases, thousands of blocks, mobs, and treasure chests.
 - Territory that grows the way *you* choose — punch the border to claim the next chunk.
 - A particle curtain shows the frontier; claiming chunks is celebrated in style.
-- `/cb chunks` shows a live map of your territory and what you can claim next.
+- `/ch chunks` shows a live map of your territory and what you can claim next.
 
 ## Installation
 
@@ -34,15 +34,15 @@ commands, and permissions.
 
 ## Commands
 
-The player command is `/cb` (alias `/chunkblock`), the admin command `/cbadmin`
+The player command is `/ch` (alias `/chunkblock`), the admin command `/chadmin`
 (aliases `/chunkblockadmin`, `/cba`). Beyond the standard BentoBox island commands:
 
 | Command | Description |
 |---|---|
-| `/cb chunks` | Your chunk count, spendable credit, and a chat map of your territory |
-| `/cb count` | Magic block count and phase |
-| `/cbadmin chunks <player> [reset]` | Inspect a player's chunks and credit, or re-lock them back to the start |
-| `/cbadmin bypass` | Toggle chunk-lock enforcement for yourself (needs `chunkblock.mod.bypasschunks`) |
+| `/ch chunks` | Your chunk count, spendable credit, and a chat map of your territory |
+| `/ch count` | Magic block count and phase |
+| `/chadmin chunks <player> [reset]` | Inspect a player's chunks and credit, or re-lock them back to the start |
+| `/chadmin bypass` | Toggle chunk-lock enforcement for yourself (needs `chunkblock.mod.bypasschunks`) |
 
 ## How claiming works
 
@@ -106,7 +106,7 @@ Lush Caves, Dripstone Caves, Mangrove Swamp, Meadow, Cherry Grove, and Jagged Pe
 Q: Why can't I walk past the glowing red wall?
 
 A: That chunk is still locked! If you're the island owner and have level credit, hit the
-wall to claim the chunk. Check `/cb chunks` to see your credit and what's claimable.
+wall to claim the chunk. Check `/ch chunks` to see your credit and what's claimable.
 
 Q: I lost levels and my farm is behind the wall now. Is it gone?
 

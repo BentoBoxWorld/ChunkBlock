@@ -11,7 +11,7 @@ protection:
         &b Rank that can break the magic
         &b block if they can break blocks.
       hint: "&c Your rank cannot break the magic block!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Starting Safety
       description: |-
         &b Prevents new players
@@ -19,12 +19,12 @@ protection:
         &b so they don't fall off.
       hint: "&c Movement blocked for safety for [number] more seconds!"
       free-to-move: "&a You are free to move. Be careful!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Bar
         description: |-
           &b Shows a status bar
           &b for each phase.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Action Bar
       description: |-
         &b Shows a status
@@ -132,7 +132,7 @@ chunkblock:
       count: "&a Island is on block &b [number] &a in the &b [name] &a phase. Lifetime count &b [lifetime] &a."
     phases:
       description: show a list of all the phases
-      title: "&2 OneBlock Phases"
+      title: "&2 ChunkBlock Phases"
       name-syntax: "&a [name]"
       description-syntax: "&b [number] blocks"
     island:
@@ -164,7 +164,7 @@ chunkblock:
     my-island-phase-default: Unknown
   gui:
     titles:
-      phases: '&0&l OneBlock Phases'
+      phases: '&0&l ChunkBlock Phases'
     # This section contains all button names and lore (description)
     buttons:
       # List of buttons in GUI's

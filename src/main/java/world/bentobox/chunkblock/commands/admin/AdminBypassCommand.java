@@ -7,7 +7,7 @@ import world.bentobox.bentobox.api.user.User;
 import world.bentobox.chunkblock.ChunkBlock;
 
 /**
- * /cbadmin bypass — lets staff with the bypass permission toggle chunk lock enforcement
+ * /chadmin bypass — lets staff with the bypass permission toggle chunk lock enforcement
  * for themselves, so they can test the game as players see it and inspect cleanly.
  *
  * @author tastybento

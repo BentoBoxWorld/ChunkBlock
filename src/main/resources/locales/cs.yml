@@ -7,7 +7,7 @@ protection:
         &b kouzelný blok, pokud
         &b dokáže rozbíjet bloky.
       hint: "&c Vaše hodnost nemůže rozbít kouzelný blok!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Počáteční Bezpečnost
       description: |-
         &b Zabrání novým hráčům
@@ -15,12 +15,12 @@ protection:
         &b aby nespadli.
       hint: "&c Pohyb zablokován kvůli bezpečnosti na [number] sekund!"
       free-to-move: "&a Můžete se volně pohybovat. Buďte opatrní!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss Bar
         description: |-
           &b Zobrazuje stavový panel
           &b pro každou fázi.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Action Bar
       description: |-
         &b Zobrazuje stav

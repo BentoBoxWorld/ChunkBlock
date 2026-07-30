@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -141,5 +143,50 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(mockPlayer.getEyeLocation()).thenReturn(new Location(world, 30.5, 66.6, 8.5, -90F, 0F));
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
         assertTrue(data.isChunkUnlocked(2, 0));
+    }
+
+    private PlayerInteractEvent hitBlock(Action action, int x, int z) {
+        Block block = mock(Block.class);
+        when(block.getX()).thenReturn(x);
+        when(block.getZ()).thenReturn(z);
+        return new PlayerInteractEvent(mockPlayer, action, null, block, org.bukkit.block.BlockFace.EAST,
+                EquipmentSlot.HAND);
+    }
+
+    @Test
+    void testMiningOwnBlockNearBorderIsNotAClaim() {
+        // The generator-mining bug: clicked block is in the player's own chunk, but the
+        // aim line would cross into the locked neighbor. Must not probe a claim.
+        level = 0;
+        listener.onBorderHit(hitBlock(Action.LEFT_CLICK_BLOCK, 14, 8));
+        assertFalse(data.isChunkUnlocked(1, 0));
+        verify(notifier, never()).notify(any(), any());
+    }
+
+    @Test
+    void testPunchingBlockInLockedChunkClaimsIt() {
+        level = 1;
+        listener.onBorderHit(hitBlock(Action.LEFT_CLICK_BLOCK, 17, 8));
+        assertTrue(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testNoCreditFeedbackIsThrottled() {
+        level = 0;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        // Two rapid failed probes, one nag
+        verify(notifier, times(1)).notify(any(), any());
+    }
+
+    @Test
+    void testAimLineBlockedBySolidWallDoesNotClaim() {
+        level = 1;
+        // A solid wall of the player's own blocks between eye and border
+        Block wall = mock(Block.class);
+        when(wall.isPassable()).thenReturn(false);
+        when(world.getBlockAt(any(Location.class))).thenReturn(wall);
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertFalse(data.isChunkUnlocked(1, 0));
     }
 }

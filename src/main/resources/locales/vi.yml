@@ -7,7 +7,7 @@ protection:
         &b khối ma thuật nếu họ
         &b có thể phá khối.
       hint: "&c Xếp hạng của bạn không thể phá khối ma thuật!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: An Toàn Khởi Đầu
       description: |-
         &b Ngăn người chơi mới
@@ -15,12 +15,12 @@ protection:
         &b để họ không bị rơi.
       hint: "&c Di chuyển bị chặn vì lý do an toàn trong [number] giây nữa!"
       free-to-move: "&a Bạn được phép di chuyển tự do. Hãy cẩn thận!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Thanh Boss
         description: |-
           &b Hiển thị thanh trạng thái
           &b cho mỗi giai đoạn.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Thanh Hành Động (Action Bar)
       description: |-
         &b Hiển thị trạng thái

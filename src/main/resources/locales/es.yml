@@ -7,7 +7,7 @@ protection:
         &b bloque mágico si puede
         &b romper bloques.
       hint: "&c ¡Tu rango no puede romper el bloque mágico!"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Seguridad Inicial
       description: |-
         &b Evita que los nuevos jugadores
@@ -15,12 +15,12 @@ protection:
         &b para que no se caigan.
       hint: "&c Movimiento bloqueado por seguridad durante [number] segundos más!"
       free-to-move: "&a Eres libre de moverte. ¡Ten cuidado!"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Barra de Jefe (Boss Bar)
         description: |-
           &b Muestra una barra de estado
           &b para cada fase.
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Barra de Acción (Action Bar)
       description: |-
         &b Muestra un estado

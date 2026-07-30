@@ -7,19 +7,19 @@ protection:
         &b 則該等級可以破壞
         &b 魔法方塊。
       hint: "&c 您的等級無法破壞魔法方塊！"
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: 初始安全保護
       description: |-
         &b 阻止新玩家在1分鐘內
         &b 移動，以防他們跌落。
       hint: "&c 出於安全考慮，移動已被阻止 [number] 秒！"
       free-to-move: "&a 您可以自由移動了。請小心！"
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
         name: Boss 血條
         description: |-
           &b 為每個階段
           &b 顯示一個狀態條。
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: 動作欄
       description: |-
         &b 在動作欄中

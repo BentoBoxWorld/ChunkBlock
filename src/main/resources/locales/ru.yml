@@ -11,17 +11,17 @@ protection:
         <green>Предотвращает ломание</green>
         <green>магического блока</green>
       hint: <red>Ломание магического блока запрещено!</red>
-    START_SAFETY:
+    CHUNKBLOCK_START_SAFETY:
       name: Защита новичков от падений
       description: |-
         <green>Запрещает новичкам двигаться</green>
         <green>в течение 1 минуты</green>
       hint: <red>Движение заблокировано в целях безопасности ещё на [number] секунд!</red>
       free-to-move: <green>Теперь вы можете двигаться. Будьте осторожны!</green>
-    ONEBLOCK_BOSSBAR:
+    CHUNKBLOCK_BOSSBAR:
       name: Боссбар
       description: Показывает статус фазы в боссбаре
-    ONEBLOCK_ACTIONBAR:
+    CHUNKBLOCK_ACTIONBAR:
       name: Панель действий
       description: Показывает статус фазы в панели действий
 chunkblock:
