@@ -277,12 +277,14 @@ public class BorderDisplay implements Listener {
             previews.remove(player.getUniqueId());
             return;
         }
-        int minX = preview.chunkX() << 4;
-        int minZ = preview.chunkZ() << 4;
-        int baseY = player.getLocation().getBlockY();
+        // The outline traces the chunk's boundary planes, so the corners meet exactly where
+        // the four walls of the locked-chunk curtain would
+        double minX = preview.chunkX() << 4;
+        double minZ = preview.chunkZ() << 4;
+        double baseY = player.getLocation().getBlockY() + 0.5D;
         Particle.DustOptions dust = new Particle.DustOptions(PREVIEW_COLOR, 1.5F);
         for (int height : PREVIEW_HEIGHTS) {
-            double y = baseY + height + 0.5D;
+            double y = baseY + height;
             for (int i = 0; i <= 16; i += 2) {
                 player.spawnParticle(Particle.DUST, minX + i, y, minZ, 1, 0, 0, 0, 0, dust);
                 player.spawnParticle(Particle.DUST, minX + i, y, minZ + 16, 1, 0, 0, 0, 0, dust);

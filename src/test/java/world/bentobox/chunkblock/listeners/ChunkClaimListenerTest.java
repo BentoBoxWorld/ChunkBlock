@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -62,7 +63,8 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(addon.getChunkManager()).thenReturn(cm);
         data = new OneBlockIslands("test");
         when(addon.getOneBlocksIsland(island)).thenReturn(data);
-        when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        BlockListener blockListener = mock(BlockListener.class);
+        when(addon.getBlockListener()).thenReturn(blockListener);
         levelListener = mock(LevelListener.class);
         when(addon.getLevelListener()).thenReturn(levelListener);
         level = 0;
@@ -303,7 +305,7 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     void testQuitDropsThePendingClaim() {
         level = 1;
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
-        listener.onQuit(new org.bukkit.event.player.PlayerQuitEvent(mockPlayer, (String) null));
+        listener.onQuit(new org.bukkit.event.player.PlayerQuitEvent(mockPlayer, (Component) null));
         verify(borderDisplay).clearPreview(uuid);
         now += 1000;
         when(mockPlayer.isSneaking()).thenReturn(true);
