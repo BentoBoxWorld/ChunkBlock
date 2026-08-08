@@ -22,14 +22,17 @@ import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 
 /**
- * Lets the island owner spend level credit by hitting the border: when they punch (or
- * right-click) toward the locked chunk blocking them, that chunk is claimed and opens up.
- * Expansion is the owner's choice, in any direction, up to the island's protection range.
+ * Lets an island spend level credit by hitting the border: when a player punches (or
+ * right-clicks) toward the locked chunk blocking them, that chunk is claimed and opens up.
+ * Expansion goes in any direction, up to the island's protection range. Who is allowed to
+ * spend is the CHUNKBLOCK_CLAIM_CHUNKS island setting, owner-only unless an island opens it
+ * to lower ranks.
  * <p>
  * Levels are hard-won, so by default a claim takes two deliberate gestures: the first hit
  * outlines the target chunk and quotes the price, and only a second hit made while sneaking
@@ -107,8 +110,10 @@ public class ChunkClaimListener implements Listener {
             return;
         }
         Island island = optionalIsland.get();
-        // Claiming is the owner's call
-        if (!player.getUniqueId().equals(island.getOwner())) {
+        User user = User.getInstance(player);
+        // Who may spend the island's credit is an island setting, owner-only by default
+        if (!island.isAllowed(user, addon.CHUNKBLOCK_CLAIM_CHUNKS)) {
+            denyClaim(user, island);
             return;
         }
         ChunkManager cm = addon.getChunkManager();
@@ -133,7 +138,20 @@ public class ChunkClaimListener implements Listener {
         if (target == null) {
             return;
         }
-        attemptClaim(User.getInstance(player), island, target[0], target[1]);
+        attemptClaim(user, island, target[0], target[1]);
+    }
+
+    /**
+     * Tells a teammate whose rank is too low that expansion is not theirs to spend on.
+     * Visitors and passers-by are told nothing: they get the ordinary locked-chunk message
+     * from the guard listener instead, and have no business hearing about the island's
+     * credit.
+     */
+    private void denyClaim(User user, Island island) {
+        if (island.getRank(user) > RanksManager.VISITOR_RANK && feedbackReady(user.getUniqueId())) {
+            user.notify(addon.CHUNKBLOCK_CLAIM_CHUNKS.getHintReference());
+            user.getPlayer().playSound(user.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 0.6F);
+        }
     }
 
     /**
@@ -185,7 +203,7 @@ public class ChunkClaimListener implements Listener {
      * enabled a claimable chunk is only previewed the first time round; the credit is spent
      * on the confirming hit.
      *
-     * @param user the island owner
+     * @param user the player spending the credit, already checked against the claim flag
      * @param island the island
      * @param chunkX target world chunk x
      * @param chunkZ target world chunk z

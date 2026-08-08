@@ -6,8 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +28,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import world.bentobox.bentobox.api.user.User;
+import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
@@ -51,24 +56,25 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        addon = mock(ChunkBlock.class);
-        when(addon.getPlugin()).thenReturn(plugin);
-        when(addon.inWorld(world)).thenReturn(true);
-        when(addon.getIslands()).thenReturn(im);
+        // A spy on a real addon, so the CHUNKBLOCK_CLAIM_CHUNKS flag field is built
+        addon = spy(new ChunkBlock());
+        doReturn(plugin).when(addon).getPlugin();
+        doReturn(true).when(addon).inWorld(world);
+        doReturn(im).when(addon).getIslands();
         settings = new Settings();
-        when(addon.getSettings()).thenReturn(settings);
+        addon.setSettings(settings);
         borderDisplay = mock(BorderDisplay.class);
-        when(addon.getBorderDisplay()).thenReturn(borderDisplay);
+        doReturn(borderDisplay).when(addon).getBorderDisplay();
         ChunkManager cm = new ChunkManager(addon);
-        when(addon.getChunkManager()).thenReturn(cm);
+        doReturn(cm).when(addon).getChunkManager();
         data = new OneBlockIslands("test");
-        when(addon.getOneBlocksIsland(island)).thenReturn(data);
+        doReturn(data).when(addon).getOneBlocksIsland(island);
         BlockListener blockListener = mock(BlockListener.class);
-        when(addon.getBlockListener()).thenReturn(blockListener);
+        doReturn(blockListener).when(addon).getBlockListener();
         levelListener = mock(LevelListener.class);
-        when(addon.getLevelListener()).thenReturn(levelListener);
+        doReturn(levelListener).when(addon).getLevelListener();
         level = 0;
-        when(addon.getIslandLevel(island)).thenAnswer(i -> level);
+        doAnswer(i -> level).when(addon).getIslandLevel(island);
 
         // Island center chunk (0, 0)
         when(island.getCenter()).thenReturn(location);
@@ -77,6 +83,8 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(island.getProtectionRange()).thenReturn(240);
         when(island.getOwner()).thenReturn(uuid);
         when(im.getIslandAt(any())).thenReturn(Optional.of(island));
+        // By default the player may claim: rank checks have their own tests
+        when(island.isAllowed(any(User.class), eq(addon.CHUNKBLOCK_CLAIM_CHUNKS))).thenReturn(true);
 
         // Player stands near the east edge of the center chunk, looking east (+x):
         // yaw -90 in Bukkit faces +x
@@ -133,11 +141,34 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     }
 
     @Test
-    void testNonOwnerCannotClaim() {
+    void testPlayerBelowTheClaimRankCannotClaim() {
         level = 100;
+        when(island.isAllowed(any(User.class), eq(addon.CHUNKBLOCK_CLAIM_CHUNKS))).thenReturn(false);
+        when(island.getRank(any(User.class))).thenReturn(RanksManager.MEMBER_RANK);
+        hitAndConfirm(Action.LEFT_CLICK_AIR);
+        assertFalse(data.isChunkUnlocked(1, 0));
+        // A teammate who cannot claim is told why rather than left wondering
+        verify(notifier).notify(any(), eq("protection.flags.CHUNKBLOCK_CLAIM_CHUNKS.hint"));
+    }
+
+    @Test
+    void testTeammateAtOrAboveTheClaimRankCanClaim() {
+        // The island has opened claiming up: a member who is not the owner may spend
+        level = 1;
         when(island.getOwner()).thenReturn(UUID.randomUUID());
+        when(island.getRank(any(User.class))).thenReturn(RanksManager.MEMBER_RANK);
+        hitAndConfirm(Action.LEFT_CLICK_AIR);
+        assertTrue(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testVisitorIsNotToldAboutTheIslandsCredit() {
+        level = 100;
+        when(island.isAllowed(any(User.class), eq(addon.CHUNKBLOCK_CLAIM_CHUNKS))).thenReturn(false);
+        when(island.getRank(any(User.class))).thenReturn(RanksManager.VISITOR_RANK);
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
         assertFalse(data.isChunkUnlocked(1, 0));
+        verify(notifier, never()).notify(any(), any());
     }
 
     @Test

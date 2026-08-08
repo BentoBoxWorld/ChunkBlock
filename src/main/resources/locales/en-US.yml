@@ -11,6 +11,13 @@ protection:
         &b Rank that can break the magic
         &b block if they can break blocks.
       hint: "&c Your rank cannot break the magic block!"
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Claim Chunks
+      description: |-
+        &b Rank that can spend the
+        &b island's level credit to
+        &b claim new chunks.
+      hint: "&c Your rank cannot claim chunks for this island!"
     CHUNKBLOCK_START_SAFETY:
       name: Starting Safety
       description: |-
