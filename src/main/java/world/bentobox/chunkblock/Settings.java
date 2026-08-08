@@ -123,6 +123,18 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.max-chunks")
     private int maxChunks = 441;
 
+    @ConfigComment("Require confirmation before level credit is spent on a chunk. When true, the")
+    @ConfigComment("first hit on the border previews the target chunk and its cost; the player")
+    @ConfigComment("must then sneak and hit the border again to actually claim it. This stops a")
+    @ConfigComment("stray swing near the border from spending levels by accident.")
+    @ConfigEntry(path = "chunkblock.claim.require-confirmation")
+    private boolean requireClaimConfirmation = true;
+
+    @ConfigComment("How long, in seconds, a previewed chunk stays confirmable. After this the")
+    @ConfigComment("player has to hit the border again to preview it afresh. Minimum 1.")
+    @ConfigEntry(path = "chunkblock.claim.confirmation-timeout")
+    private int claimConfirmationTimeout = 15;
+
     @ConfigComment("If true, losing island levels below what has been spent re-locks chunks in")
     @ConfigComment("reverse claim order (the most recently claimed chunks are lost first). Builds")
     @ConfigComment("inside re-locked chunks are untouched but cannot be reached until the levels")
@@ -2567,6 +2579,34 @@ public class Settings implements WorldSettings {
      */
     public void setMaxChunks(int maxChunks) {
         this.maxChunks = maxChunks;
+    }
+
+    /**
+     * @return true if a chunk must be previewed and confirmed before credit is spent
+     */
+    public boolean isRequireClaimConfirmation() {
+        return requireClaimConfirmation;
+    }
+
+    /**
+     * @param requireClaimConfirmation the requireClaimConfirmation to set
+     */
+    public void setRequireClaimConfirmation(boolean requireClaimConfirmation) {
+        this.requireClaimConfirmation = requireClaimConfirmation;
+    }
+
+    /**
+     * @return how long a previewed chunk stays confirmable in seconds, never less than 1
+     */
+    public int getClaimConfirmationTimeout() {
+        return Math.max(1, claimConfirmationTimeout);
+    }
+
+    /**
+     * @param claimConfirmationTimeout the claimConfirmationTimeout to set
+     */
+    public void setClaimConfirmationTimeout(int claimConfirmationTimeout) {
+        this.claimConfirmationTimeout = claimConfirmationTimeout;
     }
 
     /**

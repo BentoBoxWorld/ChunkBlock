@@ -2,8 +2,10 @@ package world.bentobox.chunkblock.listeners;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.LongSupplier;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -14,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.util.Vector;
 
@@ -27,6 +30,11 @@ import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
  * Lets the island owner spend level credit by hitting the border: when they punch (or
  * right-click) toward the locked chunk blocking them, that chunk is claimed and opens up.
  * Expansion is the owner's choice, in any direction, up to the island's protection range.
+ * <p>
+ * Levels are hard-won, so by default a claim takes two deliberate gestures: the first hit
+ * outlines the target chunk and quotes the price, and only a second hit made while sneaking
+ * spends the credit. Servers that prefer the old one-hit claim can switch confirmation off
+ * in the config.
  *
  * @author tastybento
  */
@@ -38,12 +46,44 @@ public class ChunkClaimListener implements Listener {
     private static final double STEP = 0.25;
     /** Minimum time between failure nags per player, so mining swings can't spam */
     private static final long FEEDBACK_COOLDOWN_MS = 2000;
+    /**
+     * How long a preview must have been showing before a sneaking hit can confirm it. One
+     * physical swing can fire both LEFT_CLICK_AIR and LEFT_CLICK_BLOCK on the same tick, and
+     * without this gap that single swing would preview and pay in one go.
+     */
+    private static final long CONFIRM_ARM_MS = 250;
 
     private final ChunkBlock addon;
     private final Map<UUID, Long> lastFeedback = new HashMap<>();
+    /** Chunks each player has lined up but not yet paid for */
+    private final Map<UUID, PendingClaim> pending = new HashMap<>();
+
+    /**
+     * A chunk a player has been quoted a price for, waiting on their confirming hit.
+     *
+     * @param islandId the island the chunk would join, so a preview cannot be confirmed
+     *        on someone else's island
+     * @param chunkX world chunk x coordinate
+     * @param chunkZ world chunk z coordinate
+     * @param shownAt when the preview was raised
+     */
+    private record PendingClaim(String islandId, int chunkX, int chunkZ, long shownAt) {
+    }
+
+    /** Time source, overridable so tests need not sleep */
+    private LongSupplier clock = System::currentTimeMillis;
 
     public ChunkClaimListener(ChunkBlock addon) {
         this.addon = addon;
+    }
+
+    /**
+     * Replaces the time source used for confirmation windows and feedback throttling.
+     *
+     * @param clock supplier of the current time in milliseconds
+     */
+    void setClock(LongSupplier clock) {
+        this.clock = clock;
     }
 
     /**
@@ -97,6 +137,20 @@ public class ChunkClaimListener implements Listener {
     }
 
     /**
+     * Drops a player's pending preview when they log out, so it cannot be confirmed by
+     * whoever next holds that session.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        pending.remove(uuid);
+        lastFeedback.remove(uuid);
+        if (addon.getBorderDisplay() != null) {
+            addon.getBorderDisplay().clearPreview(uuid);
+        }
+    }
+
+    /**
      * Walks a short ray along the player's line of sight and returns the first locked
      * chunk it enters, or null if the player is not aiming through the border.
      *
@@ -127,7 +181,9 @@ public class ChunkClaimListener implements Listener {
     }
 
     /**
-     * Runs the claim and gives the player the appropriate feedback.
+     * Runs the claim and gives the player the appropriate feedback. With confirmation
+     * enabled a claimable chunk is only previewed the first time round; the credit is spent
+     * on the confirming hit.
      *
      * @param user the island owner
      * @param island the island
@@ -136,9 +192,20 @@ public class ChunkClaimListener implements Listener {
      */
     public void attemptClaim(User user, Island island, int chunkX, int chunkZ) {
         ChunkManager cm = addon.getChunkManager();
+        // Price the chunk before spending anything: only a claim that would actually go
+        // through is worth asking the player to confirm
+        if (addon.getSettings().isRequireClaimConfirmation()
+                && cm.checkGeometry(island, chunkX, chunkZ) == ClaimResult.OK
+                && cm.getCredit(island) >= cm.getChunkCost() && !confirming(user, island, chunkX, chunkZ)) {
+            preview(user, island, chunkX, chunkZ);
+            return;
+        }
         ClaimResult result = cm.claim(island, chunkX, chunkZ);
         switch (result) {
-        case OK -> addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ);
+        case OK -> {
+            clearPending(user.getUniqueId());
+            addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ);
+        }
         case NO_CREDIT -> {
             if (feedbackReady(user.getUniqueId())) {
                 long needed = cm.getChunkCost() - cm.getCredit(island);
@@ -158,11 +225,70 @@ public class ChunkClaimListener implements Listener {
     }
 
     /**
+     * Decides whether this hit is the confirming one: the player must be sneaking and
+     * aiming at the very chunk they were quoted for, on the same island, inside the
+     * confirmation window and no longer in the same swing that raised the preview.
+     */
+    private boolean confirming(User user, Island island, int chunkX, int chunkZ) {
+        PendingClaim quote = pending.get(user.getUniqueId());
+        if (quote == null || !user.getPlayer().isSneaking()
+                || !Objects.equals(quote.islandId(), island.getUniqueId()) || quote.chunkX() != chunkX
+                || quote.chunkZ() != chunkZ) {
+            return false;
+        }
+        long age = clock.getAsLong() - quote.shownAt();
+        if (age >= timeoutMillis()) {
+            // The window closed; this hit re-prices the chunk instead of paying for it
+            pending.remove(user.getUniqueId());
+            return false;
+        }
+        return age >= CONFIRM_ARM_MS;
+    }
+
+    /**
+     * Quotes the price of a chunk and outlines it, arming the confirming hit.
+     */
+    private void preview(User user, Island island, int chunkX, int chunkZ) {
+        ChunkManager cm = addon.getChunkManager();
+        long now = clock.getAsLong();
+        PendingClaim previous = pending.get(user.getUniqueId());
+        pending.put(user.getUniqueId(), new PendingClaim(island.getUniqueId(), chunkX, chunkZ, now));
+        if (addon.getBorderDisplay() != null) {
+            addon.getBorderDisplay().showPreview(user.getPlayer(), chunkX, chunkZ, now + timeoutMillis());
+        }
+        // Swinging at the same chunk repeatedly keeps the outline alive but must not
+        // re-announce the price on every blow
+        boolean sameChunk = previous != null && previous.chunkX() == chunkX && previous.chunkZ() == chunkZ;
+        if (sameChunk && !feedbackReady(user.getUniqueId())) {
+            return;
+        }
+        // Aiming somewhere new always earns a fresh quote, but it still resets the throttle
+        // so the follow-up swings at that chunk stay quiet
+        lastFeedback.put(user.getUniqueId(), now);
+        long cost = cm.getChunkCost();
+        user.notify("chunkblock.chunks.claim-confirm", "[cost]", String.valueOf(cost), "[after]",
+                String.valueOf(cm.getCredit(island) - cost), "[seconds]",
+                String.valueOf(addon.getSettings().getClaimConfirmationTimeout()));
+        user.getPlayer().playSound(user.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1F, 1.4F);
+    }
+
+    private void clearPending(UUID uuid) {
+        pending.remove(uuid);
+        if (addon.getBorderDisplay() != null) {
+            addon.getBorderDisplay().clearPreview(uuid);
+        }
+    }
+
+    private long timeoutMillis() {
+        return addon.getSettings().getClaimConfirmationTimeout() * 1000L;
+    }
+
+    /**
      * Rate-limits failure feedback: repeated swings while mining should not turn every
      * failed claim probe into a chat message and a sound.
      */
     private boolean feedbackReady(UUID uuid) {
-        long now = System.currentTimeMillis();
+        long now = clock.getAsLong();
         Long last = lastFeedback.get(uuid);
         if (last != null && now - last < FEEDBACK_COOLDOWN_MS) {
             return false;

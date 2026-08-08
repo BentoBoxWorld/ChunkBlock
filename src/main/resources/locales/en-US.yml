@@ -36,6 +36,7 @@ chunkblock:
     entry-denied: "&c That chunk is locked."
     locked: "&c You can't touch that — the chunk is locked."
     claim-hint: "&e Hit the border to claim this chunk for &b [cost] &e level(s)! You have &b [credit] &e level(s) of credit."
+    claim-confirm: "&e Claim this chunk for &b [cost] &e level(s)? That leaves you &b [after] &e level(s) of credit. &6Sneak and hit the border again &e within &b [seconds]s &e to confirm."
     no-credit: "&c You need &b [needed] &c more level(s) of credit to claim this chunk."
     beyond-limit: "&c That chunk is beyond your island's protection area."
     claimed: "&a &l Chunk claimed! &r&a Your island is now &b [number] &a chunks. Credit left: &b [credit] &a level(s)."
