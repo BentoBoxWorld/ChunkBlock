@@ -130,6 +130,15 @@ public class ChunkBlock extends GameModeAddon {
             .type(Type.PROTECTION)
             .defaultRank(RanksManager.COOP_RANK)
             .build();
+    /**
+     * Flag to set who can spend the island's level credit on new chunks. Defaults to the
+     * owner alone, because a claim is irreversible until the levels are earned back.
+     */
+    public final Flag CHUNKBLOCK_CLAIM_CHUNKS = new Flag.Builder("CHUNKBLOCK_CLAIM_CHUNKS", Material.OAK_FENCE_GATE)
+            .mode(Mode.BASIC)
+            .type(Type.PROTECTION)
+            .defaultRank(RanksManager.OWNER_RANK)
+            .build();
 
     @Override
     public void onLoad() {
@@ -177,6 +186,8 @@ public class ChunkBlock extends GameModeAddon {
             }
             // Magic Block protection
             getPlugin().getFlagsManager().registerFlag(this, this.MAGIC_BLOCK);
+            // Who may spend level credit on chunks
+            getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_CLAIM_CHUNKS);
         }
     }
 

@@ -131,14 +131,14 @@ public class ChunkGuardListener implements Listener {
     }
 
     /**
-     * Tells a player bumping into the border what to do about it: owners aiming at a
-     * claimable chunk are invited to hit the border (or told how many levels they still
-     * need); everyone else just learns the chunk is locked.
+     * Tells a player bumping into the border what to do about it: those allowed to spend
+     * the island's credit on a claimable chunk are invited to hit the border (or told how
+     * many levels they still need); everyone else just learns the chunk is locked.
      */
     private void sendBumpMessage(Player player, Location to) {
         User user = User.getInstance(player);
         Optional<Island> optionalIsland = islandAt(to);
-        if (optionalIsland.isPresent() && player.getUniqueId().equals(optionalIsland.get().getOwner())) {
+        if (optionalIsland.isPresent() && optionalIsland.get().isAllowed(user, addon.CHUNKBLOCK_CLAIM_CHUNKS)) {
             Island island = optionalIsland.get();
             ChunkManager cm = addon.getChunkManager();
             if (cm.checkGeometry(island, to.getBlockX() >> 4, to.getBlockZ() >> 4) == ChunkManager.ClaimResult.OK) {
