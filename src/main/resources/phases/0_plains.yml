@@ -16,6 +16,12 @@
     700: CHEST_WITH_WATER_BUCKET
   # Hologram Lines to Display
   # The First (Before Phase 1) Hologram is Located in your Locale.
+  # The text can use any of these, and they can be mixed:
+  #   &a&lGood Luck!              legacy colour and format codes
+  #   &#55FF55Good Luck!          hex colour
+  #   <green><bold>Good Luck!     MiniMessage tags
+  # MiniMessage also gives you gradients, e.g.
+  #   <gradient:#55FF55:#00AA00>Good Luck!</gradient>
   holograms:
     0: "&aGood Luck!"
   biome: PLAINS
