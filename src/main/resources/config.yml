@@ -56,6 +56,15 @@ chunkblock:
   # island protection range can hold. The effective maximum is always capped so
   # claimed chunks fit inside the protection range.
   max-chunks: 441
+  claim:
+    # Require confirmation before level credit is spent on a chunk. When true, the
+    # first hit on the border previews the target chunk and its cost; the player
+    # must then sneak and hit the border again to actually claim it. This stops a
+    # stray swing near the border from spending levels by accident.
+    require-confirmation: true
+    # How long, in seconds, a previewed chunk stays confirmable. After this the
+    # player has to hit the border again to preview it afresh. Minimum 1.
+    confirmation-timeout: 15
   # If true, losing island levels below what has been spent re-locks chunks in
   # reverse claim order (the most recently claimed chunks are lost first). Builds
   # inside re-locked chunks are untouched but cannot be reached until the levels

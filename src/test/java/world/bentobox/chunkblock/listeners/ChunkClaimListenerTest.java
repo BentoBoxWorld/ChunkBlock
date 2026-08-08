@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
+import world.bentobox.chunkblock.chunks.BorderDisplay;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 
@@ -37,7 +40,11 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     private ChunkClaimListener listener;
     private OneBlockIslands data;
     private LevelListener levelListener;
+    private BorderDisplay borderDisplay;
+    private Settings settings;
     private long level;
+    /** Virtual clock the listener reads, so confirmation windows need no sleeping */
+    private long now;
 
     @Override
     @BeforeEach
@@ -47,7 +54,10 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(addon.getPlugin()).thenReturn(plugin);
         when(addon.inWorld(world)).thenReturn(true);
         when(addon.getIslands()).thenReturn(im);
-        when(addon.getSettings()).thenReturn(new Settings());
+        settings = new Settings();
+        when(addon.getSettings()).thenReturn(settings);
+        borderDisplay = mock(BorderDisplay.class);
+        when(addon.getBorderDisplay()).thenReturn(borderDisplay);
         ChunkManager cm = new ChunkManager(addon);
         when(addon.getChunkManager()).thenReturn(cm);
         data = new OneBlockIslands("test");
@@ -74,6 +84,8 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(mockPlayer.getGameMode()).thenReturn(GameMode.SURVIVAL);
 
         listener = new ChunkClaimListener(addon);
+        now = 1_000_000L;
+        listener.setClock(() -> now);
     }
 
     private PlayerInteractEvent hit(Action action) {
@@ -81,10 +93,22 @@ class ChunkClaimListenerTest extends CommonTestSetup {
                 EquipmentSlot.HAND);
     }
 
+    /**
+     * Performs the whole default gesture: a hit to preview the chunk, then a sneaking hit a
+     * second later to pay for it.
+     */
+    private void hitAndConfirm(Action action) {
+        listener.onBorderHit(hit(action));
+        now += 1000;
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hit(action));
+        when(mockPlayer.isSneaking()).thenReturn(false);
+    }
+
     @Test
     void testOwnerPunchingBorderClaimsChunk() {
         level = 1;
-        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        hitAndConfirm(Action.LEFT_CLICK_AIR);
         assertTrue(data.isChunkUnlocked(1, 0));
         verify(levelListener).celebrateClaim(island, 1, 0);
     }
@@ -92,7 +116,7 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     @Test
     void testRightClickAlsoClaims() {
         level = 1;
-        listener.onBorderHit(hit(Action.RIGHT_CLICK_AIR));
+        hitAndConfirm(Action.RIGHT_CLICK_AIR);
         assertTrue(data.isChunkUnlocked(1, 0));
     }
 
@@ -136,12 +160,12 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     @Test
     void testClaimingChainsOutward() {
         level = 2;
-        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        hitAndConfirm(Action.LEFT_CLICK_AIR);
         assertTrue(data.isChunkUnlocked(1, 0));
         // Move to the east edge of the newly claimed chunk and punch again
         when(mockPlayer.getLocation()).thenReturn(new Location(world, 30.5, 65, 8.5, -90F, 0F));
         when(mockPlayer.getEyeLocation()).thenReturn(new Location(world, 30.5, 66.6, 8.5, -90F, 0F));
-        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        hitAndConfirm(Action.LEFT_CLICK_AIR);
         assertTrue(data.isChunkUnlocked(2, 0));
     }
 
@@ -167,6 +191,9 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     void testPunchingBlockInLockedChunkClaimsIt() {
         level = 1;
         listener.onBorderHit(hitBlock(Action.LEFT_CLICK_BLOCK, 17, 8));
+        now += 1000;
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hitBlock(Action.LEFT_CLICK_BLOCK, 17, 8));
         assertTrue(data.isChunkUnlocked(1, 0));
     }
 
@@ -188,5 +215,109 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         when(world.getBlockAt(any(Location.class))).thenReturn(wall);
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
         assertFalse(data.isChunkUnlocked(1, 0));
+    }
+
+    // ------------------------------------------------------------------
+    // Claim confirmation
+    // ------------------------------------------------------------------
+
+    @Test
+    void testFirstHitOnlyPreviewsAndSpendsNothing() {
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertFalse(data.isChunkUnlocked(1, 0));
+        verify(levelListener, never()).celebrateClaim(any(), anyInt(), anyInt());
+        // The player is quoted a price and shown which chunk they are buying
+        verify(notifier).notify(any(), eq("chunkblock.chunks.claim-confirm"));
+        verify(borderDisplay).showPreview(eq(mockPlayer), eq(1), eq(0), anyLong());
+    }
+
+    @Test
+    void testSecondHitWithoutSneakingDoesNotClaim() {
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        now += 5000;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertFalse(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testDoubleFireOfOneSwingDoesNotClaim() {
+        // A single swing can raise both LEFT_CLICK_AIR and LEFT_CLICK_BLOCK on the same
+        // tick: the arming delay must stop that from previewing and paying at once
+        level = 1;
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertFalse(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testConfirmationExpires() {
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        // Well past the confirmation window
+        now += settings.getClaimConfirmationTimeout() * 1000L + 1;
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        // The stale quote is re-priced rather than paid
+        assertFalse(data.isChunkUnlocked(1, 0));
+        // Hitting again inside the fresh window does claim it
+        now += 1000;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertTrue(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testConfirmingWhileAimingAtADifferentChunkDoesNotClaimEither() {
+        level = 2;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        // Turn to the south border (yaw 0 faces +z) and sneak-hit: the east chunk was the
+        // one quoted, so this is a fresh preview, not a confirmation
+        now += 1000;
+        when(mockPlayer.getLocation()).thenReturn(new Location(world, 8.5, 65, 14.5, 0F, 0F));
+        when(mockPlayer.getEyeLocation()).thenReturn(new Location(world, 8.5, 66.6, 14.5, 0F, 0F));
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertFalse(data.isChunkUnlocked(1, 0));
+        assertFalse(data.isChunkUnlocked(0, 1));
+        // Confirming that new quote claims the north chunk and leaves the east one locked
+        now += 1000;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertTrue(data.isChunkUnlocked(0, 1));
+        assertFalse(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testPreviewIsNotReAnnouncedOnEverySwing() {
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        now += 100;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        now += 100;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        verify(notifier, times(1)).notify(any(), eq("chunkblock.chunks.claim-confirm"));
+    }
+
+    @Test
+    void testQuitDropsThePendingClaim() {
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        listener.onQuit(new org.bukkit.event.player.PlayerQuitEvent(mockPlayer, (String) null));
+        verify(borderDisplay).clearPreview(uuid);
+        now += 1000;
+        when(mockPlayer.isSneaking()).thenReturn(true);
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        // Nothing left to confirm, so the hit only re-previews
+        assertFalse(data.isChunkUnlocked(1, 0));
+    }
+
+    @Test
+    void testConfirmationCanBeSwitchedOff() {
+        settings.setRequireClaimConfirmation(false);
+        level = 1;
+        listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
+        assertTrue(data.isChunkUnlocked(1, 0));
+        verify(borderDisplay, never()).showPreview(any(), anyInt(), anyInt(), anyLong());
     }
 }

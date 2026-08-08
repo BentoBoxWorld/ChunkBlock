@@ -49,13 +49,23 @@ public class BorderDisplay implements Listener {
     private static final int OUT_OF_WORLD_DEPTH = 16;
     /** Dust color when the curtain is beyond the world height limits */
     private static final Color OUT_OF_WORLD_COLOR = Color.ORANGE;
+    /** Dust color for a chunk a player has lined up to claim but not yet confirmed */
+    private static final Color PREVIEW_COLOR = Color.YELLOW;
+    /** Heights above the viewer's feet at which the preview outline is drawn */
+    private static final int[] PREVIEW_HEIGHTS = { 0, 3, 6 };
 
     private final ChunkBlock addon;
     /** Client-side barrier blocks sent per player, with the original data for restore */
     private final Map<UUID, Set<BarrierBlock>> barrierBlocks = new HashMap<>();
+    /** Chunks outlined for a player pending claim confirmation */
+    private final Map<UUID, Preview> previews = new HashMap<>();
     private BukkitTask task;
 
     private record BarrierBlock(Location location, BlockData oldData) {
+    }
+
+    /** A pending claim outline: world chunk coordinates and when to stop drawing it */
+    private record Preview(int chunkX, int chunkZ, long expiry) {
     }
 
     public BorderDisplay(ChunkBlock addon) {
@@ -80,6 +90,7 @@ public class BorderDisplay implements Listener {
         barrierBlocks.keySet().stream().map(Bukkit::getPlayer).filter(java.util.Objects::nonNull)
                 .toList().forEach(this::hideBorder);
         barrierBlocks.clear();
+        previews.clear();
     }
 
     private void redrawAll() {
@@ -87,6 +98,7 @@ public class BorderDisplay implements Listener {
             if (addon.inWorld(world)) {
                 for (Player player : world.getPlayers()) {
                     showBorder(player);
+                    drawPreview(player);
                 }
             }
         }
@@ -228,6 +240,59 @@ public class BorderDisplay implements Listener {
     }
 
     /**
+     * Outlines a chunk in yellow for one player until the given time, marking it as lined
+     * up for claiming but not yet paid for. Only that player sees it, and the outline
+     * disappears by itself when the confirmation window closes.
+     *
+     * @param player the player about to spend credit
+     * @param chunkX world chunk x coordinate of the previewed chunk
+     * @param chunkZ world chunk z coordinate of the previewed chunk
+     * @param expiry when to stop drawing, in {@link System#currentTimeMillis()} terms
+     */
+    public void showPreview(Player player, int chunkX, int chunkZ, long expiry) {
+        previews.put(player.getUniqueId(), new Preview(chunkX, chunkZ, expiry));
+        drawPreview(player);
+    }
+
+    /**
+     * Stops outlining whatever chunk this player had lined up.
+     *
+     * @param uuid the player's UUID
+     */
+    public void clearPreview(UUID uuid) {
+        previews.remove(uuid);
+    }
+
+    /**
+     * Draws the pending claim outline for one player, if they have one that has not run out
+     * of time. The box is drawn around the player's own height so it reads as a wall even
+     * when the terrain beyond the border is far above or below them.
+     */
+    private void drawPreview(Player player) {
+        Preview preview = previews.get(player.getUniqueId());
+        if (preview == null) {
+            return;
+        }
+        if (System.currentTimeMillis() > preview.expiry()) {
+            previews.remove(player.getUniqueId());
+            return;
+        }
+        int minX = preview.chunkX() << 4;
+        int minZ = preview.chunkZ() << 4;
+        int baseY = player.getLocation().getBlockY();
+        Particle.DustOptions dust = new Particle.DustOptions(PREVIEW_COLOR, 1.5F);
+        for (int height : PREVIEW_HEIGHTS) {
+            double y = baseY + height + 0.5D;
+            for (int i = 0; i <= 16; i += 2) {
+                player.spawnParticle(Particle.DUST, minX + i, y, minZ, 1, 0, 0, 0, 0, dust);
+                player.spawnParticle(Particle.DUST, minX + i, y, minZ + 16, 1, 0, 0, 0, 0, dust);
+                player.spawnParticle(Particle.DUST, minX, y, minZ + i, 1, 0, 0, 0, 0, dust);
+                player.spawnParticle(Particle.DUST, minX + 16, y, minZ + i, 1, 0, 0, 0, 0, dust);
+            }
+        }
+    }
+
+    /**
      * One-shot green particle celebration along freshly unlocked chunks, visible to
      * everyone in the world near the island.
      *
@@ -264,6 +329,7 @@ public class BorderDisplay implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent e) {
         barrierBlocks.remove(e.getPlayer().getUniqueId());
+        previews.remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -279,5 +345,6 @@ public class BorderDisplay implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChangedWorld(PlayerChangedWorldEvent e) {
         barrierBlocks.remove(e.getPlayer().getUniqueId());
+        previews.remove(e.getPlayer().getUniqueId());
     }
 }
