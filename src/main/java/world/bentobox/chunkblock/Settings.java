@@ -123,6 +123,18 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.max-chunks")
     private int maxChunks = 441;
 
+    @ConfigComment("Require confirmation before level credit is spent on a chunk. When true, the")
+    @ConfigComment("first hit on the border previews the target chunk and its cost; the player")
+    @ConfigComment("must then sneak and hit the border again to actually claim it. This stops a")
+    @ConfigComment("stray swing near the border from spending levels by accident.")
+    @ConfigEntry(path = "chunkblock.claim.require-confirmation")
+    private boolean requireClaimConfirmation = true;
+
+    @ConfigComment("How long, in seconds, a previewed chunk stays confirmable. After this the")
+    @ConfigComment("player has to hit the border again to preview it afresh. Minimum 1.")
+    @ConfigEntry(path = "chunkblock.claim.confirmation-timeout")
+    private int claimConfirmationTimeout = 15;
+
     @ConfigComment("If true, losing island levels below what has been spent re-locks chunks in")
     @ConfigComment("reverse claim order (the most recently claimed chunks are lost first). Builds")
     @ConfigComment("inside re-locked chunks are untouched but cannot be reached until the levels")
@@ -451,6 +463,13 @@ public class Settings implements WorldSettings {
     @ConfigComment("Whether spawned mobs that need water to survive will spawn in a generated water block")
     @ConfigEntry(path = "island.water-mob-protection")
     private boolean waterMobProtection = true;
+
+    @ConfigComment("How often island progress is written to the database, in blocks broken")
+    @ConfigComment("Progress is also saved whenever a phase changes, a player logs out and the server shuts down,")
+    @ConfigComment("so this only decides how much is lost if the server dies without shutting down cleanly.")
+    @ConfigComment("Lower is safer but writes more often. Minimum is 1 (save every block)")
+    @ConfigEntry(path = "island.save-every")
+    private int saveEvery = 10;
 
     @ConfigComment("Default max team size")
     @ConfigComment("Permission size cannot be less than the default below. ")
@@ -1934,6 +1953,25 @@ public class Settings implements WorldSettings {
     }
 
     /**
+     * How many blocks are broken between periodic saves of island progress.
+     * A value below 1 would make the modulo check throw, so it is clamped.
+     * @return the saveEvery value, never less than 1
+     */
+    public int getSaveEvery() {
+        if (saveEvery < 1) {
+            saveEvery = 1;
+        }
+        return saveEvery;
+    }
+
+    /**
+     * @param saveEvery the saveEvery to set
+     */
+    public void setSaveEvery(int saveEvery) {
+        this.saveEvery = saveEvery;
+    }
+
+    /**
      * @return the waterMobProtection
      */
     public boolean isWaterMobProtection() {
@@ -2567,6 +2605,34 @@ public class Settings implements WorldSettings {
      */
     public void setMaxChunks(int maxChunks) {
         this.maxChunks = maxChunks;
+    }
+
+    /**
+     * @return true if a chunk must be previewed and confirmed before credit is spent
+     */
+    public boolean isRequireClaimConfirmation() {
+        return requireClaimConfirmation;
+    }
+
+    /**
+     * @param requireClaimConfirmation the requireClaimConfirmation to set
+     */
+    public void setRequireClaimConfirmation(boolean requireClaimConfirmation) {
+        this.requireClaimConfirmation = requireClaimConfirmation;
+    }
+
+    /**
+     * @return how long a previewed chunk stays confirmable in seconds, never less than 1
+     */
+    public int getClaimConfirmationTimeout() {
+        return Math.max(1, claimConfirmationTimeout);
+    }
+
+    /**
+     * @param claimConfirmationTimeout the claimConfirmationTimeout to set
+     */
+    public void setClaimConfirmationTimeout(int claimConfirmationTimeout) {
+        this.claimConfirmationTimeout = claimConfirmationTimeout;
     }
 
     /**

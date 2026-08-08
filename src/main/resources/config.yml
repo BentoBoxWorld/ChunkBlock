@@ -56,6 +56,15 @@ chunkblock:
   # island protection range can hold. The effective maximum is always capped so
   # claimed chunks fit inside the protection range.
   max-chunks: 441
+  claim:
+    # Require confirmation before level credit is spent on a chunk. When true, the
+    # first hit on the border previews the target chunk and its cost; the player
+    # must then sneak and hit the border again to actually claim it. This stops a
+    # stray swing near the border from spending levels by accident.
+    require-confirmation: true
+    # How long, in seconds, a previewed chunk stays confirmable. After this the
+    # player has to hit the border again to preview it afresh. Minimum 1.
+    confirmation-timeout: 15
   # If true, losing island levels below what has been spent re-locks chunks in
   # reverse claim order (the most recently claimed chunks are lost first). Builds
   # inside re-locked chunks are untouched but cannot be reached until the levels
@@ -400,6 +409,7 @@ world:
     CHORUS_FRUIT: 500
     CONTAINER: 500
     MAGIC_BLOCK: 200
+    CHUNKBLOCK_CLAIM_CHUNKS: 1000
     JUKEBOX: 500
     POTION_THROWING: 500
     BARREL: 500
@@ -446,6 +456,11 @@ island:
   mob-warning: 5
   # Whether spawned mobs that need water to survive will spawn in a generated water block
   water-mob-protection: true
+  # How often island progress is written to the database, in blocks broken
+  # Progress is also saved whenever a phase changes, a player logs out and the server shuts down,
+  # so this only decides how much is lost if the server dies without shutting down cleanly.
+  # Lower is safer but writes more often. Minimum is 1 (save every block)
+  save-every: 10
   # Default max team size
   # Permission size cannot be less than the default below. 
   max-team-size: 4

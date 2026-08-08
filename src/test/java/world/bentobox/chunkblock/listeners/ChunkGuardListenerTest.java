@@ -3,8 +3,11 @@ package world.bentobox.chunkblock.listeners;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableSet;
 
+import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
@@ -48,16 +52,17 @@ class ChunkGuardListenerTest extends CommonTestSetup {
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        addon = mock(ChunkBlock.class);
-        when(addon.getPlugin()).thenReturn(plugin);
-        when(addon.inWorld(world)).thenReturn(true);
-        when(addon.getIslands()).thenReturn(im);
+        // A spy on a real addon, so the CHUNKBLOCK_CLAIM_CHUNKS flag field is built
+        addon = spy(new ChunkBlock());
+        doReturn(plugin).when(addon).getPlugin();
+        doReturn(true).when(addon).inWorld(world);
+        doReturn(im).when(addon).getIslands();
         Settings settings = new Settings();
-        when(addon.getSettings()).thenReturn(settings);
+        addon.setSettings(settings);
         ChunkManager cm = new ChunkManager(addon);
-        when(addon.getChunkManager()).thenReturn(cm);
+        doReturn(cm).when(addon).getChunkManager();
         data = new OneBlockIslands("test");
-        when(addon.getOneBlocksIsland(island)).thenReturn(data);
+        doReturn(data).when(addon).getOneBlocksIsland(island);
 
         // Island centered at block (8, y, 8) → center chunk (0, 0); only that chunk unlocked
         when(island.getCenter()).thenReturn(location);
@@ -93,6 +98,22 @@ class ChunkGuardListenerTest extends CommonTestSetup {
         listener.onPlayerMove(e);
         assertTrue(e.isCancelled());
         mockedUtil.verify(() -> Util.teleportAsync(mockPlayer, location));
+    }
+
+    @Test
+    void testBumpInvitesAPlayerAllowedToClaim() {
+        when(island.isAllowed(any(User.class), eq(addon.CHUNKBLOCK_CLAIM_CHUNKS))).thenReturn(true);
+        doReturn(100L).when(addon).getIslandLevel(island);
+        listener.onPlayerMove(new PlayerMoveEvent(mockPlayer, location, lockedTo));
+        verify(notifier).notify(any(), eq("chunkblock.chunks.claim-hint"));
+    }
+
+    @Test
+    void testBumpJustSaysLockedToAPlayerWhoCannotClaim() {
+        // island.isAllowed is false by default in CommonTestSetup
+        doReturn(100L).when(addon).getIslandLevel(island);
+        listener.onPlayerMove(new PlayerMoveEvent(mockPlayer, location, lockedTo));
+        verify(notifier).notify(any(), eq("chunkblock.chunks.entry-denied"));
     }
 
     @Test
