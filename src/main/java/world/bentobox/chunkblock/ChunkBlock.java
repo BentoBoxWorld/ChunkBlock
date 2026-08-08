@@ -277,9 +277,10 @@ public class ChunkBlock extends GameModeAddon {
 
     @Override
     public void onDisable() {
-        // save cache
+        // Save cache. This must be a direct write, not a queued one: the server disables this
+        // Pladdon before BentoBox, so anything queued here depends on BentoBox draining it later.
         if (blockListener != null) {
-            blockListener.saveCache();
+            blockListener.saveCacheNow();
         }
 
         // Stop border rendering and restore client-side blocks
