@@ -3,6 +3,8 @@ package world.bentobox.chunkblock.listeners;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -14,14 +16,18 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import world.bentobox.bentobox.api.events.island.IslandResettedEvent;
+import world.bentobox.bentobox.managers.PlayersManager;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
+import world.bentobox.chunkblock.chunks.BorderDisplay;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.events.ChunkRelockEvent;
 import world.bentobox.chunkblock.events.ChunkUnlockEvent;
+import world.bentobox.chunkblock.events.RingCompleteEvent;
 
 /**
  * Tests the credit-announcement and LIFO re-lock flows in {@link LevelListener} and the
@@ -51,6 +57,8 @@ class LevelListenerTest extends CommonTestSetup {
         data = new OneBlockIslands("test");
         when(addon.getOneBlocksIsland(island)).thenReturn(data);
         when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        PlayersManager playersManager = plugin.getPlayers();
+        when(addon.getPlayers()).thenReturn(playersManager);
         level = 0;
         when(addon.getIslandLevel(island)).thenAnswer(i -> level);
 
@@ -138,6 +146,83 @@ class LevelListenerTest extends CommonTestSetup {
         cm.claim(island, 1, 0);
         listener.celebrateClaim(island, 1, 0);
         verify(pim).callEvent(any(ChunkUnlockEvent.class));
+    }
+
+    @Test
+    void testClosingARingFiresRingCompleteEventOnce() {
+        level = 8;
+        claimRingOne();
+        verify(pim).callEvent(any(RingCompleteEvent.class));
+        assertEquals(1, data.getHighestRingRewarded());
+    }
+
+    @Test
+    void testPartialRingFiresNothing() {
+        level = 8;
+        // Seven of the eight chunks — the ring never closes
+        for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
+                { -1, -1 } }) {
+            cm.claim(island, offset[0], offset[1]);
+            listener.celebrateClaim(island, offset[0], offset[1]);
+        }
+        verify(pim, never()).callEvent(any(RingCompleteEvent.class));
+        assertEquals(0, data.getHighestRingRewarded());
+    }
+
+    @Test
+    void testRingIsRewardedOnlyOnceEvenAfterRelockAndReclaim() {
+        level = 8;
+        claimRingOne();
+        // Lose a level, which re-locks the last chunk, then claim it straight back
+        level = 7;
+        listener.applyLevel(island, 7);
+        assertEquals(8, data.getUnlockedChunkCount());
+        level = 8;
+        listener.applyLevel(island, 8);
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, -1));
+        listener.celebrateClaim(island, 1, -1);
+        assertEquals(1, data.getHighestRingRewarded());
+        verify(pim, times(1)).callEvent(any(RingCompleteEvent.class));
+    }
+
+    @Test
+    void testCancellingRingCompleteEventSuppressesTheReward() {
+        BorderDisplay borderDisplay = mock(BorderDisplay.class);
+        when(addon.getBorderDisplay()).thenReturn(borderDisplay);
+        doAnswer(invocation -> {
+            if (invocation.getArgument(0) instanceof RingCompleteEvent event) {
+                event.setCancelled(true);
+            }
+            return null;
+        }).when(pim).callEvent(any());
+        level = 8;
+        claimRingOne();
+        verify(pim).callEvent(any(RingCompleteEvent.class));
+        // The per-claim celebration still runs; the whole-ring one does not
+        verify(borderDisplay, never()).celebrate(any(), argThat(offsets -> offsets.size() == 8));
+        // The ring still counts as rewarded, so a cancelled milestone is not retried
+        assertEquals(1, data.getHighestRingRewarded());
+    }
+
+    @Test
+    void testIslandResetClearsRingRewards() {
+        level = 8;
+        claimRingOne();
+        assertEquals(1, data.getHighestRingRewarded());
+        IslandResettedEvent event = mock(IslandResettedEvent.class);
+        when(event.getIsland()).thenReturn(island);
+        listener.onIslandResetted(event);
+        assertEquals(0, data.getHighestRingRewarded());
+        assertEquals(1, data.getUnlockedChunkCount());
+    }
+
+    /** Claims and celebrates all eight chunks of ring 1, closing it with the last one */
+    private void claimRingOne() {
+        for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
+                { -1, -1 }, { 1, -1 } }) {
+            assertEquals(ClaimResult.OK, cm.claim(island, offset[0], offset[1]));
+            listener.celebrateClaim(island, offset[0], offset[1]);
+        }
     }
 
     @Test

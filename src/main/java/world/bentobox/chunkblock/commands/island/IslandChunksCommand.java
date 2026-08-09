@@ -61,6 +61,8 @@ public class IslandChunksCommand extends CompositeCommand {
         user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
                 String.valueOf(cm.getChunkCost()));
+        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(cm.completedRings(island)), "[max]",
+                String.valueOf(cm.maxRingRadius(island)));
         showMap(user, island, unlocked, max);
         return true;
     }

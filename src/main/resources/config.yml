@@ -65,6 +65,23 @@ chunkblock:
     # How long, in seconds, a previewed chunk stays confirmable. After this the
     # player has to hit the border again to preview it afresh. Minimum 1.
     confirmation-timeout: 15
+  rings:
+    # Announce ring milestones to the whole server, not just the island's members.
+    # A ring is the square of chunks at a fixed distance from the center chunk:
+    # ring 1 is the eight chunks around the center, ring 2 the sixteen around those.
+    broadcast: false
+    # Console commands run once each time an island completes a whole ring.
+    # Placeholders: [ring] the completed ring, [chunks] the island's chunk count,
+    # [owner] the island owner's name.
+    # Rings are rewarded once per island — re-locking and re-claiming a ring pays
+    # nothing. Rewarding island levels here is not advised: levels buy chunks, so
+    # that makes each ring pay for the next one.
+    # Example: 'eco give [owner] 500'
+    commands: []
+    # Console commands run once for every member of the island, including the
+    # owner and offline members. Placeholders: [player], [ring], [chunks].
+    # Example: 'give [player] diamond 1'
+    player-commands: []
   # If true, losing island levels below what has been spent re-locks chunks in
   # reverse claim order (the most recently claimed chunks are lost first). Builds
   # inside re-locked chunks are untouched but cannot be reached until the levels
