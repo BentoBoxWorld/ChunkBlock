@@ -59,7 +59,7 @@ chunkblock:
     map:
       title: "&a Your island territory ([unlocked]/[max] chunks):"
       row: "&a [row]"
-      legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked"
+      legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked &6 ◎ center &b ◆ you"
       you-are-here: "&b You are on the marked chunk."
   bossbar:
     title: "Blocks remaining"
