@@ -61,6 +61,8 @@ public class IslandChunksCommand extends CompositeCommand {
         user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
                 String.valueOf(cm.getChunkCost()));
+        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(cm.completedRings(island)), "[max]",
+                String.valueOf(cm.maxRingRadius(island)));
         showMap(user, island, unlocked, max);
         return true;
     }
@@ -83,7 +85,11 @@ public class IslandChunksCommand extends CompositeCommand {
             StringBuilder row = new StringBuilder();
             for (int dx = -radius; dx <= radius; dx++) {
                 boolean here = dx == playerDx && dz == playerDz;
-                if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
+                if (dx == 0 && dz == 0) {
+                    // The center chunk holds the magic block and can never lock, so it is
+                    // marked in its own right — without it the grid has nothing to orient by
+                    row.append(here ? "&b◉" : "&6◎");
+                } else if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
                     row.append(here ? "&b◆" : "&a■");
                 } else if (cm.checkGeometry(island, centerChunkX + dx, centerChunkZ + dz) == ClaimResult.OK) {
                     row.append(here ? "&b◆" : "&e▣");

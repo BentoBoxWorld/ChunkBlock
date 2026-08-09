@@ -220,6 +220,67 @@ class ChunkManagerTest {
     }
 
     @Test
+    void testRingZeroIsAlwaysComplete() {
+        assertTrue(cm.isRingComplete(island, 0));
+        assertEquals(0, cm.completedRings(island));
+    }
+
+    @Test
+    void testRingCompletesOnlyWhenEveryChunkIsClaimed() {
+        level = 8;
+        claimRingOne();
+        assertTrue(cm.isRingComplete(island, 1));
+        assertEquals(1, cm.completedRings(island));
+        assertFalse(cm.isRingComplete(island, 2));
+    }
+
+    @Test
+    void testRingIsIncompleteWhileACornerIsMissing() {
+        level = 8;
+        // Everything in ring 1 except the far corner
+        for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
+                { -1, -1 } }) {
+            cm.claim(island, offset[0], offset[1]);
+        }
+        assertEquals(8, cm.getUnlockedChunkCount(island));
+        assertFalse(cm.isRingComplete(island, 1));
+        assertEquals(0, cm.completedRings(island));
+    }
+
+    @Test
+    void testOuterRingDoesNotCountWhileAnInnerRingHasAHole() {
+        level = 100;
+        // Ring 1 with a hole at (1, -1), then a chunk out in ring 2
+        for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
+                { -1, -1 }, { 2, 0 } }) {
+            cm.claim(island, offset[0], offset[1]);
+        }
+        assertEquals(2, cm.currentRing(island));
+        assertEquals(0, cm.completedRings(island));
+        // Filling the hole closes ring 1 and only ring 1
+        assertEquals(ClaimResult.OK, cm.claim(island, 1, -1));
+        assertEquals(1, cm.completedRings(island));
+    }
+
+    @Test
+    void testRingBeyondProtectionRangeIsNeverComplete() {
+        when(island.getProtectionRange()).thenReturn(24);
+        assertEquals(1, cm.maxRingRadius(island));
+        level = 8;
+        claimRingOne();
+        assertEquals(1, cm.completedRings(island));
+        assertFalse(cm.isRingComplete(island, 2));
+    }
+
+    /** Claims all eight chunks of ring 1, each face-adjacent to territory already held */
+    private void claimRingOne() {
+        for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
+                { -1, -1 }, { 1, -1 } }) {
+            assertEquals(ClaimResult.OK, cm.claim(island, offset[0], offset[1]));
+        }
+    }
+
+    @Test
     void testGetUnlockedOffsets() {
         level = 2;
         cm.claim(island, 1, 0);

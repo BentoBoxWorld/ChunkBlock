@@ -135,6 +135,28 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.claim.confirmation-timeout")
     private int claimConfirmationTimeout = 15;
 
+    @ConfigComment("Announce ring milestones to the whole server, not just the island's members.")
+    @ConfigComment("A ring is the square of chunks at a fixed distance from the center chunk:")
+    @ConfigComment("ring 1 is the eight chunks around the center, ring 2 the sixteen around those.")
+    @ConfigEntry(path = "chunkblock.rings.broadcast")
+    private boolean ringBroadcast = false;
+
+    @ConfigComment("Console commands run once each time an island completes a whole ring.")
+    @ConfigComment("Placeholders: [ring] the completed ring, [chunks] the island's chunk count,")
+    @ConfigComment("[owner] the island owner's name.")
+    @ConfigComment("Rings are rewarded once per island — re-locking and re-claiming a ring pays")
+    @ConfigComment("nothing. Rewarding island levels here is not advised: levels buy chunks, so")
+    @ConfigComment("that makes each ring pay for the next one.")
+    @ConfigComment("Example: 'eco give [owner] 500'")
+    @ConfigEntry(path = "chunkblock.rings.commands")
+    private List<String> ringCommands = new ArrayList<>();
+
+    @ConfigComment("Console commands run once for every member of the island, including the")
+    @ConfigComment("owner and offline members. Placeholders: [player], [ring], [chunks].")
+    @ConfigComment("Example: 'give [player] diamond 1'")
+    @ConfigEntry(path = "chunkblock.rings.player-commands")
+    private List<String> ringPlayerCommands = new ArrayList<>();
+
     @ConfigComment("If true, losing island levels below what has been spent re-locks chunks in")
     @ConfigComment("reverse claim order (the most recently claimed chunks are lost first). Builds")
     @ConfigComment("inside re-locked chunks are untouched but cannot be reached until the levels")
@@ -2605,6 +2627,48 @@ public class Settings implements WorldSettings {
      */
     public void setMaxChunks(int maxChunks) {
         this.maxChunks = maxChunks;
+    }
+
+    /**
+     * @return true if ring milestones are announced to the whole server
+     */
+    public boolean isRingBroadcast() {
+        return ringBroadcast;
+    }
+
+    /**
+     * @param ringBroadcast the ringBroadcast to set
+     */
+    public void setRingBroadcast(boolean ringBroadcast) {
+        this.ringBroadcast = ringBroadcast;
+    }
+
+    /**
+     * @return the console commands run once per completed ring, never null
+     */
+    public List<String> getRingCommands() {
+        return ringCommands == null ? Collections.emptyList() : ringCommands;
+    }
+
+    /**
+     * @param ringCommands the ringCommands to set
+     */
+    public void setRingCommands(List<String> ringCommands) {
+        this.ringCommands = ringCommands;
+    }
+
+    /**
+     * @return the console commands run for each island member per completed ring, never null
+     */
+    public List<String> getRingPlayerCommands() {
+        return ringPlayerCommands == null ? Collections.emptyList() : ringPlayerCommands;
+    }
+
+    /**
+     * @param ringPlayerCommands the ringPlayerCommands to set
+     */
+    public void setRingPlayerCommands(List<String> ringPlayerCommands) {
+        this.ringPlayerCommands = ringPlayerCommands;
     }
 
     /**
