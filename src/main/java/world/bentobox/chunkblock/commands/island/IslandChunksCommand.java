@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import net.kyori.adventure.key.Key;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
@@ -22,6 +23,14 @@ public class IslandChunksCommand extends CompositeCommand {
 
     /** Widest map that still fits comfortably in chat */
     private static final int MAX_MAP_RADIUS = 7;
+
+    /**
+     * Minecraft's built-in fixed-width font. Chat's default font is proportional, so a
+     * grid built from mixed glyphs comes out ragged — a row's width depends on which
+     * chunks happen to be claimed. Only the map rows use it; the rest of the chat stays
+     * in the normal font.
+     */
+    private static final Key MONOSPACE_FONT = Key.key("minecraft", "uniform");
 
     private ChunkBlock addon;
 
@@ -97,7 +106,8 @@ public class IslandChunksCommand extends CompositeCommand {
                     row.append(here ? "&b◇" : "&7□");
                 }
             }
-            user.sendMessage("chunkblock.chunks.map.row", "[row]", row.toString());
+            user.sendMessage(user.getTranslationAsComponent("chunkblock.chunks.map.row", "[row]", row.toString())
+                    .font(MONOSPACE_FONT));
         }
         user.sendMessage("chunkblock.chunks.map.legend", "[cost]", String.valueOf(cm.getChunkCost()));
     }
