@@ -2,6 +2,9 @@ package world.bentobox.chunkblock.commands.island;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,6 +12,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 
 import org.bukkit.Location;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +79,12 @@ class IslandChunksCommandTest extends CommonTestSetup {
         when(user.getWorld()).thenReturn(world);
         when(im.getIslandAt(playerLocation)).thenReturn(Optional.of(island));
 
+        // Hand the row string straight back as a component so the test can read it out again
+        when(user.getTranslationAsComponent(anyString(), any(String[].class))).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return Component.text((String) args[args.length - 1]);
+        });
+
         command = new IslandChunksCommand(ac, "chunks", new String[] { "chunks" });
     }
 
@@ -130,12 +143,20 @@ class IslandChunksCommandTest extends CommonTestSetup {
         assertEquals(15, mapRows().size());
     }
 
-    /** The rendered map rows, in order, as passed to the row locale key */
+    /**
+     * The rendered map rows, in order. Rows are sent as components so they can carry the
+     * monospace font, so they are read back out of the component rather than the arguments.
+     */
     private List<String> mapRows() {
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(user, org.mockito.Mockito.atLeastOnce()).sendMessage(org.mockito.ArgumentMatchers.eq(
-                "chunkblock.chunks.map.row"), org.mockito.ArgumentMatchers.eq("[row]"), captor.capture());
-        return new ArrayList<>(captor.getAllValues());
+        ArgumentCaptor<Component> captor = ArgumentCaptor.forClass(Component.class);
+        verify(user, atLeastOnce()).sendMessage(captor.capture());
+        List<String> rows = new ArrayList<>();
+        for (Component component : captor.getAllValues()) {
+            assertEquals(Key.key("minecraft", "uniform"), component.font(),
+                    "map rows must be monospaced or the grid comes out ragged");
+            rows.add(((TextComponent) component).content());
+        }
+        return rows;
     }
 
     /** The glyph at the middle of a row, colour code included */
