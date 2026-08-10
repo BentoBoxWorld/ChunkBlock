@@ -221,6 +221,18 @@ class ChunkClaimListenerTest extends CommonTestSetup {
     }
 
     @Test
+    void testUsingABlockInOwnTerritoryNeverRaisesTheRankComplaint() {
+        // Reported bug: a member opening a chest anywhere in the island's own chunks was
+        // told their rank could not claim, because rank was checked before the gesture was
+        // known to be a claim at all.
+        level = 100;
+        when(island.isAllowed(any(User.class), eq(addon.CHUNKBLOCK_CLAIM_CHUNKS))).thenReturn(false);
+        when(island.getRank(any(User.class))).thenReturn(RanksManager.MEMBER_RANK);
+        listener.onBorderHit(hitBlock(Action.RIGHT_CLICK_BLOCK, 14, 8));
+        verify(notifier, never()).notify(any(), any());
+    }
+
+    @Test
     void testPunchingBlockInLockedChunkClaimsIt() {
         level = 1;
         listener.onBorderHit(hitBlock(Action.LEFT_CLICK_BLOCK, 17, 8));

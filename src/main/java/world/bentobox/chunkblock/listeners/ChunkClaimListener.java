@@ -110,20 +110,14 @@ public class ChunkClaimListener implements Listener {
             return;
         }
         Island island = optionalIsland.get();
-        User user = User.getInstance(player);
-        // Who may spend the island's credit is an island setting, owner-only by default
-        if (!island.isAllowed(user, addon.CHUNKBLOCK_CLAIM_CHUNKS)) {
-            denyClaim(user, island);
-            return;
-        }
         ChunkManager cm = addon.getChunkManager();
         // The player must be standing in their own territory, aiming at a locked chunk
         if (cm.isLocked(island, player.getLocation())) {
             return;
         }
         // A click on a block inside unlocked territory is ordinary interaction (mining a
-        // generator, pressing a button...), never a claim gesture — regardless of where
-        // the aim line would end up beyond it.
+        // generator, opening a chest, pressing a button...), never a claim gesture —
+        // regardless of where the aim line would end up beyond it.
         Block clicked = e.getClickedBlock();
         if (clicked != null && cm.isUnlocked(island, clicked.getX() >> 4, clicked.getZ() >> 4)) {
             return;
@@ -136,6 +130,14 @@ public class ChunkClaimListener implements Listener {
             target = findTargetLockedChunk(player, island);
         }
         if (target == null) {
+            return;
+        }
+        // Only now that this is genuinely a claim gesture is rank worth raising: who may
+        // spend the island's credit is an island setting, owner-only by default. Checking
+        // any earlier turns every ordinary click into a rank complaint.
+        User user = User.getInstance(player);
+        if (!island.isAllowed(user, addon.CHUNKBLOCK_CLAIM_CHUNKS)) {
+            denyClaim(user, island);
             return;
         }
         attemptClaim(user, island, target[0], target[1]);
