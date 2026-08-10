@@ -5,7 +5,7 @@
 
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Magic Block Protection
       description: |-
         &b Rank that can break the magic

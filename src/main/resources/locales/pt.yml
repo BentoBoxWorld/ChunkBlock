@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Proteção de Bloco Mágico
       description: |-
         &b Rank que pode quebrar o

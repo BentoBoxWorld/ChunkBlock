@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: 魔法方塊保護
       description: |-
         &b 如果玩家可以破壞方塊，
