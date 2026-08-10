@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Perlindungan Blok Ajaib
       description: |-
         &b Pangkat yang dapat

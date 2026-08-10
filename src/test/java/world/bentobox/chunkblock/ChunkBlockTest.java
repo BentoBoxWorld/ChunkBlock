@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +39,7 @@ import world.bentobox.bentobox.Settings;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.addons.Addon.State;
 import world.bentobox.bentobox.api.addons.AddonDescription;
+import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.AbstractDatabaseHandler;
 import world.bentobox.bentobox.database.DatabaseSetup;
@@ -207,6 +209,26 @@ public class ChunkBlockTest extends CommonTestSetup {
         assertTrue(addon.getPlayerCommand().isPresent());
         assertTrue(addon.getAdminCommand().isPresent());
 
+    }
+
+    /**
+     * Every flag ID must be prefixed. AOneBlock, which this addon was forked from, declares
+     * flags of its own, and BentoBox's flags manager silently drops the second registration
+     * of an ID — so an unprefixed ID means that whichever gamemode loads second quietly runs
+     * on the other one's definition. See issue #24.
+     */
+    @Test
+    void testEveryFlagIdIsPrefixed() throws IllegalAccessException {
+        int checked = 0;
+        for (Field field : ChunkBlock.class.getDeclaredFields()) {
+            if (Flag.class.isAssignableFrom(field.getType())) {
+                String id = ((Flag) field.get(addon)).getID();
+                assertTrue(id.startsWith("CHUNKBLOCK_"),
+                        "Flag " + id + " needs a CHUNKBLOCK_ prefix or it collides with another addon");
+                checked++;
+            }
+        }
+        assertTrue(checked > 0, "no flags found to check — has the field type changed?");
     }
 
     /**

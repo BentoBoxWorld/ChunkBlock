@@ -230,7 +230,7 @@ public class BlockListener extends FlagListener implements Listener {
 
     /**
      * Cancels a magic-block break as early as possible when the player lacks the
-     * {@link ChunkBlock#MAGIC_BLOCK} permission.
+     * {@link ChunkBlock#CHUNKBLOCK_MAGIC_BLOCK} permission.
      * <p>
      * The full magic-block processing runs at {@link EventPriority#HIGHEST} so that
      * other protection plugins get a chance to cancel first. However, reward-granting
@@ -256,7 +256,7 @@ public class BlockListener extends FlagListener implements Listener {
         // checkIsland cancels the event and sends the protection message if the player
         // is not allowed to break the magic block.
         addon.getIslands().getIslandAt(l).filter(i -> l.equals(i.getCenter()))
-                .ifPresent(i -> checkIsland(e, e.getPlayer(), i.getCenter(), addon.MAGIC_BLOCK));
+                .ifPresent(i -> checkIsland(e, e.getPlayer(), i.getCenter(), addon.CHUNKBLOCK_MAGIC_BLOCK));
     }
 
     /**
@@ -394,7 +394,7 @@ public class BlockListener extends FlagListener implements Listener {
         // player (e.g. the block is broken by a JetsMinions minion) the protection flag
         // check is skipped: it requires a User and would otherwise throw an NPE inside
         // BentoBox's FlagListener. See https://github.com/BentoBoxWorld/ChunkBlock/issues/525
-        if (player != null && !checkIsland((@NonNull Event) e, player, island.getCenter(), addon.MAGIC_BLOCK)) {
+        if (player != null && !checkIsland((@NonNull Event) e, player, island.getCenter(), addon.CHUNKBLOCK_MAGIC_BLOCK)) {
             // Not allowed
             return;
         }

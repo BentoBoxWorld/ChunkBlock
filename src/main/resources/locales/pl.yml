@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Ochrona Magicznego Bloku
       description: |-
         &b Ranga, która może zniszczyć
