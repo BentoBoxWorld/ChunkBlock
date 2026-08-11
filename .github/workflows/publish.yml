@@ -21,13 +21,12 @@ jobs:
     uses: bentoboxworld/.github/.github/workflows/publish-platforms.yml@1f91a0edf72e8c86d671b3b8fdd3121ac6fb88e1 # master
     with:
       use_release_asset: "true"          # publish the jar attached to the release; do not rebuild
-      # TODO: ChunkBlock is not set up on Hangar or CurseForge yet. When the projects
-      # exist, set hangar_slug to the Hangar slug and curseforge_id to ChunkBlock's own
-      # CurseForge project id (1512493 was AOneBlock's — never reuse it), add the
-      # HANGAR_API_KEY / CURSEFORGE_TOKEN secrets, and re-enable this workflow
-      # (gh workflow enable publish.yml).
+      # ChunkBlock's own CurseForge project. Do not reuse 1512493 — that is AOneBlock's.
+      # Hangar has not approved ChunkBlock yet; a blank slug makes the reusable workflow
+      # skip the Hangar job entirely, so the release still succeeds. Fill in "ChunkBlock"
+      # once the project exists.
       hangar_slug: ""                    # blank = skip Hangar
-      curseforge_id: ""                  # blank = skip CurseForge
+      curseforge_id: "1646388"
       game_versions: "26.2,26.1.2,26.1.1,26.1,1.21.11,1.21.10,1.21.9,1.21.8,1.21.7,1.21.6,1.21.5"
       version: ${{ inputs.version }}     # empty on release events -> falls back to the release tag
     secrets:
