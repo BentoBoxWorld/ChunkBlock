@@ -5,7 +5,7 @@
 
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Magic Block Protection
       description: |-
         &b Rank that can break the magic
@@ -51,12 +51,15 @@ chunkblock:
     relocked: "&c Your island level dropped — [count] chunk(s) re-locked, newest first. Regain the levels to claim them back!"
     ejected: "&c The chunk you were in re-locked, so you were moved to safety."
     max-reached: "&d Your island has reached its maximum size of [number] chunks!"
+    ring-complete: "&6 &l Ring [ring] complete! &r&6 The whole ring around your island is yours — &b [chunks] &6 chunks in all."
+    ring-broadcast: "&6 [name]'s island has closed ring &b [ring] &6 — &b [chunks] &6 chunks and still growing!"
+    rings: "&a Rings completed: &b [rings] &a of &b [max]&a."
     sethome-denied: "&c You can't set a home in a locked chunk."
     info: "&a Chunks: &b [unlocked]&a/&b[max]&a. Credit: &b [credit] &a level(s) — a chunk costs &b [cost]&a."
     map:
       title: "&a Your island territory ([unlocked]/[max] chunks):"
       row: "&a [row]"
-      legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked"
+      legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked &6 ◎ center &b ◆ you"
       you-are-here: "&b You are on the marked chunk."
   bossbar:
     title: "Blocks remaining"

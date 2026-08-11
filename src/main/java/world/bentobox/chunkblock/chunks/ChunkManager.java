@@ -166,6 +166,48 @@ public class ChunkManager {
     }
 
     /**
+     * A ring is the square of chunks at a fixed Chebyshev distance from the center chunk:
+     * ring 1 is the eight chunks surrounding the center, ring 2 the sixteen around those.
+     * Ring 0 is the center chunk, which is always unlocked.
+     *
+     * @param island the island
+     * @param ring the ring radius in chunks
+     * @return true if every chunk in the ring is unlocked; false for rings that do not fit
+     *         inside the island's protection range
+     */
+    public boolean isRingComplete(Island island, int ring) {
+        if (ring <= 0) {
+            return true;
+        }
+        if (ring > maxRingRadius(island)) {
+            return false;
+        }
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        for (int d = -ring; d <= ring; d++) {
+            // North and south edges cover the corners, so the east and west edges only
+            // need the same sweep to close the square
+            if (!data.isChunkUnlocked(d, -ring) || !data.isChunkUnlocked(d, ring)
+                    || !data.isChunkUnlocked(-ring, d) || !data.isChunkUnlocked(ring, d)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param island the island
+     * @return the number of whole rings completed outwards from the center without a gap.
+     *         A claimed chunk two rings out does not count while ring 1 has a hole in it.
+     */
+    public int completedRings(Island island) {
+        int ring = 0;
+        while (isRingComplete(island, ring + 1)) {
+            ring++;
+        }
+        return ring;
+    }
+
+    /**
      * @param island the island
      * @return the island's unlocked chunk offsets in unlock order (x and z are chunk
      *         offsets relative to the center chunk)

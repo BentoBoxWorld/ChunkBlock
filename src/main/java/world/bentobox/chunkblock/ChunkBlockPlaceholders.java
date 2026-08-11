@@ -67,6 +67,7 @@ public class ChunkBlockPlaceholders {
         placeholdersManager.registerPlaceholder(addon, "island_next_chunk_level", this::getIslandNextChunkLevel);
         placeholdersManager.registerPlaceholder(addon, "island_chunk_credit", this::getIslandChunkCredit);
         placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
+        placeholdersManager.registerPlaceholder(addon, "island_rings_complete", this::getIslandRingsComplete);
     }
 
     /**
@@ -126,6 +127,17 @@ public class ChunkBlockPlaceholders {
             return "";
         }
         return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().currentRing(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return how many whole rings the user's island has closed around its center
+     */
+    public String getIslandRingsComplete(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().completedRings(i))).orElse("");
     }
 
     /**

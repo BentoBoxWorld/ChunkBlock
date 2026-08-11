@@ -5,7 +5,7 @@
 
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Магический блок
       description: |-
         <green>Предотвращает ломание</green>

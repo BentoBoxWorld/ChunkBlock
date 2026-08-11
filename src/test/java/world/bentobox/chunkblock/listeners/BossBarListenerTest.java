@@ -1,5 +1,7 @@
 package world.bentobox.chunkblock.listeners;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -23,6 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import world.bentobox.bentobox.api.events.flags.FlagSettingChangeEvent;
 import world.bentobox.bentobox.api.events.island.IslandEnterEvent;
 import world.bentobox.bentobox.api.events.island.IslandExitEvent;
@@ -178,5 +183,70 @@ public class BossBarListenerTest extends CommonTestSetup {
         mockedBukkit.verify(() -> Bukkit.createBossBar(anyString(), any(), any()), never());
         verify(bossBar, never()).addPlayer(any());
         verify(bossBar, never()).removePlayer(any());
+    }
+
+    /**
+     * Serializes to legacy section codes so a test can assert on the formatting that actually
+     * comes out, without depending on how the component tree happens to be nested.
+     */
+    private static String legacy(Component c) {
+        return LegacyComponentSerializer.legacySection().serialize(c);
+    }
+
+    /**
+     * MiniMessage tags used to be rendered as literal text because the serializer only understood
+     * legacy codes.
+     */
+    @Test
+    void testBukkitToAdventureParsesMiniMessage() {
+        Component c = BossBarListener.bukkitToAdventure("<green><bold>Plains</bold></green>");
+        assertEquals("Plains", PlainTextComponentSerializer.plainText().serialize(c));
+        assertTrue(legacy(c).contains("\u00a7a"), "expected green in " + legacy(c));
+        assertTrue(legacy(c).contains("\u00a7l"), "expected bold in " + legacy(c));
+    }
+
+    /**
+     * MiniMessage gradients, which legacy codes cannot express at all.
+     */
+    @Test
+    void testBukkitToAdventureParsesGradient() {
+        Component c = BossBarListener.bukkitToAdventure("<gradient:#55FF55:#00AA00>Plains</gradient>");
+        assertEquals("Plains", PlainTextComponentSerializer.plainText().serialize(c));
+    }
+
+    /**
+     * Translations reach this method already converted to section codes by BentoBox, so a
+     * serializer bound to '&' would leave them in the output as literal text.
+     */
+    @Test
+    void testBukkitToAdventureParsesSectionCodes() {
+        Component c = BossBarListener.bukkitToAdventure("\u00a7aPlains");
+        assertEquals("Plains", PlainTextComponentSerializer.plainText().serialize(c));
+        assertTrue(legacy(c).contains("\u00a7a"), "expected green in " + legacy(c));
+    }
+
+    /**
+     * Legacy '&' codes must keep working - every existing locale file uses them.
+     */
+    @Test
+    void testBukkitToAdventureParsesLegacyAmpersand() {
+        Component c = BossBarListener.bukkitToAdventure("&aPlains");
+        assertEquals("Plains", PlainTextComponentSerializer.plainText().serialize(c));
+        assertTrue(legacy(c).contains("\u00a7a"), "expected green in " + legacy(c));
+    }
+
+    /**
+     * Hex colours, which the previous serializer supported here and must not regress.
+     */
+    @Test
+    void testBukkitToAdventureParsesHex() {
+        Component c = BossBarListener.bukkitToAdventure("&#55FF55Plains");
+        assertEquals("Plains", PlainTextComponentSerializer.plainText().serialize(c));
+        assertEquals(TextColor.fromHexString("#55FF55"), c.color());
+    }
+
+    @Test
+    void testBukkitToAdventureNullIsEmpty() {
+        assertEquals(Component.empty(), BossBarListener.bukkitToAdventure(null));
     }
 }

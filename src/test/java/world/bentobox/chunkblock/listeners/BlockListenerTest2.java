@@ -1079,7 +1079,7 @@ class BlockListenerTest2 extends CommonTestSetup {
     /**
      * Test method for
      * {@link world.bentobox.chunkblock.listeners.BlockListener#onBlockBreakDeny(BlockBreakEvent)}
-     * When the player lacks the MAGIC_BLOCK permission the break is cancelled at this
+     * When the player lacks the CHUNKBLOCK_MAGIC_BLOCK permission the break is cancelled at this
      * early stage (via checkIsland), so later reward plugins are skipped. Regression
      * test for https://github.com/BentoBoxWorld/ChunkBlock/issues/534
      */

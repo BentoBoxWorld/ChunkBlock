@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Ochrana Kouzelného Bloku
       description: |-
         &b Hodnost, která může rozbít

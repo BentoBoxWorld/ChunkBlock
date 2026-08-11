@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import net.kyori.adventure.key.Key;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
@@ -22,6 +23,14 @@ public class IslandChunksCommand extends CompositeCommand {
 
     /** Widest map that still fits comfortably in chat */
     private static final int MAX_MAP_RADIUS = 7;
+
+    /**
+     * Minecraft's built-in fixed-width font. Chat's default font is proportional, so a
+     * grid built from mixed glyphs comes out ragged — a row's width depends on which
+     * chunks happen to be claimed. Only the map rows use it; the rest of the chat stays
+     * in the normal font.
+     */
+    private static final Key MONOSPACE_FONT = Key.key("minecraft", "uniform");
 
     private ChunkBlock addon;
 
@@ -61,6 +70,8 @@ public class IslandChunksCommand extends CompositeCommand {
         user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
                 String.valueOf(cm.getChunkCost()));
+        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(cm.completedRings(island)), "[max]",
+                String.valueOf(cm.maxRingRadius(island)));
         showMap(user, island, unlocked, max);
         return true;
     }
@@ -83,7 +94,11 @@ public class IslandChunksCommand extends CompositeCommand {
             StringBuilder row = new StringBuilder();
             for (int dx = -radius; dx <= radius; dx++) {
                 boolean here = dx == playerDx && dz == playerDz;
-                if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
+                if (dx == 0 && dz == 0) {
+                    // The center chunk holds the magic block and can never lock, so it is
+                    // marked in its own right — without it the grid has nothing to orient by
+                    row.append(here ? "&b◉" : "&6◎");
+                } else if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
                     row.append(here ? "&b◆" : "&a■");
                 } else if (cm.checkGeometry(island, centerChunkX + dx, centerChunkZ + dz) == ClaimResult.OK) {
                     row.append(here ? "&b◆" : "&e▣");
@@ -91,7 +106,8 @@ public class IslandChunksCommand extends CompositeCommand {
                     row.append(here ? "&b◇" : "&7□");
                 }
             }
-            user.sendMessage("chunkblock.chunks.map.row", "[row]", row.toString());
+            user.sendMessage(user.getTranslationAsComponent("chunkblock.chunks.map.row", "[row]", row.toString())
+                    .font(MONOSPACE_FONT));
         }
         user.sendMessage("chunkblock.chunks.map.legend", "[cost]", String.valueOf(cm.getChunkCost()));
     }

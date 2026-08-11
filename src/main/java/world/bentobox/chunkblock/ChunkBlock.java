@@ -125,7 +125,7 @@ public class ChunkBlock extends GameModeAddon {
     /**
      * Flag to set who can break the magic block.
      */
-    public final Flag MAGIC_BLOCK = new Flag.Builder("MAGIC_BLOCK", Material.GRASS_BLOCK)
+    public final Flag CHUNKBLOCK_MAGIC_BLOCK = new Flag.Builder("CHUNKBLOCK_MAGIC_BLOCK", Material.GRASS_BLOCK)
             .mode(Mode.BASIC)
             .type(Type.PROTECTION)
             .defaultRank(RanksManager.COOP_RANK)
@@ -175,19 +175,35 @@ public class ChunkBlock extends GameModeAddon {
             adminCommand = new AdminCommand(this);
             // Register flag with BentoBox
             // Register protection flag with BentoBox
-            getPlugin().getFlagsManager().registerFlag(this, CHUNKBLOCK_START_SAFETY);
+            registerFlagOrWarn(CHUNKBLOCK_START_SAFETY);
             // Bossbar
             if (getSettings().isBossBar()) {
-                getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_BOSSBAR);
+                registerFlagOrWarn(this.CHUNKBLOCK_BOSSBAR);
             }
             // Actionbar
             if (getSettings().isActionBar()) {
-                getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_ACTIONBAR);
+                registerFlagOrWarn(this.CHUNKBLOCK_ACTIONBAR);
             }
             // Magic Block protection
-            getPlugin().getFlagsManager().registerFlag(this, this.MAGIC_BLOCK);
+            registerFlagOrWarn(this.CHUNKBLOCK_MAGIC_BLOCK);
             // Who may spend level credit on chunks
-            getPlugin().getFlagsManager().registerFlag(this, this.CHUNKBLOCK_CLAIM_CHUNKS);
+            registerFlagOrWarn(this.CHUNKBLOCK_CLAIM_CHUNKS);
+        }
+    }
+
+    /**
+     * Registers a flag and complains if it is refused. A flag whose ID is already taken by
+     * another addon is dropped silently by the flags manager, and this addon then runs
+     * against whichever definition won — so the only symptom would be settings that
+     * quietly do nothing. Every ID here is prefixed to avoid that, and this says so out
+     * loud if one ever collides anyway.
+     *
+     * @param flag the flag to register
+     */
+    private void registerFlagOrWarn(Flag flag) {
+        if (!registerFlag(flag)) {
+            logError("Flag " + flag.getID() + " is already registered by another addon, so ChunkBlock's own "
+                    + "definition was dropped. Its island settings will behave as that addon defines them.");
         }
     }
 

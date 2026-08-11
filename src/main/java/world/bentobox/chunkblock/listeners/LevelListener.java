@@ -1,7 +1,9 @@
 package world.bentobox.chunkblock.listeners;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -13,6 +15,7 @@ import org.bukkit.util.Vector;
 
 import world.bentobox.bentobox.api.events.island.IslandCreatedEvent;
 import world.bentobox.bentobox.api.events.island.IslandResettedEvent;
+import world.bentobox.bentobox.api.localization.TextVariables;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
@@ -20,6 +23,7 @@ import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.events.ChunkRelockEvent;
 import world.bentobox.chunkblock.events.ChunkUnlockEvent;
+import world.bentobox.chunkblock.events.RingCompleteEvent;
 import world.bentobox.level.events.IslandLevelCalculatedEvent;
 
 /**
@@ -74,6 +78,7 @@ public class LevelListener implements Listener {
         OneBlockIslands data = addon.getOneBlocksIsland(island);
         data.resetUnlockedChunks();
         data.setLastKnownLevel(0);
+        data.setHighestRingRewarded(0);
     }
 
     /**
@@ -161,6 +166,109 @@ public class LevelListener implements Listener {
         if (addon.getBorderDisplay() != null) {
             addon.getBorderDisplay().celebrate(island, List.of(offset));
         }
+        checkRingMilestones(island);
+    }
+
+    /**
+     * Pays out any rings the island has completed but not yet been rewarded for. Normally
+     * that is a single ring — the chunk just claimed closed it — but a ring completed
+     * while an inner one still had a hole in it is caught up here once the hole is filled.
+     *
+     * @param island the island
+     */
+    private void checkRingMilestones(Island island) {
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        int completed = addon.getChunkManager().completedRings(island);
+        if (completed <= data.getHighestRingRewarded()) {
+            return;
+        }
+        for (int ring = data.getHighestRingRewarded() + 1; ring <= completed; ring++) {
+            rewardRing(island, ring);
+        }
+        data.setHighestRingRewarded(completed);
+        addon.getBlockListener().saveIsland(island);
+    }
+
+    /**
+     * Fires {@link RingCompleteEvent} for one newly completed ring and, unless a plugin
+     * cancels it, announces the milestone and runs the configured reward commands.
+     */
+    private void rewardRing(Island island, int ring) {
+        int chunks = addon.getChunkManager().getUnlockedChunkCount(island);
+        RingCompleteEvent event = new RingCompleteEvent(island, ring, chunks);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
+        String ringText = String.valueOf(ring);
+        String chunkText = String.valueOf(chunks);
+        island.getMemberSet().forEach(uuid -> {
+            User user = User.getInstance(uuid);
+            if (user.isOnline() && addon.inWorld(user.getWorld())) {
+                user.sendMessage("chunkblock.chunks.ring-complete", "[ring]", ringText, "[chunks]", chunkText);
+                user.getPlayer().playSound(user.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F);
+            }
+        });
+        if (addon.getSettings().isRingBroadcast()) {
+            String ownerName = playerName(island.getOwner());
+            Bukkit.getOnlinePlayers().forEach(player -> User.getInstance(player).sendMessage(
+                    "chunkblock.chunks.ring-broadcast", TextVariables.NAME, ownerName, "[ring]", ringText,
+                    "[chunks]", chunkText));
+        }
+        celebrateRing(island, ring);
+        List<String> ownerCommands = addon.getSettings().getRingCommands();
+        if (!ownerCommands.isEmpty()) {
+            runCommands(ownerCommands, ringText, chunkText, "[owner]", playerName(island.getOwner()));
+        }
+        List<String> memberCommands = addon.getSettings().getRingPlayerCommands();
+        if (!memberCommands.isEmpty()) {
+            for (UUID uuid : island.getMemberSet()) {
+                runCommands(memberCommands, ringText, chunkText, "[player]", playerName(uuid));
+            }
+        }
+    }
+
+    /**
+     * @return the player's name, or an empty string for an unowned island or a name the
+     *         players manager does not know
+     */
+    private String playerName(UUID uuid) {
+        return uuid == null ? "" : addon.getPlayers().getName(uuid);
+    }
+
+    /**
+     * Runs reward commands from the console, substituting the ring placeholders. Commands
+     * with an empty name substitution are skipped rather than run against a blank argument.
+     */
+    private void runCommands(List<String> commands, String ring, String chunks, String nameKey, String name) {
+        if (commands.isEmpty() || name == null || name.isEmpty()) {
+            return;
+        }
+        for (String command : commands) {
+            String toRun = command.replace("[ring]", ring).replace("[chunks]", chunks).replace(nameKey, name);
+            if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), toRun)) {
+                addon.logError("Ring reward command failed: " + toRun);
+            }
+        }
+    }
+
+    /**
+     * Sparkles the whole completed ring, not just the chunk that closed it.
+     */
+    private void celebrateRing(Island island, int ring) {
+        if (addon.getBorderDisplay() == null) {
+            return;
+        }
+        List<Vector> offsets = new ArrayList<>();
+        for (int d = -ring; d <= ring; d++) {
+            offsets.add(new Vector(d, 0, -ring));
+            offsets.add(new Vector(d, 0, ring));
+            if (d != -ring && d != ring) {
+                offsets.add(new Vector(-ring, 0, d));
+                offsets.add(new Vector(ring, 0, d));
+            }
+        }
+        addon.getBorderDisplay().celebrate(island, offsets);
     }
 
     /**

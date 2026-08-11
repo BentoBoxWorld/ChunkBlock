@@ -69,6 +69,14 @@ public class OneBlockIslands implements DataObject {
     @Expose
     private long lastKnownLevel = 0;
 
+    /**
+     * The highest ring this island has already been rewarded for completing. Milestones
+     * are earned once and stay earned: re-locking a ring and claiming it back does not pay
+     * out again. Only an island create or reset clears it.
+     */
+    @Expose
+    private int highestRingRewarded = 0;
+
     /** Fast membership view of {@link #unlockedChunks}; rebuilt lazily after loads/edits */
     private transient Set<Long> unlockedSet;
 
@@ -177,6 +185,20 @@ public class OneBlockIslands implements DataObject {
      */
     public void setLastKnownLevel(long lastKnownLevel) {
         this.lastKnownLevel = lastKnownLevel;
+    }
+
+    /**
+     * @return the highest ring this island has already been rewarded for
+     */
+    public int getHighestRingRewarded() {
+        return highestRingRewarded;
+    }
+
+    /**
+     * @param highestRingRewarded the highest rewarded ring
+     */
+    public void setHighestRingRewarded(int highestRingRewarded) {
+        this.highestRingRewarded = highestRingRewarded;
     }
 
     /**

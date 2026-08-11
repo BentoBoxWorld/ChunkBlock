@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: 魔法ブロック保護
       description: |-
         &b ブロックを破壊できる場合、

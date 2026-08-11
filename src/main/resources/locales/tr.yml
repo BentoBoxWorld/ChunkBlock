@@ -1,6 +1,6 @@
 protection:
   flags:
-    MAGIC_BLOCK:
+    CHUNKBLOCK_MAGIC_BLOCK:
       name: Büyülü Blok Koruması
       description: |-
         &b Blokları kırabilirlerse
