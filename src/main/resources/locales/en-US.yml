@@ -62,15 +62,16 @@ chunkblock:
       legend: "&a ■ yours &e ▣ claimable ([cost] level(s) each) &7 □ locked &6 ◎ center &b ◆ you"
       you-are-here: "&b You are on the marked chunk."
     # The map dialog: one button per chunk. Tooltips show when the mouse is over a chunk.
+    # These are MiniMessage, which is what new text should use — the old &-codes still work.
     dialog:
-      close: "&f Close"
+      close: "<white>Close"
       tooltip:
-        center: "&6 The center chunk — your magic block is here."
-        owned: "&a Chunk [x], [z] &r&a — yours."
-        claimable: "&e Chunk [x], [z] &r&e — claimable for &b [cost] &e level(s). Go to that border and hit it."
-        no-credit: "&e Chunk [x], [z] &r&e — costs &b [cost] &e level(s). You need &c [needed] &e more level(s) of credit."
-        locked: "&7 Chunk [x], [z] &r&7 — locked. Claim your way out to it."
-        you-are-here: "&b You are standing here."
+        center: "<gold>The center chunk — your magic block is here."
+        owned: "<green>Chunk [x], [z] — yours."
+        claimable: "<yellow>Chunk [x], [z] — claimable for <aqua>[cost]</aqua> level(s). Go to that border and hit it."
+        no-credit: "<yellow>Chunk [x], [z] — costs <aqua>[cost]</aqua> level(s). You need <red>[needed]</red> more level(s) of credit."
+        locked: "<gray>Chunk [x], [z] — locked. Claim your way out to it."
+        you-are-here: "<aqua>You are standing here."
   bossbar:
     title: "Blocks remaining"
     # status: "&a Phase blocks &b [total]. Blocks left: [todo]"

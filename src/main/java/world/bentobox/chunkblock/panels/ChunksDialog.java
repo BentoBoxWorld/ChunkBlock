@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -21,10 +20,10 @@ import net.kyori.adventure.text.event.ClickCallback;
 import world.bentobox.bentobox.api.dialogs.Dialogs;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
-import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
+import world.bentobox.chunkblock.chunks.ChunkMap;
+import world.bentobox.chunkblock.chunks.ChunkMap.Cell;
 
 /**
  * The territory map of {@code /ch chunks} drawn as a dialog: one button per chunk, laid
@@ -56,29 +55,6 @@ public class ChunksDialog {
     private static final Duration CALLBACK_LIFETIME = Duration.ofMinutes(5);
 
     private static final String REFERENCE = "chunkblock.chunks.dialog.";
-
-    /** What a chunk is to this island, which decides its glyph and its tooltip */
-    enum Kind {
-        /** The chunk holding the magic block, which can never lock */
-        CENTER,
-        /** Already claimed */
-        OWNED,
-        /** Locked, but adjacent to the island and inside the protection range */
-        CLAIMABLE,
-        /** Locked and not claimable yet */
-        LOCKED
-    }
-
-    /**
-     * One square of the map.
-     *
-     * @param dx chunk offset east of the center chunk
-     * @param dz chunk offset south of the center chunk
-     * @param kind what this chunk is to the island
-     * @param here true if the player is standing in this chunk
-     */
-    record Cell(int dx, int dz, Kind kind, boolean here) {
-    }
 
     private final ChunkBlock addon;
     private final User user;
@@ -156,36 +132,12 @@ public class ChunksDialog {
      * out in, so the grid comes out with north at the top.
      */
     List<Cell> cells() {
-        ChunkManager cm = addon.getChunkManager();
-        int centerChunkX = island.getCenter().getBlockX() >> 4;
-        int centerChunkZ = island.getCenter().getBlockZ() >> 4;
-        Location location = user.getLocation();
-        // A player who is not in this world stands on no chunk of the map
-        boolean sameWorld = location != null && Util.sameWorld(island.getWorld(), location.getWorld());
-        int playerDx = sameWorld ? (location.getBlockX() >> 4) - centerChunkX : Integer.MIN_VALUE;
-        int playerDz = sameWorld ? (location.getBlockZ() >> 4) - centerChunkZ : Integer.MIN_VALUE;
-        List<Cell> cells = new ArrayList<>();
-        for (int dz = -radius; dz <= radius; dz++) {
-            for (int dx = -radius; dx <= radius; dx++) {
-                Kind kind;
-                if (dx == 0 && dz == 0) {
-                    kind = Kind.CENTER;
-                } else if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
-                    kind = Kind.OWNED;
-                } else if (cm.checkGeometry(island, centerChunkX + dx, centerChunkZ + dz) == ClaimResult.OK) {
-                    kind = Kind.CLAIMABLE;
-                } else {
-                    kind = Kind.LOCKED;
-                }
-                cells.add(new Cell(dx, dz, kind, dx == playerDx && dz == playerDz));
-            }
-        }
-        return cells;
+        return ChunkMap.cells(addon, island, user.getLocation(), radius);
     }
 
     private ActionButton button(Cell cell) {
         Component tooltip = tooltip(cell);
-        return ActionButton.builder(glyph(cell)).tooltip(tooltip).width(BUTTON_WIDTH)
+        return ActionButton.builder(ChunkMap.glyph(cell)).tooltip(tooltip).width(BUTTON_WIDTH)
                 .action(DialogAction.customClick((view, audience) -> reopen(tooltip),
                         ClickCallback.Options.builder().uses(1).lifetime(CALLBACK_LIFETIME).build()))
                 .build();
@@ -199,30 +151,6 @@ public class ChunksDialog {
         // Dialog callbacks may arrive off the main thread, and everything the map reads is
         // island data
         Bukkit.getScheduler().runTask(addon.getPlugin(), () -> show(addon, user, island, selection));
-    }
-
-    /**
-     * The glyph on a chunk's button. The same marks the chat map uses, so the legend reads
-     * the same either way.
-     */
-    static String glyphReference(Cell cell) {
-        if (cell.here()) {
-            return switch (cell.kind()) {
-            case CENTER -> "&b◉";
-            case OWNED, CLAIMABLE -> "&b◆";
-            case LOCKED -> "&b◇";
-            };
-        }
-        return switch (cell.kind()) {
-        case CENTER -> "&6◎";
-        case OWNED -> "&a■";
-        case CLAIMABLE -> "&e▣";
-        case LOCKED -> "&7□";
-        };
-    }
-
-    private Component glyph(Cell cell) {
-        return Util.parseMiniMessageOrLegacy(glyphReference(cell));
     }
 
     /**
@@ -256,7 +184,12 @@ public class ChunksDialog {
         return value > 0 ? "+" + value : String.valueOf(value);
     }
 
+    /**
+     * Translates a locale key straight to a component. Going through the user rather than
+     * parsing the translated string here keeps every message on BentoBox's own path,
+     * whether the locale file is written in MiniMessage or in old color codes.
+     */
     private Component text(String reference, String... variables) {
-        return Util.parseMiniMessageOrLegacy(user.getTranslation(reference, variables));
+        return user.getTranslationAsComponent(reference, variables);
     }
 }

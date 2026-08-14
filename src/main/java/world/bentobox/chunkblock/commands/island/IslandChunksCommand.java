@@ -3,6 +3,7 @@ package world.bentobox.chunkblock.commands.island;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import net.kyori.adventure.key.Key;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
@@ -12,7 +13,8 @@ import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
-import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
+import world.bentobox.chunkblock.chunks.ChunkMap;
+import world.bentobox.chunkblock.chunks.ChunkMap.Cell;
 import world.bentobox.chunkblock.panels.ChunksDialog;
 
 /**
@@ -92,30 +94,18 @@ public class IslandChunksCommand extends CompositeCommand {
     private void showMap(User user, Island island, int unlocked, int max) {
         ChunkManager cm = addon.getChunkManager();
         int radius = Math.min(MAX_MAP_RADIUS, cm.currentRing(island) + 1);
-        int centerChunkX = island.getCenter().getBlockX() >> 4;
-        int centerChunkZ = island.getCenter().getBlockZ() >> 4;
-        int playerDx = (user.getLocation().getBlockX() >> 4) - centerChunkX;
-        int playerDz = (user.getLocation().getBlockZ() >> 4) - centerChunkZ;
+        int width = 2 * radius + 1;
+        List<Cell> cells = ChunkMap.cells(addon, island, user.getLocation(), radius);
         user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max));
-        for (int dz = -radius; dz <= radius; dz++) {
-            StringBuilder row = new StringBuilder();
-            for (int dx = -radius; dx <= radius; dx++) {
-                boolean here = dx == playerDx && dz == playerDz;
-                if (dx == 0 && dz == 0) {
-                    // The center chunk holds the magic block and can never lock, so it is
-                    // marked in its own right — without it the grid has nothing to orient by
-                    row.append(here ? "&b◉" : "&6◎");
-                } else if (addon.getOneBlocksIsland(island).isChunkUnlocked(dx, dz)) {
-                    row.append(here ? "&b◆" : "&a■");
-                } else if (cm.checkGeometry(island, centerChunkX + dx, centerChunkZ + dz) == ClaimResult.OK) {
-                    row.append(here ? "&b◆" : "&e▣");
-                } else {
-                    row.append(here ? "&b◇" : "&7□");
-                }
-            }
-            user.sendMessage(user.getTranslationAsComponent("chunkblock.chunks.map.row", "[row]", row.toString())
-                    .font(MONOSPACE_FONT));
+        for (int row = 0; row < width; row++) {
+            // A row goes into the [row] variable of a translation, so it has to be text by
+            // then. It is MiniMessage text, the same format the locale files are written
+            // in — color codes spliced into a MiniMessage line would show up raw.
+            String glyphs = cells.subList(row * width, (row + 1) * width).stream().map(ChunkMap::glyphText)
+                    .collect(Collectors.joining());
+            user.sendMessage(
+                    user.getTranslationAsComponent("chunkblock.chunks.map.row", "[row]", glyphs).font(MONOSPACE_FONT));
         }
         user.sendMessage("chunkblock.chunks.map.legend", "[cost]", String.valueOf(cm.getChunkCost()));
     }

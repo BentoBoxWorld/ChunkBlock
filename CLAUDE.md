@@ -65,6 +65,12 @@ mvn verify + SonarCloud), Jenkins at ci.codemc.org builds release jars on master
 
 - Locale keys live under `chunkblock.chunks.*` for gating messages (en-US.yml is the
   source of truth; other locales lag until synced).
+- **New locale text is MiniMessage** (`<green>`, `<aqua>`); the old `&`-codes still parse,
+  so files are mixed. Never build colored text yourself and splice it into a translation —
+  go through `User#getTranslationAsComponent` / `sendMessage(Component)` and keep colors in
+  Components. Where a formatted fragment really must reach a `[variable]` (the chat map's
+  `[row]`), serialize it to MiniMessage with `Util.getMiniMessage()` rather than emitting
+  `&` codes into what may be a MiniMessage line.
 - Public API for other plugins: `ChunkUnlockEvent`/`ChunkRelockEvent` (per chunk, carry
   claim-order index), request handler `unlocked-chunks`.
 - Tests extend `CommonTestSetup` (mocked Bukkit/BentoBox); `ChunkManagerTest` and the
