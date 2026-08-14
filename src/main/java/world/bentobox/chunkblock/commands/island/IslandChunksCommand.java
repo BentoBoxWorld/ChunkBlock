@@ -6,16 +6,19 @@ import java.util.Optional;
 
 import net.kyori.adventure.key.Key;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
+import world.bentobox.bentobox.api.dialogs.Dialogs;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.util.Util;
 import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.chunks.ChunkManager.ClaimResult;
+import world.bentobox.chunkblock.panels.ChunksDialog;
 
 /**
  * /ch chunks — shows how big your island is, how much level credit you can spend, and a
- * little chat map of your territory with the chunks you could claim next.
+ * map of your territory with the chunks you could claim next: a dialog of one button per
+ * chunk where the server supports dialogs, a chat map of glyphs where it does not.
  *
  * @author tastybento
  */
@@ -63,6 +66,11 @@ public class IslandChunksCommand extends CompositeCommand {
             return false;
         }
         Island island = optionalIsland.get();
+        // The dialog map is the good one: buttons are the same size on every client. The
+        // chat map is what servers too old for dialogs get instead.
+        if (Dialogs.isSupported() && ChunksDialog.show(addon, user, island)) {
+            return true;
+        }
         ChunkManager cm = addon.getChunkManager();
         int unlocked = cm.getUnlockedChunkCount(island);
         int max = cm.getMaxChunks(island);
