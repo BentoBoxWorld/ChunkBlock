@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,12 +70,15 @@ class IslandChunksCommandTest extends CommonTestSetup {
 
         // Island center chunk-centered at chunk (0, 0)
         when(island.getCenter()).thenReturn(location);
+        when(island.getWorld()).thenReturn(world);
+        when(world.getName()).thenReturn("chunkblock_world");
         when(location.getBlockX()).thenReturn(8);
         when(location.getBlockZ()).thenReturn(8);
         when(island.getProtectionRange()).thenReturn(240);
         // The player's own location is a separate mock, so moving them leaves the island put
         when(playerLocation.getBlockX()).thenReturn(8);
         when(playerLocation.getBlockZ()).thenReturn(8);
+        when(playerLocation.getWorld()).thenReturn(world);
         when(user.getLocation()).thenReturn(playerLocation);
         when(user.getWorld()).thenReturn(world);
         when(im.getIslandAt(playerLocation)).thenReturn(Optional.of(island));
@@ -101,7 +105,7 @@ class IslandChunksCommandTest extends CommonTestSetup {
         List<String> rows = mapRows();
         // Fresh island: one claimed chunk, so the map reaches one ring out — 3 x 3
         assertEquals(3, rows.size());
-        assertEquals("&b◉", middleGlyph(rows.get(1)));
+        assertEquals("<aqua>◉", middleGlyph(rows.get(1)));
     }
 
     @Test
@@ -110,7 +114,7 @@ class IslandChunksCommandTest extends CommonTestSetup {
         when(playerLocation.getBlockX()).thenReturn(24);
         assertTrue(command.execute(user, "", List.of()));
         List<String> rows = mapRows();
-        assertEquals("&6◎", middleGlyph(rows.get(1)));
+        assertEquals("<gold>◎", middleGlyph(rows.get(1)));
     }
 
     @Test
@@ -125,9 +129,9 @@ class IslandChunksCommandTest extends CommonTestSetup {
         // Ring 1 claimed, so the map reaches ring 2 — 5 x 5
         assertEquals(5, rows.size());
         String center = rows.get(2);
-        assertEquals("&b◉", middleGlyph(center));
+        assertEquals("<aqua>◉", middleGlyph(center));
         // The eight chunks around the center are owned, not confused with the center itself
-        assertEquals("&a■&b◉&a■", center.substring(center.indexOf("&b◉") - 3, center.indexOf("&b◉") + 6));
+        assertEquals(List.of("<green>■", "<aqua>◉", "<green>■"), glyphs(center).subList(1, 4));
     }
 
     @Test
@@ -159,11 +163,14 @@ class IslandChunksCommandTest extends CommonTestSetup {
         return rows;
     }
 
-    /** The glyph at the middle of a row, colour code included */
+    /** A row split back into its glyphs, each one a MiniMessage colour tag plus its mark */
+    private List<String> glyphs(String row) {
+        return Arrays.stream(row.split("(?=<)")).filter(s -> !s.isEmpty()).toList();
+    }
+
+    /** The glyph at the middle of a row, colour tag included */
     private String middleGlyph(String row) {
-        // Every glyph is a two-character colour code plus one character
-        int glyphs = row.length() / 3;
-        int middle = (glyphs / 2) * 3;
-        return row.substring(middle, middle + 3);
+        List<String> glyphs = glyphs(row);
+        return glyphs.get(glyphs.size() / 2);
     }
 }
