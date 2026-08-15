@@ -120,7 +120,7 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         level = 1;
         hitAndConfirm(Action.LEFT_CLICK_AIR);
         assertTrue(data.isChunkUnlocked(1, 0));
-        verify(levelListener).celebrateClaim(island, 1, 0);
+        verify(levelListener).celebrateClaim(island, 1, 0, uuid);
     }
 
     @Test
@@ -135,7 +135,7 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         level = 0;
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
         assertFalse(data.isChunkUnlocked(1, 0));
-        verify(levelListener, never()).celebrateClaim(any(), anyInt(), anyInt());
+        verify(levelListener, never()).celebrateClaim(any(), anyInt(), anyInt(), any());
         // The player is told what they are missing
         verify(notifier).notify(any(), any());
     }
@@ -271,7 +271,7 @@ class ChunkClaimListenerTest extends CommonTestSetup {
         level = 1;
         listener.onBorderHit(hit(Action.LEFT_CLICK_AIR));
         assertFalse(data.isChunkUnlocked(1, 0));
-        verify(levelListener, never()).celebrateClaim(any(), anyInt(), anyInt());
+        verify(levelListener, never()).celebrateClaim(any(), anyInt(), anyInt(), any());
         // The player is quoted a price and shown which chunk they are buying
         verify(notifier).notify(any(), eq("chunkblock.chunks.claim-confirm"));
         verify(borderDisplay).showPreview(eq(mockPlayer), eq(1), eq(0), anyLong());
