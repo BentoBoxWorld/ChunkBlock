@@ -17,6 +17,7 @@ import world.bentobox.chunkblock.activity.ActivityManager;
 import world.bentobox.chunkblock.chunks.BorderDisplay;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.listeners.ActivityListener;
+import world.bentobox.chunkblock.trophies.TrophyManager;
 import world.bentobox.chunkblock.commands.admin.AdminCommand;
 import world.bentobox.chunkblock.commands.island.PlayerCommand;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
@@ -93,6 +94,8 @@ public class ChunkBlock extends GameModeAddon {
     private ChunkManager chunkManager;
     /** The per-member activity counters (the ledger/leaderboard/trophy substrate) */
     private ActivityManager activityManager;
+    /** The config-defined island trophies and titles */
+    private TrophyManager trophyManager;
     /** The placeholder manager for ChunkBlock */
     private ChunkBlockPlaceholders phManager;
     /** The listener for hologram-related events */
@@ -249,8 +252,10 @@ public class ChunkBlock extends GameModeAddon {
         oneBlockManager = new OneBlocksManager(this);
         // Initialize the chunk lock manager
         chunkManager = new ChunkManager(this);
-        // Initialize the activity counters
+        // Initialize the activity counters and the trophies that read them
         activityManager = new ActivityManager(this);
+        trophyManager = new TrophyManager(this);
+        trophyManager.loadTrophies();
         // Load phase data
         if (loadData()) {
             // Failed to load - don't register anything
@@ -345,6 +350,9 @@ public class ChunkBlock extends GameModeAddon {
             log("Reloaded ChunkBlock settings");
             loadData();
         }
+        if (trophyManager != null) {
+            trophyManager.loadTrophies();
+        }
     }
 
     /**
@@ -366,6 +374,13 @@ public class ChunkBlock extends GameModeAddon {
      */
     public ActivityManager getActivityManager() {
         return activityManager;
+    }
+
+    /**
+     * @return the trophy and title manager, or null before the addon is enabled
+     */
+    public TrophyManager getTrophyManager() {
+        return trophyManager;
     }
 
     /**
@@ -503,6 +518,8 @@ public class ChunkBlock extends GameModeAddon {
         super.saveDefaultConfig();
         // Save default phases panel
         this.saveResource("panels/phases_panel.yml", false);
+        // Save default trophy definitions
+        this.saveResource("trophies.yml", false);
     }
 
     /*

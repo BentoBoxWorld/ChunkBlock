@@ -1,6 +1,7 @@
 package world.bentobox.chunkblock.activity;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,8 +44,8 @@ public class ActivityManager {
     /** Unsaved frequent-counter records per island, so block breaks don't save every hit */
     private final Map<String, Integer> unsavedCounts = new HashMap<>();
 
-    /** Today as an epoch day; replaceable so tests can move time */
-    private LongSupplier daySupplier = () -> LocalDate.now().toEpochDay();
+    /** Today as an epoch day in the server's zone; replaceable so tests can move time */
+    private LongSupplier daySupplier = () -> LocalDate.now(ZoneId.systemDefault()).toEpochDay();
 
     public ActivityManager(ChunkBlock addon) {
         this.addon = addon;
@@ -69,7 +70,7 @@ public class ActivityManager {
      * @param type the counter
      * @param amount the amount to add, &gt; 0 (anything else is ignored)
      */
-    public void record(@NonNull Island island, @Nullable UUID member, @NonNull CounterType type, long amount) {
+    public void recordActivity(@NonNull Island island, @Nullable UUID member, @NonNull CounterType type, long amount) {
         if (amount <= 0 || (member != null && !island.getMemberSet().contains(member))) {
             return;
         }
@@ -78,6 +79,9 @@ public class ActivityManager {
         data.add(member == null ? ISLAND_SCOPE : member.toString(), type.name(), today, amount);
         data.prune(today - Math.max(1, addon.getSettings().getActivityRetentionDays()) + 1);
         save(data, type == CounterType.MAGIC_BLOCKS);
+        if (addon.getTrophyManager() != null) {
+            addon.getTrophyManager().check(island);
+        }
     }
 
     /**
@@ -94,8 +98,8 @@ public class ActivityManager {
     public boolean recordClaim(@NonNull Island island, int dx, int dz, @Nullable UUID member) {
         IslandActivity data = getActivity(island.getUniqueId());
         boolean first = data.getClaimedEver().add(dx + "," + dz);
-        record(island, member, first ? CounterType.CHUNKS_CLAIMED : CounterType.CHUNKS_RECLAIMED, 1);
-        // record() may have skipped saving (non-member) but the claimedEver set changed
+        recordActivity(island, member, first ? CounterType.CHUNKS_CLAIMED : CounterType.CHUNKS_RECLAIMED, 1);
+        // recordActivity() may have skipped saving (non-member) but the claimedEver set changed
         if (first) {
             save(data, false);
         }

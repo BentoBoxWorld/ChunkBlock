@@ -1,0 +1,64 @@
+# ChunkBlock trophies.
+#
+# A trophy is a name, an icon, a condition, and what earning it grants. An island earns
+# each trophy once and keeps it: re-locking chunks on level loss and claiming them back
+# never re-awards, and only an island create or reset clears earned trophies.
+#
+# A trophy with a "title" makes that title available to the island. The island's active
+# title is chosen with /ch title, shown by the %chunkblock_island_title% placeholder.
+#
+# ------------------------------------------------------------------------------------
+# DO NOT reward island levels from trophy commands. Levels are the currency that buys
+# chunks in ChunkBlock, so a trophy that grants levels makes each milestone pay for the
+# next one — a compounding loop, not a reward. Economy money, items, cosmetics and
+# titles are all fine; levels are not.
+# ------------------------------------------------------------------------------------
+#
+# Format, all fields under a unique trophy id:
+#   name: display name (MiniMessage text, e.g. "<gold>First Ring")
+#   description: one line shown in listings (MiniMessage)
+#   icon: a Bukkit Material name for panels/dialogs
+#   title: OPTIONAL island title this trophy carries (MiniMessage)
+#   criteria:
+#     type: RING or COUNTER
+#     # for RING:
+#     ring: 1              # earned when this ring of chunks is complete (1 = the eight
+#                          # chunks around the center)
+#     # for COUNTER:
+#     counter: one of MAGIC_BLOCKS, LEVELS_EARNED, CHUNKS_CLAIMED, CHUNKS_RECLAIMED,
+#              CHUNKS_RELOCKED, RINGS_COMPLETED
+#     scope: ISLAND        # ISLAND = the island's total, MEMBER = any single member
+#     threshold: 10        # the amount that must be reached
+#     window-days: 0       # 0 = lifetime; otherwise only the last N days count (must be
+#                          # within chunkblock.activity.daily-retention-days in config.yml)
+#   rewards:
+#     commands: []         # console commands run once. Placeholders: [owner], [trophy]
+#     player-commands: []  # console commands run once per member. Placeholders: [player], [trophy]
+trophies:
+  first-ring:
+    name: "<gold>First Ring"
+    description: "<gray>Complete the first ring of chunks around your magic block."
+    icon: GOLD_INGOT
+    title: "<gold>Ring Bearer"
+    criteria:
+      type: RING
+      ring: 1
+  homesteader:
+    name: "<green>Homesteader"
+    description: "<gray>Claim ten different chunks for your island."
+    icon: GRASS_BLOCK
+    criteria:
+      type: COUNTER
+      counter: CHUNKS_CLAIMED
+      scope: ISLAND
+      threshold: 10
+  ten-thousand-blocks:
+    name: "<aqua>Ten Thousand Blocks"
+    description: "<gray>Break ten thousand magic blocks as an island."
+    icon: DIAMOND_PICKAXE
+    title: "<aqua>Block Breaker"
+    criteria:
+      type: COUNTER
+      counter: MAGIC_BLOCKS
+      scope: ISLAND
+      threshold: 10000

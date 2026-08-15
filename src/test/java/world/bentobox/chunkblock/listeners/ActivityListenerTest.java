@@ -1,7 +1,9 @@
 package world.bentobox.chunkblock.listeners;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -55,13 +57,13 @@ class ActivityListenerTest extends CommonTestSetup {
     @Test
     void testMagicBlockBreakByPlayer() {
         listener.onMagicBlock(new MagicBlockEvent(island, uuid, null, block, null));
-        verify(am).record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        verify(am).recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
     }
 
     @Test
     void testMagicBlockBreakByMinionIsIslandScope() {
         listener.onMagicBlock(new MagicBlockEvent(island, null, null, block, null));
-        verify(am).record(island, null, CounterType.MAGIC_BLOCKS, 1);
+        verify(am).recordActivity(island, null, CounterType.MAGIC_BLOCKS, 1);
     }
 
     @Test
@@ -73,7 +75,7 @@ class ActivityListenerTest extends CommonTestSetup {
     @Test
     void testChunkRelockIsIslandScope() {
         listener.onChunkRelock(new ChunkRelockEvent(island, new Vector(1, 0, 0), 3));
-        verify(am).record(island, null, CounterType.CHUNKS_RELOCKED, 1);
+        verify(am).recordActivity(island, null, CounterType.CHUNKS_RELOCKED, 1);
     }
 
     @Test
@@ -81,7 +83,7 @@ class ActivityListenerTest extends CommonTestSetup {
         RingCompleteEvent event = new RingCompleteEvent(island, 1, 9);
         event.setCancelled(true);
         listener.onRingComplete(event);
-        verify(am).record(island, null, CounterType.RINGS_COMPLETED, 1);
+        verify(am).recordActivity(island, null, CounterType.RINGS_COMPLETED, 1);
     }
 
     @Test
@@ -129,6 +131,6 @@ class ActivityListenerTest extends CommonTestSetup {
         when(island.getWorld()).thenReturn(null);
         when(addon.inWorld((org.bukkit.World) null)).thenReturn(false);
         listener.onMagicBlock(new MagicBlockEvent(island, uuid, null, block, null));
-        verify(am, org.mockito.Mockito.never()).record(any(), any(), any(), org.mockito.ArgumentMatchers.anyLong());
+        verify(am, never()).recordActivity(any(), any(), any(), anyLong());
     }
 }
