@@ -79,7 +79,7 @@ class ActivityManagerTest extends CommonTestSetup {
 
     @Test
     void testRecordAndLifetime() {
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 5);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 5);
         assertEquals(5, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 0));
         // Island total includes the member's contribution
         assertEquals(5, am.getCount(island, null, CounterType.MAGIC_BLOCKS, 0));
@@ -90,21 +90,21 @@ class ActivityManagerTest extends CommonTestSetup {
     @Test
     void testNonMemberIsNotCounted() {
         UUID stranger = UUID.randomUUID();
-        am.record(island, stranger, CounterType.MAGIC_BLOCKS, 5);
+        am.recordActivity(island, stranger, CounterType.MAGIC_BLOCKS, 5);
         assertEquals(0, am.getCount(island, stranger, CounterType.MAGIC_BLOCKS, 0));
         assertEquals(0, am.getCount(island, null, CounterType.MAGIC_BLOCKS, 0));
     }
 
     @Test
     void testNonPositiveAmountIgnored() {
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 0);
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, -3);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 0);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, -3);
         assertEquals(0, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 0));
     }
 
     @Test
     void testIslandScopeRecording() {
-        am.record(island, null, CounterType.LEVELS_EARNED, 10);
+        am.recordActivity(island, null, CounterType.LEVELS_EARNED, 10);
         assertEquals(10, am.getCount(island, null, CounterType.LEVELS_EARNED, 0));
         // Nothing was attributed to the member
         assertEquals(0, am.getCount(island, uuid, CounterType.LEVELS_EARNED, 0));
@@ -112,9 +112,9 @@ class ActivityManagerTest extends CommonTestSetup {
 
     @Test
     void testTimeWindows() {
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 3);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 3);
         day += 5;
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 2);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 2);
         // Today only
         assertEquals(2, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 1));
         // Last 3 days miss the older record
@@ -130,10 +130,10 @@ class ActivityManagerTest extends CommonTestSetup {
     @Test
     void testRetentionPrunesDailyButNotLifetime() {
         settings.setActivityRetentionDays(7);
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 3);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 3);
         day += 10;
         // Recording again prunes the now-too-old bucket
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         assertEquals(1, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 30));
         // Lifetime is never pruned
         assertEquals(4, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 0));
@@ -157,8 +157,8 @@ class ActivityManagerTest extends CommonTestSetup {
     void testMembersKeepSeparateCounts() {
         UUID mate = UUID.randomUUID();
         when(island.getMemberSet()).thenReturn(ImmutableSet.of(uuid, mate));
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 3);
-        am.record(island, mate, CounterType.MAGIC_BLOCKS, 4);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 3);
+        am.recordActivity(island, mate, CounterType.MAGIC_BLOCKS, 4);
         assertEquals(3, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 0));
         assertEquals(4, am.getCount(island, mate, CounterType.MAGIC_BLOCKS, 0));
         assertEquals(7, am.getCount(island, null, CounterType.MAGIC_BLOCKS, 0));
@@ -167,13 +167,13 @@ class ActivityManagerTest extends CommonTestSetup {
 
     @Test
     void testContributorsExcludeIslandScope() {
-        am.record(island, null, CounterType.LEVELS_EARNED, 10);
+        am.recordActivity(island, null, CounterType.LEVELS_EARNED, 10);
         assertTrue(am.getContributors(island).isEmpty());
     }
 
     @Test
     void testResetIslandClearsEverything() {
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 5);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 5);
         assertTrue(am.recordClaim(island, 1, 0, uuid));
         am.resetIsland("island-id");
         assertEquals(0, am.getCount(island, uuid, CounterType.MAGIC_BLOCKS, 0));
@@ -184,22 +184,22 @@ class ActivityManagerTest extends CommonTestSetup {
     @Test
     void testFrequentCounterSavesAreThrottled() throws Exception {
         for (int i = 0; i < 19; i++) {
-            am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+            am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         }
         verify(h, never()).saveObject(any());
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         verify(h).saveObject(any());
     }
 
     @Test
     void testRareCountersSaveImmediately() throws Exception {
-        am.record(island, uuid, CounterType.CHUNKS_CLAIMED, 1);
+        am.recordActivity(island, uuid, CounterType.CHUNKS_CLAIMED, 1);
         verify(h).saveObject(any());
     }
 
     @Test
     void testSaveCacheNowWritesDirectly() throws Exception {
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         am.saveCacheNow();
         verify(h).saveObjectNow(any());
     }

@@ -99,7 +99,7 @@ public class LevelListener implements Listener {
         // The delta is only known here, so level gains are recorded directly rather than
         // through ActivityListener. Island scope: Level cannot attribute levels to a member.
         if (level > oldLevel && addon.getActivityManager() != null) {
-            addon.getActivityManager().record(island, null, CounterType.LEVELS_EARNED, level - oldLevel);
+            addon.getActivityManager().recordActivity(island, null, CounterType.LEVELS_EARNED, level - oldLevel);
         }
         // Level dropped below what has been spent → the most recent claims are lost
         if (addon.getSettings().isRelockOnLevelLoss() && cm.getSpentLevels(island) > Math.max(0, level)) {

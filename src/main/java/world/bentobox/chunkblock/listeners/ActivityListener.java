@@ -38,7 +38,7 @@ public class ActivityListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMagicBlock(MagicBlockEvent e) {
         if (addon.inWorld(e.getIsland().getWorld())) {
-            addon.getActivityManager().record(e.getIsland(), e.getPlayerUUID(), CounterType.MAGIC_BLOCKS, 1);
+            addon.getActivityManager().recordActivity(e.getIsland(), e.getPlayerUUID(), CounterType.MAGIC_BLOCKS, 1);
         }
     }
 
@@ -60,7 +60,7 @@ public class ActivityListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChunkRelock(ChunkRelockEvent e) {
         if (addon.inWorld(e.getIsland().getWorld())) {
-            addon.getActivityManager().record(e.getIsland(), null, CounterType.CHUNKS_RELOCKED, 1);
+            addon.getActivityManager().recordActivity(e.getIsland(), null, CounterType.CHUNKS_RELOCKED, 1);
         }
     }
 
@@ -72,7 +72,7 @@ public class ActivityListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onRingComplete(RingCompleteEvent e) {
         if (addon.inWorld(e.getIsland().getWorld())) {
-            addon.getActivityManager().record(e.getIsland(), null, CounterType.RINGS_COMPLETED, 1);
+            addon.getActivityManager().recordActivity(e.getIsland(), null, CounterType.RINGS_COMPLETED, 1);
         }
     }
 
