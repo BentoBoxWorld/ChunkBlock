@@ -41,6 +41,9 @@ public class TrophyAwardEvent extends BentoBoxEvent implements Cancellable {
         return getHandlerList();
     }
 
+    // Bukkit's event bus looks this method up reflectively by this exact name on every
+    // event class, so it must shadow the superclass method
+    @SuppressWarnings("java:S9149")
     public static HandlerList getHandlerList() {
         return handlers;
     }

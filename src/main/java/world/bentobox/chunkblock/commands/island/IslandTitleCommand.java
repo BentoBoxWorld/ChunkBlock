@@ -21,6 +21,7 @@ import world.bentobox.chunkblock.trophies.Trophy;
 public class IslandTitleCommand extends CompositeCommand {
 
     private static final String CLEAR = "none";
+    private static final String TITLE_VAR = "[title]";
 
     private ChunkBlock addon;
 
@@ -53,6 +54,11 @@ public class IslandTitleCommand extends CompositeCommand {
     @Override
     public boolean execute(User user, String label, List<String> args) {
         Island island = getIslands().getIsland(getWorld(), user);
+        if (island == null) {
+            // canExecute already refused this, but never spend credit on a null island
+            user.sendMessage("general.errors.no-island");
+            return false;
+        }
         if (args.isEmpty()) {
             showTitles(user, island);
             return true;
@@ -68,7 +74,7 @@ public class IslandTitleCommand extends CompositeCommand {
             return false;
         }
         addon.getTrophyManager().getTrophy(id).ifPresent(trophy -> user
-                .sendMessage("chunkblock.commands.title.set", "[title]", trophy.title()));
+                .sendMessage("chunkblock.commands.title.set", TITLE_VAR, trophy.title()));
         return true;
     }
 
@@ -88,14 +94,14 @@ public class IslandTitleCommand extends CompositeCommand {
                 user.sendMessage("chunkblock.commands.title.trophy-entry", "[name]", trophy.name());
             } else {
                 user.sendMessage("chunkblock.commands.title.title-entry", "[name]", trophy.name(),
-                        "[title]", trophy.title(), "[id]", trophy.id());
+                        TITLE_VAR, trophy.title(), "[id]", trophy.id());
             }
         }
         String active = addon.getTrophyManager().getActiveTitleText(island);
         if (active.isEmpty()) {
             user.sendMessage("chunkblock.commands.title.no-active");
         } else {
-            user.sendMessage("chunkblock.commands.title.active", "[title]", active);
+            user.sendMessage("chunkblock.commands.title.active", TITLE_VAR, active);
         }
     }
 

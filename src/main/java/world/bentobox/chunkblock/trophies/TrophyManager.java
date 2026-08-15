@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,6 +46,8 @@ import world.bentobox.chunkblock.trophies.Trophy.Scope;
 public class TrophyManager {
 
     private static final String TROPHIES_FILE = "trophies.yml";
+    /** Prefix for config-validation complaints */
+    private static final String TROPHY = "Trophy '";
 
     private final ChunkBlock addon;
     /** Trophies by id, in config order */
@@ -79,7 +82,7 @@ public class TrophyManager {
             for (String id : section.getKeys(false)) {
                 ConfigurationSection ts = section.getConfigurationSection(id);
                 if (ts == null) {
-                    addon.logError("Trophy '" + id + "' is not a section - skipping.");
+                    addon.logError(TROPHY + id + "' is not a section - skipping.");
                     continue;
                 }
                 Trophy trophy = parseTrophy(id, ts);
@@ -95,7 +98,7 @@ public class TrophyManager {
     private Trophy parseTrophy(String id, ConfigurationSection ts) {
         Material icon = Material.matchMaterial(ts.getString("icon", "GOLD_INGOT"));
         if (icon == null) {
-            addon.logError("Trophy '" + id + "': unknown icon material '" + ts.getString("icon")
+            addon.logError(TROPHY + id + "': unknown icon material '" + ts.getString("icon")
                     + "' - skipping.");
             return null;
         }
@@ -111,36 +114,36 @@ public class TrophyManager {
     @Nullable
     private Criteria parseCriteria(String id, @Nullable ConfigurationSection cs) {
         if (cs == null) {
-            addon.logError("Trophy '" + id + "': no criteria section - skipping.");
+            addon.logError(TROPHY + id + "': no criteria section - skipping.");
             return null;
         }
         CriteriaType type = matchEnum(CriteriaType.class, cs.getString("type"));
         if (type == null) {
-            addon.logError("Trophy '" + id + "': criteria type must be RING or COUNTER - skipping.");
+            addon.logError(TROPHY + id + "': criteria type must be RING or COUNTER - skipping.");
             return null;
         }
         if (type == CriteriaType.RING) {
             int ring = cs.getInt("ring", 0);
             if (ring < 1) {
-                addon.logError("Trophy '" + id + "': ring must be 1 or more - skipping.");
+                addon.logError(TROPHY + id + "': ring must be 1 or more - skipping.");
                 return null;
             }
             return new Criteria(type, ring, null, Scope.ISLAND, 0, 0);
         }
         CounterType counter = matchEnum(CounterType.class, cs.getString("counter"));
         if (counter == null) {
-            addon.logError("Trophy '" + id + "': unknown counter '" + cs.getString("counter")
+            addon.logError(TROPHY + id + "': unknown counter '" + cs.getString("counter")
                     + "' - skipping.");
             return null;
         }
         long threshold = cs.getLong("threshold", 0);
         if (threshold < 1) {
-            addon.logError("Trophy '" + id + "': threshold must be 1 or more - skipping.");
+            addon.logError(TROPHY + id + "': threshold must be 1 or more - skipping.");
             return null;
         }
         Scope scope = matchEnum(Scope.class, cs.getString("scope", "ISLAND"));
         if (scope == null) {
-            addon.logError("Trophy '" + id + "': scope must be ISLAND or MEMBER - skipping.");
+            addon.logError(TROPHY + id + "': scope must be ISLAND or MEMBER - skipping.");
             return null;
         }
         return new Criteria(type, 0, counter, scope, threshold, Math.max(0, cs.getInt("window-days", 0)));
@@ -204,12 +207,14 @@ public class TrophyManager {
         if (c.type() == CriteriaType.RING) {
             return addon.getChunkManager().completedRings(island) >= c.ring();
         }
+        // Parsing guarantees every COUNTER criteria has a counter
+        CounterType counter = Objects.requireNonNull(c.counter());
         if (c.scope() == Scope.ISLAND) {
-            return addon.getActivityManager().getCount(island, null, c.counter(), c.windowDays()) >= c
+            return addon.getActivityManager().getCount(island, null, counter, c.windowDays()) >= c
                     .threshold();
         }
         return addon.getActivityManager().getContributors(island).stream().anyMatch(
-                uuid -> addon.getActivityManager().getCount(island, uuid, c.counter(), c.windowDays()) >= c
+                uuid -> addon.getActivityManager().getCount(island, uuid, counter, c.windowDays()) >= c
                         .threshold());
     }
 
@@ -296,8 +301,8 @@ public class TrophyManager {
      */
     @NonNull
     public String getActiveTitleText(@NonNull Island island) {
-        return getTrophy(addon.getOneBlocksIsland(island).getActiveTitle()).map(Trophy::title)
-                .orElse("");
+        return getTrophy(addon.getOneBlocksIsland(island).getActiveTitle())
+                .map(trophy -> trophy.title() == null ? "" : trophy.title()).orElse("");
     }
 
     /**

@@ -210,10 +210,10 @@ class ActivityManagerTest extends CommonTestSetup {
         world.bentobox.chunkblock.trophies.TrophyManager tm = mock(
                 world.bentobox.chunkblock.trophies.TrophyManager.class);
         when(addon.getTrophyManager()).thenReturn(tm);
-        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         verify(tm).check(island);
         // A dropped record still checks nothing new but must not blow up
-        am.record(island, UUID.randomUUID(), CounterType.MAGIC_BLOCKS, 1);
+        am.recordActivity(island, UUID.randomUUID(), CounterType.MAGIC_BLOCKS, 1);
         verify(tm, times(1)).check(island);
     }
 
