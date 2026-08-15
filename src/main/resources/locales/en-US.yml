@@ -85,9 +85,24 @@ chunkblock:
   actionbar:
     status: "<green>Phase: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blocks: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Progression: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Action Bar is not active for this island</red>"
+  trophies:
+    awarded: "<gold><bold>Trophy earned: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Your island can now show the title </yellow>[title]<yellow> — pick it with </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
   commands:
     chunks:
       description: "show your unlocked chunks and a map of your territory"
+    title:
+      description: "show your island's trophies and choose its title"
+      parameters: "[trophy-id | none]"
+      header: "<green>Your island's trophies:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — title </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Your island has not earned any trophies yet.</gray>"
+      active: "<green>Active title: </green>[title]"
+      no-active: "<gray>No title is active. Pick one with </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Your island's title is now </green>[title]<green>.</green>"
+      cleared: "<green>Your island no longer shows a title.</green>"
+      not-earned: "<red>Your island has not earned a trophy with that title.</red>"
     admin:
       chunks:
         parameters: "<player> [reset]"

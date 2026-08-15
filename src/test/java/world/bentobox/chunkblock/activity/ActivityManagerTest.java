@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -202,6 +203,18 @@ class ActivityManagerTest extends CommonTestSetup {
         am.recordActivity(island, uuid, CounterType.MAGIC_BLOCKS, 1);
         am.saveCacheNow();
         verify(h).saveObjectNow(any());
+    }
+
+    @Test
+    void testTrophyCheckRunsOnRecord() {
+        world.bentobox.chunkblock.trophies.TrophyManager tm = mock(
+                world.bentobox.chunkblock.trophies.TrophyManager.class);
+        when(addon.getTrophyManager()).thenReturn(tm);
+        am.record(island, uuid, CounterType.MAGIC_BLOCKS, 1);
+        verify(tm).check(island);
+        // A dropped record still checks nothing new but must not blow up
+        am.record(island, UUID.randomUUID(), CounterType.MAGIC_BLOCKS, 1);
+        verify(tm, times(1)).check(island);
     }
 
     @Test

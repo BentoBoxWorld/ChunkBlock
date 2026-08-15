@@ -68,6 +68,33 @@ public class ChunkBlockPlaceholders {
         placeholdersManager.registerPlaceholder(addon, "island_chunk_credit", this::getIslandChunkCredit);
         placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
         placeholdersManager.registerPlaceholder(addon, "island_rings_complete", this::getIslandRingsComplete);
+        placeholdersManager.registerPlaceholder(addon, "island_title", this::getIslandTitle);
+        placeholdersManager.registerPlaceholder(addon, "island_trophies", this::getIslandTrophies);
+    }
+
+    /**
+     * @param user user
+     * @return the user's island's active trophy title as configured (MiniMessage text),
+     *         or an empty string for no title
+     */
+    public String getIslandTitle(User user) {
+        if (user == null || user.getUniqueId() == null || addon.getTrophyManager() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> addon.getTrophyManager().getActiveTitleText(i)).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return how many trophies the user's island has earned
+     */
+    public String getIslandTrophies(User user) {
+        if (user == null || user.getUniqueId() == null || addon.getTrophyManager() == null) {
+            return "";
+        }
+        return getUsersIsland(user)
+                .map(i -> String.valueOf(addon.getOneBlocksIsland(i).getEarnedTrophies().size()))
+                .orElse("");
     }
 
     /**

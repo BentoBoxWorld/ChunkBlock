@@ -81,6 +81,8 @@ public class LevelListener implements Listener {
         data.resetUnlockedChunks();
         data.setLastKnownLevel(0);
         data.setHighestRingRewarded(0);
+        data.getEarnedTrophies().clear();
+        data.setActiveTitle("");
     }
 
     /**

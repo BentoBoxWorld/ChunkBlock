@@ -331,6 +331,9 @@ permissions:
   chunkblock.island.chunks:
     description: Allow use of '/ch chunks' command - show your unlocked chunks and territory map
     default: TRUE
+  chunkblock.island.title:
+    description: Allow use of '/ch title' command - show earned trophies and choose the island's title
+    default: TRUE
   chunkblock.admin.chunks:
     description: Allow use of '/chadmin chunks' command - inspect, set or recalculate a player's unlocked chunks
     default: OP 

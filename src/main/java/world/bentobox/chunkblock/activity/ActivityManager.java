@@ -79,6 +79,9 @@ public class ActivityManager {
         data.add(member == null ? ISLAND_SCOPE : member.toString(), type.name(), today, amount);
         data.prune(today - Math.max(1, addon.getSettings().getActivityRetentionDays()) + 1);
         save(data, type == CounterType.MAGIC_BLOCKS);
+        if (addon.getTrophyManager() != null) {
+            addon.getTrophyManager().check(island);
+        }
     }
 
     /**
