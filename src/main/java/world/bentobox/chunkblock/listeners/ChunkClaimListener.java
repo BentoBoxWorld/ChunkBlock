@@ -224,7 +224,7 @@ public class ChunkClaimListener implements Listener {
         switch (result) {
         case OK -> {
             clearPending(user.getUniqueId());
-            addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ);
+            addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ, user.getUniqueId());
         }
         case NO_CREDIT -> {
             if (feedbackReady(user.getUniqueId())) {

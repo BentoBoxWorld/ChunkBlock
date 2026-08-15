@@ -169,6 +169,14 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.eject-players-on-relock")
     private boolean ejectPlayersOnRelock = true;
 
+    @ConfigComment("How many days of per-day activity buckets to keep per island. Activity counters")
+    @ConfigComment("(blocks broken, chunks claimed, levels earned... per member) store a lifetime")
+    @ConfigComment("total plus one bucket per day so time-windowed readouts are possible; buckets")
+    @ConfigComment("older than this are pruned. Lifetime totals are never pruned. Size this to the")
+    @ConfigComment("longest window anything reads — a season, a weekly ledger. Minimum 1.")
+    @ConfigEntry(path = "chunkblock.activity.daily-retention-days")
+    private int activityRetentionDays = 100;
+
     @ConfigComment("Cancel natural mob spawning inside locked chunks.")
     @ConfigEntry(path = "chunkblock.deny-mob-spawns-in-locked")
     private boolean denyMobSpawnsInLocked = true;
@@ -2669,6 +2677,20 @@ public class Settings implements WorldSettings {
      */
     public void setRingPlayerCommands(List<String> ringPlayerCommands) {
         this.ringPlayerCommands = ringPlayerCommands;
+    }
+
+    /**
+     * @return how many days of per-day activity buckets are kept, never less than 1
+     */
+    public int getActivityRetentionDays() {
+        return Math.max(1, activityRetentionDays);
+    }
+
+    /**
+     * @param activityRetentionDays the activityRetentionDays to set
+     */
+    public void setActivityRetentionDays(int activityRetentionDays) {
+        this.activityRetentionDays = activityRetentionDays;
     }
 
     /**

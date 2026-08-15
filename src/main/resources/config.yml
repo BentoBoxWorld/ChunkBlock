@@ -90,6 +90,13 @@ chunkblock:
   # If true, players standing in a chunk when it re-locks are moved to the nearest
   # unlocked spot. If false they may walk out but not back in.
   eject-players-on-relock: true
+  activity:
+    # How many days of per-day activity buckets to keep per island. Activity counters
+    # (blocks broken, chunks claimed, levels earned... per member) store a lifetime
+    # total plus one bucket per day so time-windowed readouts are possible; buckets
+    # older than this are pruned. Lifetime totals are never pruned. Size this to the
+    # longest window anything reads — a season, a weekly ledger. Minimum 1.
+    daily-retention-days: 100
   # Cancel natural mob spawning inside locked chunks.
   deny-mob-spawns-in-locked: true
   # Bounce dropped items back when they cross into a locked chunk so players
