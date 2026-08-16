@@ -64,7 +64,7 @@ chunkblock:
       count: '<green>島は </green><aqua>[name] </aqua><green>フェーズのブロック </green><aqua>[number]</aqua><green> 上にあります。生涯カウント </green><aqua>[lifetime] </aqua><green>。</green>'
     phases:
       description: すべてのフェーズのリストを表示する
-      title: ＆2 OneBlockフェーズ
+      title: ＆2 ChunkBlockフェーズ
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number]ブロック</aqua>'
     island:

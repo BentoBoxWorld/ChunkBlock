@@ -66,7 +66,7 @@ chunkblock:
       count: '<green>L''isola è in blocco </green><aqua>[number] </aqua><green>nella fase </green><aqua>[name] </aqua><green>. Lifetime count </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: mostra un elenco di tutte le fasi
-      title: '<dark_green>Fasi OneBlock</dark_green>'
+      title: '<dark_green>Fasi ChunkBlock</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] blocchi</aqua>'
     island:

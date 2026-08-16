@@ -68,7 +68,7 @@ chunkblock:
       count: '<green>Island befindet sich in Block </green><aqua>[number]</aqua><green> in der Phase </green><aqua>[Name] </aqua><green>. Lebenszeitanzahl </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: Zeigen Sie eine Liste aller Phasen an
-      title: '<dark_green>OneBlock-Phasen</dark_green>'
+      title: '<dark_green>ChunkBlock-Phasen</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] Blöcke</aqua>'
     island:
@@ -102,7 +102,7 @@ chunkblock:
     my-island-phase-default: Unbekannt
   gui:
     titles:
-      phases: '<black><bold>OneBlock-Phasen</bold></black>'
+      phases: '<black><bold>ChunkBlock-Phasen</bold></black>'
     buttons:
       previous:
         name: '<white><bold>Vorherige Seite</bold></white>'

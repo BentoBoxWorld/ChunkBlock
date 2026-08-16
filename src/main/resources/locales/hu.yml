@@ -67,7 +67,7 @@ chunkblock:
       count: 'Az <green>sziget a </green><aqua>[number]</aqua><green> blokkon található, a </green><aqua>[name] </aqua><green>fázisban. Élettartam száma </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: az összes fázis felsorolása
-      title: '<dark_green>OneBlock Fázis</dark_green>'
+      title: '<dark_green>ChunkBlock Fázis</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] blokkolja</aqua>'
     island:
@@ -99,7 +99,7 @@ chunkblock:
     my-island-phase-default: Ismeretlen
   gui:
     titles:
-      phases: '<black><bold>OneBlock fázisok</bold></black>'
+      phases: '<black><bold>ChunkBlock fázisok</bold></black>'
     buttons:
       previous:
         name: '<white><bold>Előző oldal</bold></white>'
