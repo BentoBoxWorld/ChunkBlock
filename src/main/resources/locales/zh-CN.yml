@@ -63,7 +63,7 @@ chunkblock:
       count: '<green>岛位于 </green><aqua>[name] </aqua><green>阶段的 </green><aqua>[number]</aqua><green> 区块。生命周期计数 </green><aqua>[lifetime] </aqua><green>。</green>'
     phases:
       description: 显示所有阶段的列表
-      title: '<dark_green>OneBlock 阶段</dark_green>'
+      title: '<dark_green>ChunkBlock 阶段</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>挖掘了 [number] 个方块</aqua>'
     island:
@@ -95,7 +95,7 @@ chunkblock:
     my-island-phase-default: 未知
   gui:
     titles:
-      phases: '<black><bold>OneBlock 阶段</bold></black>'
+      phases: '<black><bold>ChunkBlock 阶段</bold></black>'
     buttons:
       previous:
         name: '<white><bold>上一页</bold></white>'

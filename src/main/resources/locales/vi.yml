@@ -66,7 +66,7 @@ chunkblock:
       count: '<green>Đảo nằm trên khối </green><aqua>[number] </aqua><green>trong giai đoạn </green><aqua>[name]. </aqua>'
     phases:
       description: hiển thị một danh sách tất cả các giai đoạn
-      title: '<dark_green>Giai đoạn OneBlock</dark_green>'
+      title: '<dark_green>Giai đoạn ChunkBlock</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] khối</aqua>'
     island:
@@ -98,7 +98,7 @@ chunkblock:
     my-island-phase-default: Không xác định
   gui:
     titles:
-      phases: '<black><bold>Giai đoạn OneBlock</bold></black>'
+      phases: '<black><bold>Giai đoạn ChunkBlock</bold></black>'
     buttons:
       previous:
         name: '<white><bold>Trang trước</bold></white>'
@@ -131,5 +131,5 @@ chunkblock:
       click-to-change: '<yellow>Bấm </yellow><gray>để thay đổi.</gray>'
   island:
     starting-hologram: |-
-      <green>Chào mừng đến với OneBlock
+      <green>Chào mừng đến với ChunkBlock
       </green><yellow>Đập khối này để bắt đầu</yellow>

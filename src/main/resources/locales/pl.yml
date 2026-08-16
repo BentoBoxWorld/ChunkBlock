@@ -64,7 +64,7 @@ chunkblock:
       count: '<green>Wyspa jest na bloku </green><aqua>[number] w fazie [name]. Lifetime count [lifetime] </aqua><green>.</green>'
     phases:
       description: pokaż listę wszystkich faz
-      title: '<dark_green>Fazy OneBlock</dark_green>'
+      title: '<dark_green>Fazy ChunkBlock</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] bloków</aqua>'
     island:
@@ -98,7 +98,7 @@ chunkblock:
     my-island-phase-default: Nieznana
   gui:
     titles:
-      phases: '<black><bold>Fazy OneBlock</bold></black>'
+      phases: '<black><bold>Fazy ChunkBlock</bold></black>'
     buttons:
       previous:
         name: '<white><bold>Następna strona</bold></white>'
@@ -130,5 +130,5 @@ chunkblock:
       click-to-change: '<yellow>Kliknij </yellow><gray>, aby zmienić.</gray>'
   island:
     starting-hologram: |-
-      <green>Witamy w OneBlock
+      <green>Witamy w ChunkBlock
       </green><yellow>Zniszcz ten blok, aby rozpocząć</yellow>

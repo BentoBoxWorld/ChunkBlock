@@ -64,7 +64,7 @@ chunkblock:
       count: '<green>Otok je u bloku </green><aqua>[number]</aqua><green> u </green><aqua>[name] </aqua><green>fazi. Životni vijek </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: prikažite popis svih faza
-      title: '<dark_green>OneBlock Faze</dark_green>'
+      title: '<dark_green>ChunkBlock Faze</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] blokova</aqua>'
     island:
@@ -96,7 +96,7 @@ chunkblock:
     my-island-phase-default: Nepoznato
   gui:
     titles:
-      phases: '<black><bold>OneBlock faze</bold></black>'
+      phases: '<black><bold>ChunkBlock faze</bold></black>'
     buttons:
       previous:
         name: '<white><bold>Prethodna stranica</bold></white>'
