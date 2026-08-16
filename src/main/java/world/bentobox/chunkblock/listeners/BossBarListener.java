@@ -57,7 +57,7 @@ public class BossBarListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onBreakBlockEvent(MagicBlockEvent e) {
-        if (!ready()) {
+        if (!ready() || e.getPlayerUUID() == null) {
             return;
         }
         // Update boss bar
