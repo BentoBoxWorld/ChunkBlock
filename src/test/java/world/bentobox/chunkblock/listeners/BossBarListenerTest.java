@@ -249,4 +249,16 @@ public class BossBarListenerTest extends CommonTestSetup {
     void testBukkitToAdventureNullIsEmpty() {
         assertEquals(Component.empty(), BossBarListener.bukkitToAdventure(null));
     }
+
+    /**
+     * NPC/minion breaks fire MagicBlockEvent with a null playerUUID; the listener must not throw.
+     */
+    @Test
+    void testNullPlayerUUIDDoesNotThrow() {
+        when(island.isAllowed(addon.CHUNKBLOCK_BOSSBAR)).thenReturn(true);
+        when(island.isAllowed(addon.CHUNKBLOCK_ACTIONBAR)).thenReturn(true);
+        bbl.onBreakBlockEvent(new MagicBlockEvent(island, null, null, block, Material.STONE));
+        verify(mockPlayer, never()).sendActionBar(any(Component.class));
+        verify(bossBar, never()).addPlayer(any());
+    }
 }

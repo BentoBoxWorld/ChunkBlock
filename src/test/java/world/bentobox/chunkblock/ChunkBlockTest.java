@@ -70,6 +70,7 @@ public class ChunkBlockTest extends CommonTestSetup {
         deleteAll(new File("database"));
         deleteAll(new File("database_backup"));
         new File("config.yml").delete();
+        new File("trophies.yml").delete();
         deleteAll(new File("addons"));
         deleteAll(new File("panels"));
     }
@@ -130,6 +131,14 @@ public class ChunkBlockTest extends CommonTestSetup {
             path = Paths.get("panels");
             Files.createDirectory(path);
             path = Paths.get("panels/phases_panel.yml");
+            Files.copy(fromPath, path);
+
+            // Add the new files to the jar.
+            add(path, tempJarOutputStream);
+
+            // Copy over trophies file from src folder
+            fromPath = Paths.get("src/main/resources/trophies.yml");
+            path = Paths.get("trophies.yml");
             Files.copy(fromPath, path);
 
             // Add the new files to the jar.

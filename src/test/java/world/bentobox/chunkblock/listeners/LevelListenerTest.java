@@ -144,7 +144,7 @@ class LevelListenerTest extends CommonTestSetup {
     void testCelebrateClaimFiresUnlockEvent() {
         level = 1;
         cm.claim(island, 1, 0);
-        listener.celebrateClaim(island, 1, 0);
+        listener.celebrateClaim(island, 1, 0, uuid);
         verify(pim).callEvent(any(ChunkUnlockEvent.class));
     }
 
@@ -163,7 +163,7 @@ class LevelListenerTest extends CommonTestSetup {
         for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
                 { -1, -1 } }) {
             cm.claim(island, offset[0], offset[1]);
-            listener.celebrateClaim(island, offset[0], offset[1]);
+            listener.celebrateClaim(island, offset[0], offset[1], uuid);
         }
         verify(pim, never()).callEvent(any(RingCompleteEvent.class));
         assertEquals(0, data.getHighestRingRewarded());
@@ -180,7 +180,7 @@ class LevelListenerTest extends CommonTestSetup {
         level = 8;
         listener.applyLevel(island, 8);
         assertEquals(ClaimResult.OK, cm.claim(island, 1, -1));
-        listener.celebrateClaim(island, 1, -1);
+        listener.celebrateClaim(island, 1, -1, uuid);
         assertEquals(1, data.getHighestRingRewarded());
         verify(pim, times(1)).callEvent(any(RingCompleteEvent.class));
     }
@@ -221,7 +221,7 @@ class LevelListenerTest extends CommonTestSetup {
         for (int[] offset : new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 },
                 { -1, -1 }, { 1, -1 } }) {
             assertEquals(ClaimResult.OK, cm.claim(island, offset[0], offset[1]));
-            listener.celebrateClaim(island, offset[0], offset[1]);
+            listener.celebrateClaim(island, offset[0], offset[1], uuid);
         }
     }
 

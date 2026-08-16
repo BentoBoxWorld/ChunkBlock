@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
+import org.eclipse.jdt.annotation.Nullable;
 
 import world.bentobox.bentobox.api.events.island.IslandCreatedEvent;
 import world.bentobox.bentobox.api.events.island.IslandResettedEvent;
@@ -19,6 +20,7 @@ import world.bentobox.bentobox.api.localization.TextVariables;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.chunkblock.ChunkBlock;
+import world.bentobox.chunkblock.activity.CounterType;
 import world.bentobox.chunkblock.chunks.ChunkManager;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.events.ChunkRelockEvent;
@@ -79,6 +81,8 @@ public class LevelListener implements Listener {
         data.resetUnlockedChunks();
         data.setLastKnownLevel(0);
         data.setHighestRingRewarded(0);
+        data.getEarnedTrophies().clear();
+        data.setActiveTitle("");
     }
 
     /**
@@ -94,6 +98,11 @@ public class LevelListener implements Listener {
         long oldLevel = data.getLastKnownLevel();
         data.setLastKnownLevel(level);
         addon.getBlockListener().saveIsland(island);
+        // The delta is only known here, so level gains are recorded directly rather than
+        // through ActivityListener. Island scope: Level cannot attribute levels to a member.
+        if (level > oldLevel && addon.getActivityManager() != null) {
+            addon.getActivityManager().recordActivity(island, null, CounterType.LEVELS_EARNED, level - oldLevel);
+        }
         // Level dropped below what has been spent → the most recent claims are lost
         if (addon.getSettings().isRelockOnLevelLoss() && cm.getSpentLevels(island) > Math.max(0, level)) {
             relock(island, level);
@@ -144,13 +153,14 @@ public class LevelListener implements Listener {
      * @param island the island
      * @param chunkX claimed world chunk x
      * @param chunkZ claimed world chunk z
+     * @param claimer the player who spent the credit, or null if no player did
      */
-    public void celebrateClaim(Island island, int chunkX, int chunkZ) {
+    public void celebrateClaim(Island island, int chunkX, int chunkZ, @Nullable UUID claimer) {
         ChunkManager cm = addon.getChunkManager();
         int count = cm.getUnlockedChunkCount(island);
         Vector offset = new Vector(chunkX - (island.getCenter().getBlockX() >> 4), 0,
                 chunkZ - (island.getCenter().getBlockZ() >> 4));
-        Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, offset, count - 1));
+        Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, offset, count - 1, claimer));
         long creditLeft = Math.max(0, cm.getCredit(island));
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);

@@ -77,6 +77,21 @@ public class OneBlockIslands implements DataObject {
     @Expose
     private int highestRingRewarded = 0;
 
+    /**
+     * The trophies this island has earned, by trophy id. Earned once, stays earned:
+     * re-locking and re-claiming never re-awards, and only an island create or reset
+     * clears this.
+     */
+    @Expose
+    private Set<String> earnedTrophies = new HashSet<>();
+
+    /**
+     * The id of the earned trophy whose title the island currently shows, or empty for
+     * no title.
+     */
+    @Expose
+    private String activeTitle = "";
+
     /** Fast membership view of {@link #unlockedChunks}; rebuilt lazily after loads/edits */
     private transient Set<Long> unlockedSet;
 
@@ -199,6 +214,39 @@ public class OneBlockIslands implements DataObject {
      */
     public void setHighestRingRewarded(int highestRingRewarded) {
         this.highestRingRewarded = highestRingRewarded;
+    }
+
+    /**
+     * @return the earned trophy ids, never null. Mutable — callers add and clear in place.
+     */
+    @NonNull
+    public Set<String> getEarnedTrophies() {
+        if (earnedTrophies == null) {
+            earnedTrophies = new HashSet<>();
+        }
+        return earnedTrophies;
+    }
+
+    /**
+     * @param earnedTrophies the earned trophy ids to set
+     */
+    public void setEarnedTrophies(Set<String> earnedTrophies) {
+        this.earnedTrophies = earnedTrophies;
+    }
+
+    /**
+     * @return the id of the trophy whose title the island shows, or an empty string
+     */
+    @NonNull
+    public String getActiveTitle() {
+        return activeTitle == null ? "" : activeTitle;
+    }
+
+    /**
+     * @param activeTitle the trophy id whose title to show, or an empty string for none
+     */
+    public void setActiveTitle(String activeTitle) {
+        this.activeTitle = activeTitle;
     }
 
     /**

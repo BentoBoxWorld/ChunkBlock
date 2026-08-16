@@ -140,7 +140,11 @@ public class ChunkClaimListener implements Listener {
             denyClaim(user, island);
             return;
         }
-        attemptClaim(user, island, target[0], target[1]);
+        long creditBefore = addon.getChunkManager().getCredit(island);
+        ClaimResult result = attemptClaim(user, island, target[0], target[1]);
+        if (result == ClaimResult.OK) {
+            logClaimAudit(player, island, e.getAction(), clicked != null, target[0], target[1], creditBefore);
+        }
     }
 
     /**
@@ -210,7 +214,7 @@ public class ChunkClaimListener implements Listener {
      * @param chunkX target world chunk x
      * @param chunkZ target world chunk z
      */
-    public void attemptClaim(User user, Island island, int chunkX, int chunkZ) {
+    public ClaimResult attemptClaim(User user, Island island, int chunkX, int chunkZ) {
         ChunkManager cm = addon.getChunkManager();
         // Price the chunk before spending anything: only a claim that would actually go
         // through is worth asking the player to confirm
@@ -218,13 +222,13 @@ public class ChunkClaimListener implements Listener {
                 && cm.checkGeometry(island, chunkX, chunkZ) == ClaimResult.OK
                 && cm.getCredit(island) >= cm.getChunkCost() && !confirming(user, island, chunkX, chunkZ)) {
             preview(user, island, chunkX, chunkZ);
-            return;
+            return null;
         }
         ClaimResult result = cm.claim(island, chunkX, chunkZ);
         switch (result) {
         case OK -> {
             clearPending(user.getUniqueId());
-            addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ);
+            addon.getLevelListener().celebrateClaim(island, chunkX, chunkZ, user.getUniqueId());
         }
         case NO_CREDIT -> {
             if (feedbackReady(user.getUniqueId())) {
@@ -242,6 +246,7 @@ public class ChunkClaimListener implements Listener {
             // Aiming at a diagonal corner or a chunk already owned: no claim, no nag
         }
         }
+        return result;
     }
 
     /**
@@ -297,6 +302,27 @@ public class ChunkClaimListener implements Listener {
         if (addon.getBorderDisplay() != null) {
             addon.getBorderDisplay().clearPreview(uuid);
         }
+    }
+
+    private void logClaimAudit(Player player, Island island, Action action, boolean clickedBlock, int chunkX,
+            int chunkZ, long creditBefore) {
+        ChunkManager cm = addon.getChunkManager();
+        Location loc = player.getLocation();
+        int cx = island.getCenter().getBlockX() >> 4;
+        int cz = island.getCenter().getBlockZ() >> 4;
+        int dx = chunkX - cx;
+        int dz = chunkZ - cz;
+        int borderBlockX = dx > 0 ? chunkX << 4 : ((chunkX + 1) << 4) - 1;
+        int borderBlockZ = dz > 0 ? chunkZ << 4 : ((chunkZ + 1) << 4) - 1;
+        double dist = Math.min(Math.abs(loc.getX() - borderBlockX), Math.abs(loc.getZ() - borderBlockZ));
+        addon.log(String.format(
+                "CHUNK CLAIM: player=%s uuid=%s at=[%.1f, %.1f, %.1f] yaw=%.0f pitch=%.0f "
+                        + "action=%s clickedBlock=%b sneaking=%b chunk=(%d,%d) offset=(%d,%d) "
+                        + "borderDist=%.1f confirm=%b count=%d credit=%d->%d",
+                player.getName(), player.getUniqueId(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(),
+                loc.getPitch(), action, clickedBlock, player.isSneaking(), chunkX, chunkZ, dx, dz, dist,
+                addon.getSettings().isRequireClaimConfirmation(), cm.getUnlockedChunkCount(island), creditBefore,
+                cm.getCredit(island)));
     }
 
     private long timeoutMillis() {
