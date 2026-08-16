@@ -64,7 +64,7 @@ chunkblock:
       count: '<green>Острів знаходиться на блоці </green><aqua>[number]</aqua><green> у фазі </green><aqua>[name] </aqua><green>. Підрахунок тривалості життя </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: показати список усіх фаз
-      title: '<dark_green>OneBlock фази</dark_green>'
+      title: '<dark_green>ChunkBlock фази</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] блоків</aqua>'
     island:

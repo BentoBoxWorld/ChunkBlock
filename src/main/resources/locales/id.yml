@@ -64,7 +64,7 @@ chunkblock:
       count: '<green>Pulau ada di blok </green><aqua>[number] </aqua><green>dalam fase </green><aqua>[name]. </aqua>'
     phases:
       description: perlihatkan daftar semua fase
-      title: '<dark_green>Fase OneBlock</dark_green>'
+      title: '<dark_green>Fase ChunkBlock</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] blok</aqua>'
     island:

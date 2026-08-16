@@ -64,7 +64,7 @@ chunkblock:
       count: 'Ostrov <green>je na bloku </green><aqua>[number]</aqua><green> ve fázi </green><aqua>[name] </aqua><green>. Počet doživotí </green><aqua>[lifetime] </aqua><green>.</green>'
     phases:
       description: zobrazit seznam všech fází
-      title: '<dark_green>Fáze OneBlock</dark_green>'
+      title: '<dark_green>Fáze ChunkBlock</dark_green>'
       name-syntax: '<green>[name]</green>'
       description-syntax: '<aqua>[number] bloků</aqua>'
     island:
