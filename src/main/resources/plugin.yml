@@ -6,4 +6,4 @@ api-version: "1.21"
 authors: [tastybento]
 contributors: ["The BentoBoxWorld Community"]
 website: https://bentobox.world
-description: ${project.description}
+description: "${project.description}"
