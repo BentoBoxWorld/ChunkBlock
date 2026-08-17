@@ -34,6 +34,7 @@ public class IslandLedgerCommand extends CompositeCommand {
     @Override
     public void setup() {
         setDescription(REF + "description");
+        setParametersHelp(REF + "parameters");
         setOnlyPlayer(true);
         setPermission("island.ledger");
         addon = getAddon();
