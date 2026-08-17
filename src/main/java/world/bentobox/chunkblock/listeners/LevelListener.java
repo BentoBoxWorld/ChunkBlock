@@ -226,6 +226,10 @@ public class LevelListener implements Listener {
                     "[chunks]", chunkText));
         }
         celebrateRing(island, ring);
+        if (addon.getActivityManager() != null) {
+            addon.getActivityManager().recordActivity(island, null,
+                    world.bentobox.chunkblock.activity.CounterType.RINGS_COMPLETED, 1);
+        }
         List<String> ownerCommands = addon.getSettings().getRingCommands();
         if (!ownerCommands.isEmpty()) {
             runCommands(ownerCommands, ringText, chunkText, "[owner]", playerName(island.getOwner()));

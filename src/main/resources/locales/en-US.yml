@@ -54,6 +54,7 @@ chunkblock:
     ring-complete: "<gold><bold>Ring [ring] complete! </bold>The whole ring around your island is yours — </gold><aqua>[chunks] </aqua><gold>chunks in all.</gold>"
     ring-broadcast: "<gold>[name]'s island has closed ring </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>chunks and still growing!</gold>"
     rings: "<green>Rings completed: </green><aqua>[rings] </aqua><green>of </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Ring [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> chunks to go.</yellow>"
     sethome-denied: "<red>You can't set a home in a locked chunk.</red>"
     info: "<green>Chunks: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Credit: </green><aqua>[credit] </aqua><green>level(s) — a chunk costs </green><aqua>[cost]</aqua><green>.</green>"
     map:
@@ -91,6 +92,15 @@ chunkblock:
   commands:
     chunks:
       description: "show your unlocked chunks and a map of your territory"
+    ledger:
+      description: "show team member contributions"
+      parameters: "[days]"
+      header: "<green>Island Contribution Ledger </green><gray>([window])</gray>"
+      all-time: "all time"
+      last-days: "last [days] days"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blocks, </gray><green>[chunks]</green><gray> chunks, </gray><green>[rings]</green><gray> rings</gray>"
+      total: "<gold>Total: </gold><green>[blocks]</green><gold> blocks, </gold><green>[chunks]</green><gold> chunks, </gold><green>[rings]</green><gold> rings</gold>"
+      no-activity: "<gray>No activity recorded yet.</gray>"
     title:
       description: "show your island's trophies and choose its title"
       parameters: "[trophy-id | none]"

@@ -43,6 +43,22 @@ trophies:
     criteria:
       type: RING
       ring: 1
+  second-ring:
+    name: "<yellow>Second Ring"
+    description: "<gray>Complete the second ring of chunks."
+    icon: GOLD_BLOCK
+    title: "<yellow>Ring Champion"
+    criteria:
+      type: RING
+      ring: 2
+  third-ring:
+    name: "<red>Third Ring"
+    description: "<gray>Complete the third ring of chunks."
+    icon: DIAMOND
+    title: "<red>Ring Master"
+    criteria:
+      type: RING
+      ring: 3
   homesteader:
     name: "<green>Homesteader"
     description: "<gray>Claim ten different chunks for your island."
