@@ -69,17 +69,35 @@ class IslandTitleCommandTest extends CommonTestSetup {
     }
 
     @Test
-    void testListWithNothingEarned() {
+    void testToggleOnWhenNothingEarned() {
+        when(tm.getActiveTitleText(island)).thenReturn("");
         when(tm.getEarned(island)).thenReturn(List.of());
-        assertTrue(command.execute(user, "title", List.of()));
+        assertFalse(command.execute(user, "title", List.of()));
         verify(user).sendMessage("chunkblock.commands.title.none-earned-yet");
+    }
+
+    @Test
+    void testToggleOffWhenActive() {
+        when(tm.getActiveTitleText(island)).thenReturn("<gold>The Outpost");
+        assertTrue(command.execute(user, "title", List.of()));
+        verify(tm).setActiveTitle(island, null);
+        verify(user).sendMessage("chunkblock.commands.title.toggled-off", "[title]", "<gold>The Outpost");
+    }
+
+    @Test
+    void testToggleOnWhenInactive() {
+        when(tm.getActiveTitleText(island)).thenReturn("");
+        when(tm.getEarned(island)).thenReturn(List.of(TITLED, UNTITLED));
+        when(tm.setActiveTitle(island, "first-ring")).thenReturn(true);
+        assertTrue(command.execute(user, "title", List.of()));
+        verify(user).sendMessage("chunkblock.commands.title.toggled-on", "[title]", "<gold>Ring Bearer");
     }
 
     @Test
     void testListShowsTrophiesTitlesAndActiveTitle() {
         when(tm.getEarned(island)).thenReturn(List.of(TITLED, UNTITLED));
         when(tm.getActiveTitleText(island)).thenReturn("<gold>Ring Bearer");
-        assertTrue(command.execute(user, "title", List.of()));
+        assertTrue(command.execute(user, "title", List.of("list")));
         verify(user).sendMessage("chunkblock.commands.title.header");
         verify(user).sendMessage("chunkblock.commands.title.title-entry", "[name]", "<gold>First Ring",
                 "[title]", "<gold>Ring Bearer", "[id]", "first-ring");
@@ -91,7 +109,7 @@ class IslandTitleCommandTest extends CommonTestSetup {
     void testListMentionsWhenNoTitleIsActive() {
         when(tm.getEarned(island)).thenReturn(List.of(UNTITLED));
         when(tm.getActiveTitleText(island)).thenReturn("");
-        assertTrue(command.execute(user, "title", List.of()));
+        assertTrue(command.execute(user, "title", List.of("list")));
         verify(user).sendMessage("chunkblock.commands.title.no-active");
     }
 
@@ -122,6 +140,7 @@ class IslandTitleCommandTest extends CommonTestSetup {
         when(tm.getEarned(island)).thenReturn(List.of(TITLED, UNTITLED));
         Optional<List<String>> options = command.tabComplete(user, "title", List.of(""));
         assertTrue(options.isPresent());
+        assertTrue(options.get().contains("list"));
         assertTrue(options.get().contains("none"));
         assertTrue(options.get().contains("first-ring"));
         // A trophy with no title is not offered

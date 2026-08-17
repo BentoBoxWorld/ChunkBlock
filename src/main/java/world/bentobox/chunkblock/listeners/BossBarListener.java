@@ -198,10 +198,19 @@ public class BossBarListener implements Listener {
         int numBlocksToGo = addon.getOneBlockManager().getNextPhaseBlocks(obi);
         int phaseBlocks = addon.getOneBlockManager().getPhaseBlocks(obi);
         int done = phaseBlocks - numBlocksToGo;
+        String titlePrefix = "";
+        if (addon.getTrophyManager() != null) {
+            String activeTitle = addon.getTrophyManager().getActiveTitleText(island);
+            if (!activeTitle.isEmpty()) {
+                titlePrefix = user.getTranslationOrNothing("chunkblock.bossbar.title-prefix",
+                        "[title]", activeTitle);
+            }
+        }
         String translation = user.getTranslationOrNothing("chunkblock.bossbar.status", "[togo]",
                 String.valueOf(numBlocksToGo), "[total]", String.valueOf(phaseBlocks), "[done]", String.valueOf(done),
                 "[phase-name]", obi.getPhaseName(), "[percent-done]",
-                Math.round(addon.getOneBlockManager().getPercentageDone(obi)) + "%");
+                Math.round(addon.getOneBlockManager().getPercentageDone(obi)) + "%",
+                "[island-title]", titlePrefix);
         bar.setTitle(translation);
         // Add to user if they don't have it already
         Player player = Bukkit.getPlayer(uuid);
