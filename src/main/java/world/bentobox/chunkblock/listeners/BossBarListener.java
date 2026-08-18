@@ -209,8 +209,8 @@ public class BossBarListener implements Listener {
         String translation = user.getTranslationOrNothing("chunkblock.bossbar.status", "[togo]",
                 String.valueOf(numBlocksToGo), "[total]", String.valueOf(phaseBlocks), "[done]", String.valueOf(done),
                 "[phase-name]", obi.getPhaseName(), "[percent-done]",
-                Math.round(addon.getOneBlockManager().getPercentageDone(obi)) + "%",
-                "[island-title]", titlePrefix);
+                Math.round(addon.getOneBlockManager().getPercentageDone(obi)) + "%");
+        translation = translation.replace("[island-title]", titlePrefix);
         bar.setTitle(translation);
         // Add to user if they don't have it already
         Player player = Bukkit.getPlayer(uuid);
