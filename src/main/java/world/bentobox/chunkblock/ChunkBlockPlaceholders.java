@@ -68,6 +68,7 @@ public class ChunkBlockPlaceholders {
         placeholdersManager.registerPlaceholder(addon, "island_chunk_credit", this::getIslandChunkCredit);
         placeholdersManager.registerPlaceholder(addon, "island_ring", this::getIslandRing);
         placeholdersManager.registerPlaceholder(addon, "island_rings_complete", this::getIslandRingsComplete);
+        placeholdersManager.registerPlaceholder(addon, "island_next_ring_remaining", this::getNextRingRemaining);
         placeholdersManager.registerPlaceholder(addon, "island_title", this::getIslandTitle);
         placeholdersManager.registerPlaceholder(addon, "island_trophies", this::getIslandTrophies);
     }
@@ -165,6 +166,24 @@ public class ChunkBlockPlaceholders {
             return "";
         }
         return getUsersIsland(user).map(i -> String.valueOf(addon.getChunkManager().completedRings(i))).orElse("");
+    }
+
+    /**
+     * @param user user
+     * @return how many chunks remain to complete the user's island's next ring, or "0" if
+     *         all rings are done
+     */
+    public String getNextRingRemaining(User user) {
+        if (user == null || user.getUniqueId() == null) {
+            return "";
+        }
+        return getUsersIsland(user).map(i -> {
+            int next = addon.getChunkManager().completedRings(i) + 1;
+            if (next > addon.getChunkManager().maxRingRadius(i)) {
+                return "0";
+            }
+            return String.valueOf(addon.getChunkManager().chunksRemainingInRing(i, next));
+        }).orElse("");
     }
 
     /**

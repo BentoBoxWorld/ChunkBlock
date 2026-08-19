@@ -39,10 +39,26 @@ trophies:
     name: "<gold>First Ring"
     description: "<gray>Complete the first ring of chunks around your magic block."
     icon: GOLD_INGOT
-    title: "<gold>Ring Bearer"
+    title: "<gold>The Outpost"
     criteria:
       type: RING
       ring: 1
+  second-ring:
+    name: "<yellow>Second Ring"
+    description: "<gray>Complete the second ring of chunks."
+    icon: GOLD_BLOCK
+    title: "<yellow>The Stronghold"
+    criteria:
+      type: RING
+      ring: 2
+  third-ring:
+    name: "<red>Third Ring"
+    description: "<gray>Complete the third ring of chunks."
+    icon: DIAMOND
+    title: "<red>The Citadel"
+    criteria:
+      type: RING
+      ring: 3
   homesteader:
     name: "<green>Homesteader"
     description: "<gray>Claim ten different chunks for your island."
@@ -56,7 +72,7 @@ trophies:
     name: "<aqua>Ten Thousand Blocks"
     description: "<gray>Break ten thousand magic blocks as an island."
     icon: DIAMOND_PICKAXE
-    title: "<aqua>Block Breaker"
+    title: "<aqua>The Forge"
     criteria:
       type: COUNTER
       counter: MAGIC_BLOCKS
