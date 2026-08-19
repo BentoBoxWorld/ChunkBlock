@@ -80,7 +80,7 @@ public class SettingsTest extends CommonTestSetup {
      */
     @Test
     void testGetIslandProtectionRange() {
-        assertEquals(240, s.getIslandProtectionRange());
+        assertEquals(168, s.getIslandProtectionRange());
     }
 
     /**
