@@ -80,8 +80,17 @@ public class IslandChunksCommand extends CompositeCommand {
         user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
                 String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
                 String.valueOf(cm.getChunkCost()));
-        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(cm.completedRings(island)), "[max]",
-                String.valueOf(cm.maxRingRadius(island)));
+        int completedRings = cm.completedRings(island);
+        int maxRing = cm.maxRingRadius(island);
+        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(completedRings), "[max]",
+                String.valueOf(maxRing));
+        int nextRing = completedRings + 1;
+        if (nextRing <= maxRing) {
+            int remaining = cm.chunksRemainingInRing(island, nextRing);
+            int total = 8 * nextRing;
+            user.sendMessage("chunkblock.chunks.ring-progress", "[ring]", String.valueOf(nextRing),
+                    "[remaining]", String.valueOf(remaining), "[total]", String.valueOf(total));
+        }
         showMap(user, island, unlocked, max);
         return true;
     }

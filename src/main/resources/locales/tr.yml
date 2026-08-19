@@ -26,9 +26,17 @@ protection:
         <aqua>Her aşama için bir
         durumu Eylem Çubuğunda
         gösterir.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Kısımları Talep Et
+      description: |-
+        <aqua>Adanın seviye kredisini
+        harcayarak yeni kısımları talep
+        edebilecek rütbe.</aqua>
+      hint: "<red>Rütbeniz bu ada için kısımları talep edemez!</red>"
 chunkblock:
   bossbar:
     title: Kalan bloklar
+    title-prefix: "[title] | "
     status: '<green>Faz blokları </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,7 +44,67 @@ chunkblock:
   actionbar:
     status: "<green>Aşama: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Bloklar: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>İlerleme: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Bu ada için eylem çubuğu aktif değil</red>"
+  trophies:
+    awarded: "<gold><bold>Ödül kazanıldı: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Adanız şu başlığı kazandı </yellow>[title]<yellow> — </yellow><aqua>/ch title</aqua><yellow> kullanarak açıp kapatın.</yellow>"
+  chunks:
+    entry-denied: "<red>Bu kısım kilitli.</red>"
+    locked: "<red>Buna dokunmayabilirsin — kısım kilitli.</red>"
+    claim-hint: "<yellow>Bu kısımı talep etmek için sınırı vur </yellow><aqua>[cost] </aqua><yellow>seviye(si) için! Var </yellow><aqua>[credit] </aqua><yellow>seviye(si) kredi.</yellow>"
+    claim-confirm: "<yellow>Bu kısımı </yellow><aqua>[cost] </aqua><yellow>seviye(si) için talep etmek istiyor musun? Sana </yellow><aqua>[after] </aqua><yellow>seviye(si) kredi bırakacak. </yellow><gold>Gizli tuş ve sınırı yeniden vur </gold><yellow>içinde </yellow><aqua>[seconds]s </aqua><yellow>onaylamak için.</yellow>"
+    no-credit: "<red>Bu kısımı talep etmek için </red><aqua>[needed] </aqua><red>daha fazla seviye(si) krediye ihtiyacın var.</red>"
+    beyond-limit: "<red>Bu kısım adanın koruma alanının ötesinde.</red>"
+    claimed: "<green><bold>Kısım talep edildi! </bold>Adanız şimdi </green><aqua>[number] </aqua><green>kısım. Kalan kredi: </green><aqua>[credit] </aqua><green>seviye(si).</green>"
+    credit: "<green>Daha </green><aqua>[count] </aqua><green>kısım talep edebilirsin! Sınırına git ve büyütmek istediğin yeri vur.</green>"
+    relocked: "<red>Ada seviyeniz düştü — [count] kısım yeniden kilitlendi, en yenisi önce. Seviyelerinizi geri kazanarak talep edin!</red>"
+    ejected: "<red>İçinde bulunduğun kısım yeniden kilitlendi, bu yüzden seni güvenli alana taşındım.</red>"
+    max-reached: "<light_purple>Adanız maksimum boyutu [number] kısma ulaştı!</light_purple>"
+    ring-complete: "<gold><bold>Halka [ring] tamamlandı! </bold>Adanın etrafındaki tüm halka sinin — </gold><aqua>[chunks] </aqua><gold>kısım toplamı.</gold>"
+    ring-broadcast: "<gold>[name]'nin adası halka </gold><aqua>[ring] </aqua><gold>kapattı — </gold><aqua>[chunks] </aqua><gold>kısım ve hala büyüyor!</gold>"
+    rings: "<green>Tamamlanan halkalar: </green><aqua>[rings] </aqua><green> / </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Halka [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> kısım gitmek için.</yellow>"
+    sethome-denied: "<red>Kilitli bir kısımda ev ayarlayamazsın.</red>"
+    info: "<green>Kısımlar: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredi: </green><aqua>[credit] </aqua><green>seviye(si) — bir kısım maliyeti </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Adanızın bölgesi ([unlocked]/[max] kısım):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ senin </green><yellow>▣ talep edilebilir ([cost] seviye(si) her biri) </yellow><gray>□ kilitli </gray><gold>◎ merkez </gold><aqua>◆ sen</aqua>"
+      you-are-here: "<aqua>İşaretlenmiş kısımda varsın.</aqua>"
+    dialog:
+      close: "<white>Kapat"
+      tooltip:
+        center: "<gold>Merkez kısım — sihirli bloğun burada.</gold>"
+        owned: "<green>Kısım [x], [z] — senin.</green>"
+        claimable: "<yellow>Kısım [x], [z] — talep edilebilir <aqua>[cost]</aqua> seviye(si) için. O sınırına git ve vur.</yellow>"
+        no-credit: "<yellow>Kısım [x], [z] — maliyetler <aqua>[cost]</aqua> seviye(si). <red>[needed]</red> daha fazla seviye(si) krediye ihtiyacın var.</yellow>"
+        locked: "<gray>Kısım [x], [z] — kilitli. Talep ederek çık.</gray>"
+        you-are-here: "<aqua>Burada duruyorsun.</aqua>"
   commands:
+    chunks:
+      description: "talep edilen kısımlarınızı ve bölgenizin haritasını göster"
+    ledger:
+      description: "takım üyesi katkılarını göster"
+      parameters: "[gün]"
+      header: "<green>Ada Katkı Defteri </green><gray>([window])</gray>"
+      all-time: "tüm zaman"
+      last-days: "son [days] gün"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blok, </gray><green>[chunks]</green><gray> kısım, </gray><green>[rings]</green><gray> halka</gray>"
+      total: "<gold>Toplam: </gold><green>[blocks]</green><gold> blok, </gold><green>[chunks]</green><gold> kısım, </gold><green>[rings]</green><gold> halka</gold>"
+      no-activity: "<gray>Henüz hiçbir etkinlik kaydedilmedi.</gray>"
+    title:
+      description: "adanızın başlığını aç/kapat veya birini seç"
+      parameters: "[liste | ödül-id | yok]"
+      header: "<green>Adanızın ödülleri:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — başlık </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Adanız henüz hiçbir ödül kazanmadı.</gray>"
+      active: "<green>Etkin başlık: </green>[title]"
+      no-active: "<gray>Etkin başlık yok. Birini seç </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Adanızın başlığı şimdi </green>[title]<green>.</green>"
+      cleared: "<green>Adanız artık başlık göstermiyor.</green>"
+      toggled-on: "<green>Ada başlığı </green>[title]<green> şimdi gösteriliyor.</green>"
+      toggled-off: "<yellow>Ada başlığı </yellow>[title]<yellow> şimdi gizli.</yellow>"
+      not-earned: "<red>Adanız bu başlığa sahip bir ödül kazanmadı.</red>"
     admin:
       setcount:
         parameters: <ad> <sayı> [lifetime]
@@ -57,6 +125,45 @@ chunkblock:
         parameters: <Aşama>
         description: konsoldaki faz olasılıklarının akıl sağlığını kontrol etmek
         see-console: '<green>Rapor için konsola bakın</green>'
+      bypass:
+        description: "kendiniz için kısım kilit uygulamasını değiştir"
+        "on": "<green>Kısım kilitlerini atlayıyorsunuz. Sınır görselleri sizin için gizli.</green>"
+        "off": "<green>Kısım kilitleri yeniden uygulanıyor.</green>"
+      chunks:
+        parameters: "<oyuncu> [sıfırla]"
+        description: "oyuncunun talep edilen kısımlarını kontrol et veya başlangıca kilitle"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>kısım, </green><aqua>[spent] </aqua><green>seviye(si) harcanmış, </green><aqua>[credit] </aqua><green>kredi.</green>"
+        reset: "<green>[name]'nin kısımları yalnızca merkez kısma kadar yeniden kilitlendi.</green>"
+      phases:
+        description: "faz sırası editörünü aç"
+        no-index: "<red>Hiçbir faz dizini yüklenmedi, bu yüzden fazlar yeniden sıralanamaz</red>"
+        saved: "<green>Faz sırası kaydedildi ve uygulandı</green>"
+        save-failed: "<red>Faz sırası kaydedilemedi! Hatalar için konsola bakın</red>"
+        gui:
+          title: "<dark_green>Faz Sırası</dark_green>"
+          info-title: "<white>Nasıl Kullanılır</white>"
+          instructions: |-
+            <gray>Bir fazı almak için tıkla,
+            sonra nereye gitmesi gerektiğini tıkla.
+            Sağ tıkla bir fazı
+            açıp kapatmak için.</gray>
+          repeat: "<gray>Son fazdan sonra sayı </gray><aqua>[number]</aqua><gray> ye atlar</gray>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Başlangıç: </gray><aqua>[number]</aqua>"
+          length: "<gray>Uzunluk: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Devre Dışı</red>"
+          version-locked: "<red>Minecraft [version]+ Gerekli</red>"
+          pick-up: "<yellow>Taşımak için tıkla</yellow>"
+          toggle: "<yellow>Değiştirmek için sağ tıkla</yellow>"
+          set-length: "<yellow>Uzunluğu ayarlamak için Shift+Sol tıkla</yellow>"
+          drop-here: "<yellow>Buraya düşürmek için tıkla</yellow>"
+          drop-at-end: "<green>Sona düşür</green>"
+          held: "<yellow>Taşınıyor: [name]</yellow>"
+          put-back: "<yellow>Geri koymak için tıkla</yellow>"
+          enter-length: "<yellow>Sohbete </yellow><green>[name] </green><yellow> için yeni bir uzunluk gir - şu anda </yellow><aqua>[number] </aqua><yellow> blok. Yazı </yellow><red>cancel </red><yellow> onu tutmak için.</yellow>"
+          invalid-length: "<red>Uzunluk 0'dan büyük bir tam sayı olmalı</red>"
+          length-cancelled: "<red>Uzunluk değiştirilmedi</red>"
+          cancel-word: "cancel"
     count:
       description: blok sayısını ve aşamayı göster
       info: '<green>[name] aşamasında blok </green><aqua>[number] üzerindesiniz</aqua>'

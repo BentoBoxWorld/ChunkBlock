@@ -26,9 +26,17 @@ protection:
         <aqua>Menampilkan status
         untuk setiap fase
         di Action Bar.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Klaim Chunk
+      description: |-
+        <aqua>Pangkat yang dapat menghabiskan
+        kredit tingkat pulau
+        untuk klaim chunk baru.</aqua>
+      hint: "<red>Pangkatmu tidak dapat mengklaim chunk untuk pulau ini!</red>"
 chunkblock:
   bossbar:
     title: Blok tersisa
+    title-prefix: "[title] | "
     status: 'Blok fase <aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,8 +44,107 @@ chunkblock:
   actionbar:
     status: "<green>Fase: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blok: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Kemajuan: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Action Bar tidak aktif untuk pulau ini</red>"
+  trophies:
+    awarded: "<gold><bold>Trofi diraih: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Pulau mu meraih gelar </yellow>[title]<yellow> — aktifkan dan nonaktifkan menggunakan </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Chunk itu terkunci.</red>"
+    locked: "<red>Anda tidak bisa menyentuh itu — chunk terkunci.</red>"
+    claim-hint: "<yellow>Tekan perbatasan untuk mengklaim chunk ini untuk </yellow><aqua>[cost] </aqua><yellow>level! Anda memiliki </yellow><aqua>[credit] </aqua><yellow>level kredit.</yellow>"
+    claim-confirm: "<yellow>Klaim chunk ini untuk </yellow><aqua>[cost] </aqua><yellow>level? Itu meninggalkan Anda </yellow><aqua>[after] </aqua><yellow>level kredit. </yellow><gold>Berselundup dan tekan perbatasan lagi </gold><yellow>dalam </yellow><aqua>[seconds]s </aqua><yellow>untuk mengkonfirmasi.</yellow>"
+    no-credit: "<red>Anda perlu </red><aqua>[needed] </aqua><red>lebih banyak level kredit untuk mengklaim chunk ini.</red>"
+    beyond-limit: "<red>Chunk itu melampaui area perlindungan pulau Anda.</red>"
+    claimed: "<green><bold>Chunk diklaim! </bold>Pulau Anda sekarang </green><aqua>[number] </aqua><green>chunk. Kredit tersisa: </green><aqua>[credit] </aqua><green>level.</green>"
+    credit: "<green>Anda dapat mengklaim </green><aqua>[count] </aqua><green>chunk lagi! Pergi ke perbatasan Anda dan tekan di mana Anda ingin tumbuh.</green>"
+    relocked: "<red>Level pulau Anda turun — [count] chunk terkunci kembali, yang terbaru terlebih dahulu. Dapatkan kembali levelnya untuk mengklaimnya kembali!</red>"
+    ejected: "<red>Chunk tempat Anda berada terkunci kembali, jadi Anda dipindahkan ke tempat aman.</red>"
+    max-reached: "<light_purple>Pulau Anda telah mencapai ukuran maksimal [number] chunk!</light_purple>"
+    ring-complete: "<gold><bold>Ring [ring] selesai! </bold>Seluruh ring di sekitar pulau Anda adalah milik Anda — </gold><aqua>[chunks] </aqua><gold>chunk semuanya.</gold>"
+    ring-broadcast: "<gold>Pulau [name] telah menutup ring </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>chunk dan masih berkembang!</gold>"
+    rings: "<green>Ring selesai: </green><aqua>[rings] </aqua><green>dari </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Ring [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> chunk lagi.</yellow>"
+    sethome-denied: "<red>Anda tidak dapat mengatur rumah di chunk terkunci.</red>"
+    info: "<green>Chunk: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredit: </green><aqua>[credit] </aqua><green>level — chunk biaya </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Wilayah pulau Anda ([unlocked]/[max] chunk):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ milik Anda </green><yellow>▣ dapat diklaim ([cost] level masing-masing) </yellow><gray>□ terkunci </gray><gold>◎ pusat </gold><aqua>◆ Anda</aqua>"
+      you-are-here: "<aqua>Anda berada di chunk yang ditandai.</aqua>"
+    dialog:
+      close: "<white>Tutup"
+      tooltip:
+        center: "<gold>Chunk pusat — blok ajaib Anda ada di sini."
+        owned: "<green>Chunk [x], [z] — milik Anda."
+        claimable: "<yellow>Chunk [x], [z] — dapat diklaim untuk <aqua>[cost]</aqua> level. Pergi ke perbatasan itu dan tekan."
+        no-credit: "<yellow>Chunk [x], [z] — biaya <aqua>[cost]</aqua> level. Anda memerlukan <red>[needed]</red> lebih banyak level kredit."
+        locked: "<gray>Chunk [x], [z] — terkunci. Klaim jalan Anda ke sana."
+        you-are-here: "<aqua>Anda berdiri di sini."
   commands:
+    chunks:
+      description: "tampilkan chunk yang tidak terkunci dan peta wilayah Anda"
+    ledger:
+      description: "tampilkan kontribusi anggota tim"
+      parameters: "[days]"
+      header: "<green>Buku Besar Kontribusi Pulau </green><gray>([window])</gray>"
+      all-time: "semua waktu"
+      last-days: "[days] hari terakhir"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blok, </gray><green>[chunks]</green><gray> chunk, </gray><green>[rings]</green><gray> ring</gray>"
+      total: "<gold>Total: </gold><green>[blocks]</green><gold> blok, </gold><green>[chunks]</green><gold> chunk, </gold><green>[rings]</green><gold> ring</gold>"
+      no-activity: "<gray>Tidak ada aktivitas yang tercatat.</gray>"
+    title:
+      description: "aktifkan/nonaktifkan gelar pulau Anda, atau pilih satu"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trofi pulau Anda:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — gelar </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Pulau Anda belum meraih trofi apa pun.</gray>"
+      active: "<green>Gelar aktif: </green>[title]"
+      no-active: "<gray>Tidak ada gelar aktif. Pilih satu dengan </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Gelar pulau Anda sekarang </green>[title]<green>.</green>"
+      cleared: "<green>Pulau Anda tidak lagi menampilkan gelar.</green>"
+      toggled-on: "<green>Gelar pulau </green>[title]<green> sekarang ditampilkan.</green>"
+      toggled-off: "<yellow>Gelar pulau </yellow>[title]<yellow> sekarang disembunyikan.</yellow>"
+      not-earned: "<red>Pulau Anda belum meraih trofi dengan gelar itu.</red>"
     admin:
+      bypass:
+        description: "aktifkan/nonaktifkan penegakan kunci chunk untuk Anda sendiri"
+        "on": "<green>Anda sekarang memotong kunci chunk. Visual perbatasan disembunyikan untuk Anda.</green>"
+        "off": "<green>Kunci chunk berlaku untuk Anda lagi.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "inspeksi chunk yang tidak terkunci pemain atau kunci kembali ke awal"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>chunk, </green><aqua>[spent] </aqua><green>level dihabiskan, </green><aqua>[credit] </aqua><green>kredit.</green>"
+        reset: "<green>Chunk [name] terkunci kembali hanya ke chunk pusat.</green>"
+      phases:
+        description: "buka editor urutan fase"
+        no-index: "<red>Tidak ada indeks fase yang dimuat, jadi fase tidak dapat disusun ulang</red>"
+        saved: "<green>Urutan fase disimpan dan diterapkan</green>"
+        save-failed: "<red>Tidak dapat menyimpan urutan fase! Lihat konsol untuk kesalahan</red>"
+        gui:
+          title: "<dark_green>Urutan Fase</dark_green>"
+          info-title: "<white>Cara menggunakan</white>"
+          instructions: |-
+            <gray>Klik fase untuk mengambilnya,
+            lalu klik di mana seharusnya.
+            Klik kanan untuk mengalihkan fase
+            on atau off.</gray>
+          repeat: "<gray>Setelah fase terakhir penghitungan melompat ke </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Mulai: </gray><aqua>[number]</aqua>"
+          length: "<gray>Panjang: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Dinonaktifkan</red>"
+          version-locked: "<red>Memerlukan Minecraft [version]+</red>"
+          pick-up: "<yellow>Klik untuk memindahkan</yellow>"
+          toggle: "<yellow>Klik kanan untuk mengalihkan</yellow>"
+          set-length: "<yellow>Shift-klik kiri untuk menetapkan panjang</yellow>"
+          drop-here: "<yellow>Klik untuk menjatuhkan di sini</yellow>"
+          drop-at-end: "<green>Jatuhkan di akhir</green>"
+          held: "<yellow>Memindahkan: [name]</yellow>"
+          put-back: "<yellow>Klik untuk mengembalikan</yellow>"
+          enter-length: "<yellow>Masukkan panjang baru di obrolan untuk </yellow><green>[name] </green><yellow>- saat ini </yellow><aqua>[number] </aqua><yellow>blok. Ketik </yellow><red>cancel </red><yellow>untuk menyimpannya.</yellow>"
+          invalid-length: "<red>Panjang harus berupa bilangan bulat di atas 0</red>"
+          length-cancelled: "<red>Panjang tidak berubah</red>"
+          cancel-word: "cancel"
       setcount:
         parameters: <name> <count>
         description: atur jumlah blok pemain

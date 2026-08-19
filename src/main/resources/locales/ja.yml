@@ -26,9 +26,17 @@ protection:
         <aqua>各フェーズの
         ステータスを
         アクションバーに表示します。</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: チャンク認領
+      description: |-
+        <aqua>島のレベル額度を使用して
+        新しいチャンクを認領できる
+        ランク。</aqua>
+      hint: "<red>あなたのランクではこの島のチャンクを認領できません！</red>"
 chunkblock:
   bossbar:
     title: 残りのブロック
+    title-prefix: "[title] | "
     status: '位相ブロック <aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,6 +44,41 @@ chunkblock:
   actionbar:
     status: "<green>フェーズ: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>ブロック数: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>進行状況: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>この島ではアクションバーが有効ではありません</red>"
+  chunks:
+    entry-denied: "<red>そのチャンクはロックされています。</red>"
+    locked: "<red>そこに触れることはできません — チャンクがロックされています。</red>"
+    claim-hint: "<yellow>ボーダーをヒットしてこのチャンクを </yellow><aqua>[cost] </aqua><yellow>レベルで認領してください！現在 </yellow><aqua>[credit] </aqua><yellow>レベルの額度があります。</yellow>"
+    claim-confirm: "<yellow>このチャンクを </yellow><aqua>[cost] </aqua><yellow>レベルで認領しますか？その後 </yellow><aqua>[after] </aqua><yellow>レベルの額度が残ります。</yellow><gold>潜行してボーダーを再度ヒットしてください </gold><yellow></yellow><aqua>[seconds]s </aqua><yellow>以内に確認してください。</yellow>"
+    no-credit: "<red>このチャンクを認領するには </red><aqua>[needed] </aqua><red>レベルの額度が必要です。</red>"
+    beyond-limit: "<red>そのチャンクは島の保護範囲を超えています。</red>"
+    claimed: "<green><bold>チャンク認領完了！ </bold>あなたの島は今 </green><aqua>[number] </aqua><green>個のチャンクです。残りの額度：</green><aqua> [credit] </aqua><green>レベル。</green>"
+    credit: "<green>さらに </green><aqua>[count] </aqua><green>個のチャンクを認領できます！ボーダーに行き、成長させたい場所をヒットしてください。</green>"
+    relocked: "<red>島のレベルが低下しました — [count] 個のチャンクが再ロックされました（新しい順）。レベルを取り戻して再度認領してください！</red>"
+    ejected: "<red>あなたがいたチャンクが再ロックされたため、安全な場所に移動されました。</red>"
+    max-reached: "<light_purple>島が最大サイズ [number] チャンクに達しました！</light_purple>"
+    ring-complete: "<gold><bold>リング [ring] 完成！ </bold>島の周り全体があなたのものです — </gold><aqua>[chunks] </aqua><gold>個のチャンク全部。</gold>"
+    ring-broadcast: "<gold>[name] の島がリング </gold><aqua>[ring] </aqua><gold>を閉じました — </gold><aqua>[chunks] </aqua><gold>個のチャンク、まだ成長中！</gold>"
+    rings: "<green>完成したリング：</green><aqua> [rings] </aqua><green>/ </green><aqua>[max]</aqua><green>。</green>"
+    ring-progress: "<yellow>リング [ring]：</yellow><aqua> [remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> チャンクまで。</yellow>"
+    sethome-denied: "<red>ロックされたチャンク内にホームを設定することはできません。</red>"
+    info: "<green>チャンク：</green><aqua> [unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>。額度：</green><aqua> [credit] </aqua><green>レベル — チャンク1個のコストは </green><aqua>[cost]</aqua><green>。</green>"
+    map:
+      title: "<green>あなたの島の領土（[unlocked]/[max] チャンク）：</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ あなたのもの </green><yellow>▣ 認領可能（各 [cost] レベル） </yellow><gray>□ ロック済み </gray><gold>◎ 中心 </gold><aqua>◆ あなた</aqua>"
+      you-are-here: "<aqua>あなたはマークされたチャンク上にいます。</aqua>"
+    dialog:
+      close: "<white>閉じる"
+      tooltip:
+        center: "<gold>中央チャンク — あなたの魔法ブロックはここにあります。"
+        owned: "<green>チャンク [x], [z] — あなたのもの。"
+        claimable: "<yellow>チャンク [x], [z] — <aqua>[cost]</aqua> レベルで認領可能。そのボーダーに行ってヒットしてください。"
+        no-credit: "<yellow>チャンク [x], [z] — <aqua>[cost]</aqua> レベルが必要です。<red>[needed]</red> レベルの額度が不足しています。"
+        locked: "<gray>チャンク [x], [z] — ロック済み。認領して到達してください。"
+        you-are-here: "<aqua>あなたはここに立っています。"
+  trophies:
+    awarded: "<gold><bold>トロフィー獲得：</bold></gold>[name]<gold>！</gold>"
+    title-available: "<yellow>島が称号 </yellow>[title]<yellow> を獲得しました — </yellow><aqua>/ch title</aqua><yellow> で切り替えてください。</yellow>"
   commands:
     admin:
       setcount:
@@ -57,6 +100,70 @@ chunkblock:
         parameters: <フェーズ>
         description: コンソールに位相確率の健全性チェックを表示する
         see-console: ＆aコンソールでレポートを表示
+      bypass:
+        description: "チャンクロック強制を自分に対して切り替える"
+        'on': "<green>チャンクロックをバイパスできるようになりました。ボーダービジュアルはあなたに隠されています。</green>"
+        'off': "<green>チャンクロックが再びあなたに適用されます。</green>"
+      chunks:
+        parameters: "<プレイヤー> [reset]"
+        description: "プレイヤーの解放されたチャンクを調査するか、開始時点に戻す"
+        info: "<green>[name]：</green><aqua> [number]</aqua><green>/</green><aqua>[max] </aqua><green>チャンク、</green><aqua>[spent] </aqua><green>レベル費用、</green><aqua>[credit] </aqua><green>額度。</green>"
+        reset: "<green>[name] のチャンクが中央チャンクのみに再ロックされました。</green>"
+      phases:
+        description: "フェーズ順序エディターを開く"
+        no-index: "<red>フェーズインデックスが読み込まれていないため、フェーズを並べ替えることはできません</red>"
+        saved: "<green>フェーズ順序が保存され適用されました</green>"
+        save-failed: "<red>フェーズ順序を保存できませんでした！コンソールをチェックしてください</red>"
+        gui:
+          title: "<dark_green>フェーズ順序</dark_green>"
+          info-title: "<white>使用方法</white>"
+          instructions: |-
+            <gray>フェーズをクリックして拾い上げ、
+            その後ドロップする場所をクリックしてください。
+            右クリックでフェーズのオン/オフを
+            切り替えます。</gray>
+          repeat: "<gray>最後のフェーズの後、カウントは </gray><aqua>[number]</aqua><gray> にジャンプします</gray>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>開始：</gray><aqua> [number]</aqua>"
+          length: "<gray>長さ：</gray><aqua> [number]</aqua>"
+          disabled: "<red>無効</red>"
+          version-locked: "<red>Minecraft [version]+ が必要です</red>"
+          pick-up: "<yellow>クリックして移動</yellow>"
+          toggle: "<yellow>右クリックして切り替え</yellow>"
+          set-length: "<yellow>Shift + 左クリックして長さを設定</yellow>"
+          drop-here: "<yellow>クリックしてここにドロップ</yellow>"
+          drop-at-end: "<green>最後にドロップ</green>"
+          held: "<yellow>移動中：[name]</yellow>"
+          put-back: "<yellow>クリックして戻す</yellow>"
+          enter-length: "<yellow>チャットで </yellow><green>[name] </green><yellow>の新しい長さを入力してください — 現在 </yellow><aqua>[number] </aqua><yellow>ブロックです。キープするには </yellow><red>cancel </red><yellow>と入力してください。</yellow>"
+          invalid-length: "<red>長さは0より大きい整数である必要があります</red>"
+          length-cancelled: "<red>長さが変更されていません</red>"
+          cancel-word: "cancel"
+    chunks:
+      description: "解放されたチャンクと領土マップを表示"
+    ledger:
+      description: "チームメンバーの貢献度を表示"
+      parameters: "[days]"
+      header: "<green>島の貢献度台帳 </green><gray>([window])</gray>"
+      all-time: "全時間"
+      last-days: "過去 [days] 日"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>：</gray><green>[blocks]</green><gray> ブロック、</gray><green>[chunks]</green><gray> チャンク、</gray><green>[rings]</green><gray> リング</gray>"
+      total: "<gold>合計：</gold><green>[blocks]</green><gold> ブロック、</gold><green>[chunks]</green><gold> チャンク、</gold><green>[rings]</green><gold> リング</gold>"
+      no-activity: "<gray>記録されたアクティビティはまだありません。</gray>"
+    title:
+      description: "島の称号を切り替えるか選択する"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>島のトロフィー：</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — 称号 </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>島はまだトロフィーを獲得していません。</gray>"
+      active: "<green>アクティブな称号：</green> [title]"
+      no-active: "<gray>アクティブな称号がありません。</gray><aqua>/ch title</aqua><gray> で選んでください。</gray>"
+      set: "<green>島の称号が </green>[title]<green> に設定されました。</green>"
+      cleared: "<green>島は称号を表示しなくなりました。</green>"
+      toggled-on: "<green>島の称号 </green>[title]<green> が表示されるようになりました。</green>"
+      toggled-off: "<yellow>島の称号 </yellow>[title]<yellow> が非表示になりました。</yellow>"
+      not-earned: "<red>島はその称号のトロフィーを獲得していません。</red>"
     count:
       description: ブロック数とフェーズを表示する
       info: '[name]フェーズのブロック[number]にいます'

@@ -26,9 +26,17 @@ protection:
         <aqua>Mostra uno stato
         per ogni fase
         nella Action Bar.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Rivendica Blocchi
+      description: |-
+        <aqua>Grado che può spendere il
+        credito di livello dell'isola
+        per rivendicare nuovi blocchi.</aqua>
+      hint: "<red>Il tuo grado non può rivendicare blocchi per quest'isola!</red>"
 chunkblock:
   bossbar:
     title: Blocca i restanti
+    title-prefix: "[title] | "
     status: '<green>Blocchi di fase </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,8 +44,107 @@ chunkblock:
   actionbar:
     status: "<green>Fase: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blocchi: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Progresso: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>La barra d'azione non è attiva per quest'isola</red>"
+  trophies:
+    awarded: "<gold><bold>Trofeo vinto: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>La tua isola ha vinto il titolo </yellow>[title]<yellow> — attiva e disattiva usando </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Quel blocco è bloccato.</red>"
+    locked: "<red>Non puoi toccare questo — il blocco è bloccato.</red>"
+    claim-hint: "<yellow>Colpisci il confine per rivendicare questo blocco per </yellow><aqua>[cost] </aqua><yellow>livello! Hai </yellow><aqua>[credit] </aqua><yellow>livello di credito.</yellow>"
+    claim-confirm: "<yellow>Rivendica questo blocco per </yellow><aqua>[cost] </aqua><yellow>livello? Ti rimangono </yellow><aqua>[after] </aqua><yellow>livello di credito. </yellow><gold>Striscia e colpisci di nuovo il confine </gold><yellow>entro </yellow><aqua>[seconds]s </aqua><yellow>per confermare.</yellow>"
+    no-credit: "<red>Hai bisogno di </red><aqua>[needed] </aqua><red>più livello di credito per rivendicare questo blocco.</red>"
+    beyond-limit: "<red>Quel blocco è oltre l'area di protezione della tua isola.</red>"
+    claimed: "<green><bold>Blocco rivendicato! </bold>La tua isola è ora </green><aqua>[number] </aqua><green>blocchi. Credito rimanente: </green><aqua>[credit] </aqua><green>livello.</green>"
+    credit: "<green>Puoi rivendicare </green><aqua>[count] </aqua><green>altri blocchi! Vai al tuo confine e colpiscilo dove vuoi crescere.</green>"
+    relocked: "<red>Il livello della tua isola è sceso — [count] blocco(i) è(sono) stato(i) bloccato(i) di nuovo, il più nuovo prima. Recupera i livelli per rivendicarli di nuovo!</red>"
+    ejected: "<red>Il blocco in cui eri è stato ribloccato, quindi sei stato spostato al sicuro.</red>"
+    max-reached: "<light_purple>La tua isola ha raggiunto la dimensione massima di [number] blocchi!</light_purple>"
+    ring-complete: "<gold><bold>Anello [ring] completato! </bold>L'intero anello intorno alla tua isola è tuo — </gold><aqua>[chunks] </aqua><gold>blocchi in tutto.</gold>"
+    ring-broadcast: "<gold>L'isola di [name] ha chiuso l'anello </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>blocchi e ancora in crescita!</gold>"
+    rings: "<green>Anelli completati: </green><aqua>[rings] </aqua><green>di </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Anello [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> blocchi rimasti.</yellow>"
+    sethome-denied: "<red>Non puoi impostare una casa in un blocco bloccato.</red>"
+    info: "<green>Blocchi: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Credito: </green><aqua>[credit] </aqua><green>livello — un blocco costa </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Territorio della tua isola ([unlocked]/[max] blocchi):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ il tuo </green><yellow>▣ rivendicabile ([cost] livello ciascuno) </yellow><gray>□ bloccato </gray><gold>◎ centro </gold><aqua>◆ tu</aqua>"
+      you-are-here: "<aqua>Sei sul blocco contrassegnato.</aqua>"
+    dialog:
+      close: "<white>Chiudi"
+      tooltip:
+        center: "<gold>Il blocco centrale — il tuo blocco magico è qui."
+        owned: "<green>Blocco [x], [z] — tuo."
+        claimable: "<yellow>Blocco [x], [z] — rivendicabile per <aqua>[cost]</aqua> livello. Vai a quel confine e colpiscilo."
+        no-credit: "<yellow>Blocco [x], [z] — costa <aqua>[cost]</aqua> livello. Hai bisogno di <red>[needed]</red> più livello di credito."
+        locked: "<gray>Blocco [x], [z] — bloccato. Rivendica il tuo percorso verso di esso."
+        you-are-here: "<aqua>Stai in piedi qui."
   commands:
+    chunks:
+      description: "mostra i tuoi blocchi sbloccati e una mappa del tuo territorio"
+    ledger:
+      description: "mostra i contributi dei membri del team"
+      parameters: "[days]"
+      header: "<green>Libro Mastro dei Contributi dell'Isola </green><gray>([window])</gray>"
+      all-time: "sempre"
+      last-days: "ultimi [days] giorni"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blocchi, </gray><green>[chunks]</green><gray> chunk, </gray><green>[rings]</green><gray> anelli</gray>"
+      total: "<gold>Totale: </gold><green>[blocks]</green><gold> blocchi, </gold><green>[chunks]</green><gold> chunk, </gold><green>[rings]</green><gold> anelli</gold>"
+      no-activity: "<gray>Nessuna attività registrata.</gray>"
+    title:
+      description: "attiva/disattiva il titolo della tua isola, o scegline uno"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>I tuoi trofei dell'isola:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — titolo </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>La tua isola non ha ancora vinto alcun trofeo.</gray>"
+      active: "<green>Titolo attivo: </green>[title]"
+      no-active: "<gray>Nessun titolo attivo. Scegline uno con </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Il titolo della tua isola è ora </green>[title]<green>.</green>"
+      cleared: "<green>La tua isola non mostra più un titolo.</green>"
+      toggled-on: "<green>Titolo dell'isola </green>[title]<green> è ora visibile.</green>"
+      toggled-off: "<yellow>Titolo dell'isola </yellow>[title]<yellow> è ora nascosto.</yellow>"
+      not-earned: "<red>La tua isola non ha vinto un trofeo con quel titolo.</red>"
     admin:
+      bypass:
+        description: "attiva/disattiva l'applicazione del blocco per te stesso"
+        "on": "<green>Ora ignori i blocchi dei blocchi. Gli elementi visivi del confine sono nascosti per te.</green>"
+        "off": "<green>I blocchi di blocco si applicano di nuovo a te.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "ispeziona i blocchi sbloccati di un giocatore o bloccali di nuovo all'inizio"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>blocchi, </green><aqua>[spent] </aqua><green>livello speso, </green><aqua>[credit] </aqua><green>credito.</green>"
+        reset: "<green>I blocchi di [name] sono stati ribloccati solo al blocco centrale.</green>"
+      phases:
+        description: "apri l'editor dell'ordine delle fasi"
+        no-index: "<red>Nessun indice di fase caricato, quindi le fasi non possono essere riordinate</red>"
+        saved: "<green>Ordine delle fasi salvato e applicato</green>"
+        save-failed: "<red>Impossibile salvare l'ordine delle fasi! Vedere la console per gli errori</red>"
+        gui:
+          title: "<dark_green>Ordine Fase</dark_green>"
+          info-title: "<white>Come usare</white>"
+          instructions: |-
+            <gray>Fai clic su una fase per sollevarla,
+            quindi fai clic su dove dovrebbe andare.
+            Fai clic con il pulsante destro del mouse per attivare/disattivare una fase
+            attiva o disattiva.</gray>
+          repeat: "<gray>Dopo l'ultima fase il conteggio salta a </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Inizio: </gray><aqua>[number]</aqua>"
+          length: "<gray>Lunghezza: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Disabilitato</red>"
+          version-locked: "<red>Richiede Minecraft [version]+</red>"
+          pick-up: "<yellow>Fai clic per spostare</yellow>"
+          toggle: "<yellow>Fai clic con il pulsante destro del mouse per attivare/disattivare</yellow>"
+          set-length: "<yellow>Maiusc+clic sinistro per impostare la lunghezza</yellow>"
+          drop-here: "<yellow>Fai clic per rilasciare qui</yellow>"
+          drop-at-end: "<green>Rilascia alla fine</green>"
+          held: "<yellow>Spostamento: [name]</yellow>"
+          put-back: "<yellow>Fai clic per rimettere</yellow>"
+          enter-length: "<yellow>Immetti una nuova lunghezza in chat per </yellow><green>[name] </green><yellow>- attualmente </yellow><aqua>[number] </aqua><yellow>blocchi. Digita </yellow><red>cancel </red><yellow>per mantenerlo.</yellow>"
+          invalid-length: "<red>La lunghezza deve essere un numero intero superiore a 0</red>"
+          length-cancelled: "<red>Lunghezza non modificata</red>"
+          cancel-word: "cancel"
       setcount:
         parameters: <nome> <conto>
         description: imposta il conteggio dei blocchi del giocatore

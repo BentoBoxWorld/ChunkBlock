@@ -26,9 +26,17 @@ protection:
         <aqua>Zobrazuje stav
         pro každou fázi
         v Action Baru.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Uzavřít Kusy
+      description: |-
+        <aqua>Hodnost, která může utratit
+        úroveň kreditu ostrova
+        aby si nárokovala nové kusy.</aqua>
+      hint: "<red>Vaše hodnost nemůže nárokovat kusy pro tento ostrov!</red>"
 chunkblock:
   bossbar:
     title: Bloky zbývající
+    title-prefix: "[title] | "
     status: '<green>Fázové bloky & B [done] & d / & b [total]</green>'
     color: RED
     style: SEGMENTED_20
@@ -36,6 +44,41 @@ chunkblock:
   actionbar:
     status: "<green>Fáze: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Bloky: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Postup: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Action Bar není pro tento ostrov aktivní</red>"
+  trophies:
+    awarded: "<gold><bold>Trofej získána: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Váš ostrov získal titul </yellow>[title]<yellow> — přepínejte jej zapínáním a vypínáním pomocí </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Ten kus je zamčený.</red>"
+    locked: "<red>Nemůžeš se tam dotknout — kus je zamčený.</red>"
+    claim-hint: "<yellow>Zasáhni hranici, aby ses nárokoval tento kus za </yellow><aqua>[cost] </aqua><yellow>úroveň(í)! Máš </yellow><aqua>[credit] </aqua><yellow>úroveň(í) kreditu.</yellow>"
+    claim-confirm: "<yellow>Nárokovat si tento kus za </yellow><aqua>[cost] </aqua><yellow>úroveň(í)? To ti zanechá </yellow><aqua>[after] </aqua><yellow>úroveň(í) kreditu. </yellow><gold>Plíž se a zasáhni hranici znovu </gold><yellow>během </yellow><aqua>[seconds]s </aqua><yellow>pro potvrzení.</yellow>"
+    no-credit: "<red>Potřebuješ </red><aqua>[needed] </aqua><red>více úroveň(í) kreditu pro nárok na tento kus.</red>"
+    beyond-limit: "<red>Ten kus je za oblastí ochrany tvého ostrova.</red>"
+    claimed: "<green><bold>Kus nárokován! </bold>Tvůj ostrov má nyní </green><aqua>[number] </aqua><green>kusů. Zbývající kredit: </green><aqua>[credit] </aqua><green>úroveň(í).</green>"
+    credit: "<green>Můžeš si nárokovat </green><aqua>[count] </aqua><green>více kusů! Jdi k své hranici a zasáhni ji kde chceš růst.</green>"
+    relocked: "<red>Úroveň tvého ostrova klesla — [count] kus(y) znovu zamčen(y), nejnovější první. Získej úrovně zpět, abys si je znovu nárokoval!</red>"
+    ejected: "<red>Kus, ve kterém si byl, byl znovu zamčen, takže jsi byl přesunut do bezpečí.</red>"
+    max-reached: "<light_purple>Tvůj ostrov dosáhl maximální velikosti [number] kusů!</light_purple>"
+    ring-complete: "<gold><bold>Kruh [ring] dokončen! </bold>Celý kruh kolem tvého ostrova je tvůj — </gold><aqua>[chunks] </aqua><gold>kusů celkem.</gold>"
+    ring-broadcast: "<gold>Ostrov [name] uzavřel kruh </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>kusů a stále roste!</gold>"
+    rings: "<green>Dokončené kruhy: </green><aqua>[rings] </aqua><green>z </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Kruh [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> kusů zbývá.</yellow>"
+    sethome-denied: "<red>Nemůžeš nastavit domov v zamčeném kusu.</red>"
+    info: "<green>Kusy: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredit: </green><aqua>[credit] </aqua><green>úroveň(í) — kus stojí </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Území tvého ostrova ([unlocked]/[max] kusů):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ tvůj </green><yellow>▣ se dá nárokovat ([cost] úroveň(í) každý) </yellow><gray>□ zamčený </gray><gold>◎ střed </gold><aqua>◆ ty</aqua>"
+      you-are-here: "<aqua>Stojíš na označeném kusu.</aqua>"
+    dialog:
+      close: "<white>Zavřít"
+      tooltip:
+        center: "<gold>Střední kus — tvůj kouzelný blok je zde."
+        owned: "<green>Kus [x], [z] — tvůj."
+        claimable: "<yellow>Kus [x], [z] — se dá nárokovat za <aqua>[cost]</aqua> úroveň(í). Jdi na tu hranici a zasáhni ji."
+        no-credit: "<yellow>Kus [x], [z] — stojí <aqua>[cost]</aqua> úroveň(í). Potřebuješ <red>[needed]</red> více úroveň(í) kreditu."
+        locked: "<gray>Kus [x], [z] — zamčený. Nárokuj si cestu ven k němu."
+        you-are-here: "<aqua>Stojíš zde."
   commands:
     admin:
       setcount:
@@ -57,6 +100,45 @@ chunkblock:
         parameters: <fáze>
         description: zobrazí v konzoli kontrolu pravděpodobnosti fází
         see-console: '<green>Podívejte se do konzoly pro zprávu</green>'
+      bypass:
+        description: "přepnout vynucení zámku kusu sebe"
+        "on": "<green>Teď obchází zámky kusů. Vizuály hranic jsou pro tebe skryté.</green>"
+        "off": "<green>Zámky kusů se na tebe znovu aplikují.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "inspekovat odemčené kusy hráče nebo je znovu zamknout na začátek"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>kusů, </green><aqua>[spent] </aqua><green>úroveň(í) utraceno, </green><aqua>[credit] </aqua><green>kredit.</green>"
+        reset: "<green>Kusy [name] byly znovu zamčeny na pouhý střední kus.</green>"
+      phases:
+        description: "otevřít editor pořadí fází"
+        no-index: "<red>Není načten žádný index fází, takže fáze nelze přeuspořádat</red>"
+        saved: "<green>Pořadí fází uloženo a aplikováno</green>"
+        save-failed: "<red>Nelze uložit pořadí fází! Chyby najdete v konzoli</red>"
+        gui:
+          title: "<dark_green>Pořadí Fází</dark_green>"
+          info-title: "<white>Jak používat</white>"
+          instructions: |-
+            <gray>Klikni na fázi, aby si jsi ji zvednul,
+            pak klikni kde by měla jít.
+            Pravý klik přepne fázi
+            zapnuto nebo vypnuto.</gray>
+          repeat: "<gray>Po poslední fázi se počet skočí na </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Začátek: </gray><aqua>[number]</aqua>"
+          length: "<gray>Délka: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Zakázáno</red>"
+          version-locked: "<red>Potřebuje Minecraft [version]+</red>"
+          pick-up: "<yellow>Klikni pro přesunutí</yellow>"
+          toggle: "<yellow>Pravý klik pro přepnutí</yellow>"
+          set-length: "<yellow>Shift+levý klik pro nastavení délky</yellow>"
+          drop-here: "<yellow>Klikni pro upuštění zde</yellow>"
+          drop-at-end: "<green>Upustit na konec</green>"
+          held: "<yellow>Pohybování: [name]</yellow>"
+          put-back: "<yellow>Klikni pro vrácení</yellow>"
+          enter-length: "<yellow>Zadej novou délku v chatu pro </yellow><green>[name] </green><yellow>- v současné době je </yellow><aqua>[number] </aqua><yellow>bloků. Zadej </yellow><red>cancel </red><yellow>pro zachování.</yellow>"
+          invalid-length: "<red>Délka musí být celé číslo vyšší než 0</red>"
+          length-cancelled: "<red>Délka nezměněna</red>"
+          cancel-word: "cancel"
     count:
       description: zobrazit počet bloků a fázi
       info: '<green>Jste na bloku </green><aqua>[number] ve fázi </aqua><green>[name]</green>'
@@ -85,6 +167,31 @@ chunkblock:
       description: respawnuje magický blok v situacích, kdy zmizí
       block-exist: '<green>Blok existuje, nevyžadoval respawning. Označil jsem to za vás.</green>'
       block-respawned: '<green>Blok byl znovu vytvořen.</green>'
+    chunks:
+      description: "zobrazit tvoje odemčené kusy a mapu tvého území"
+    ledger:
+      description: "zobrazit příspěvky členů týmu"
+      parameters: "[days]"
+      header: "<green>Ledger příspěvků ostrova </green><gray>([window])</gray>"
+      all-time: "celkově"
+      last-days: "poslední [days] dní"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> bloků, </gray><green>[chunks]</green><gray> kusů, </gray><green>[rings]</green><gray> kruhů</gray>"
+      total: "<gold>Celkem: </gold><green>[blocks]</green><gold> bloků, </gold><green>[chunks]</green><gold> kusů, </gold><green>[rings]</green><gold> kruhů</gold>"
+      no-activity: "<gray>Zatím nebyla zaznamenána žádná aktivita.</gray>"
+    title:
+      description: "přepínat titul svého ostrova zapínáním/vypínáním, nebo si vybrat jeden"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trofeje tvého ostrova:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — titul </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Tvůj ostrov si zatím nevydělal žádné trofeje.</gray>"
+      active: "<green>Aktivní titul: </green>[title]"
+      no-active: "<gray>Žádný titul není aktivní. Vyber si jeden pomocí </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Titul tvého ostrova je nyní </green>[title]<green>.</green>"
+      cleared: "<green>Tvůj ostrov už neukazuje titul.</green>"
+      toggled-on: "<green>Titul ostrova </green>[title]<green> se teď zobrazuje.</green>"
+      toggled-off: "<yellow>Titul ostrova </yellow>[title]<yellow> se teď skrývá.</yellow>"
+      not-earned: "<red>Tvůj ostrov si nevydělal trofej s tímto titulem.</red>"
   phase:
     insufficient-level: Tvůj ostrov je na příliš nízké úrovni, musí být alespoň [number].
     insufficient-funds: Nemáš dostatečné prostředky! Musíš mít alespoň [number].

@@ -60,6 +60,9 @@ public class IslandTitleCommand extends CompositeCommand {
             return false;
         }
         if (args.isEmpty()) {
+            return toggleTitle(user, island);
+        }
+        if ("list".equalsIgnoreCase(args.get(0))) {
             showTitles(user, island);
             return true;
         }
@@ -105,6 +108,25 @@ public class IslandTitleCommand extends CompositeCommand {
         }
     }
 
+    private boolean toggleTitle(User user, Island island) {
+        String active = addon.getTrophyManager().getActiveTitleText(island);
+        if (!active.isEmpty()) {
+            addon.getTrophyManager().setActiveTitle(island, null);
+            user.sendMessage("chunkblock.commands.title.toggled-off", TITLE_VAR, active);
+            return true;
+        }
+        // No active title — try to activate the first earned trophy that carries one
+        Optional<Trophy> first = addon.getTrophyManager().getEarned(island).stream()
+                .filter(t -> t.title() != null).findFirst();
+        if (first.isEmpty()) {
+            user.sendMessage("chunkblock.commands.title.none-earned-yet");
+            return false;
+        }
+        addon.getTrophyManager().setActiveTitle(island, first.get().id());
+        user.sendMessage("chunkblock.commands.title.toggled-on", TITLE_VAR, first.get().title());
+        return true;
+    }
+
     @Override
     public Optional<List<String>> tabComplete(User user, String alias, List<String> args) {
         Island island = getIslands().getIsland(getWorld(), user);
@@ -112,6 +134,7 @@ public class IslandTitleCommand extends CompositeCommand {
             return Optional.empty();
         }
         List<String> options = new ArrayList<>();
+        options.add("list");
         options.add(CLEAR);
         addon.getTrophyManager().getEarned(island).stream().filter(t -> t.title() != null)
                 .map(Trophy::id).forEach(options::add);

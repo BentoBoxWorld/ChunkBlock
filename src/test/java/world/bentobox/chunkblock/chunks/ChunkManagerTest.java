@@ -281,6 +281,37 @@ class ChunkManagerTest {
     }
 
     @Test
+    void testChunksRemainingInRingZero() {
+        assertEquals(0, cm.chunksRemainingInRing(island, 0));
+    }
+
+    @Test
+    void testChunksRemainingInRingOneFresh() {
+        assertEquals(8, cm.chunksRemainingInRing(island, 1));
+    }
+
+    @Test
+    void testChunksRemainingInRingOnePartial() {
+        level = 3;
+        cm.claim(island, 1, 0);
+        cm.claim(island, 0, 1);
+        cm.claim(island, -1, 0);
+        assertEquals(5, cm.chunksRemainingInRing(island, 1));
+    }
+
+    @Test
+    void testChunksRemainingInRingOneComplete() {
+        level = 8;
+        claimRingOne();
+        assertEquals(0, cm.chunksRemainingInRing(island, 1));
+    }
+
+    @Test
+    void testChunksRemainingInRingTwo() {
+        assertEquals(16, cm.chunksRemainingInRing(island, 2));
+    }
+
+    @Test
     void testGetUnlockedOffsets() {
         level = 2;
         cm.claim(island, 1, 0);

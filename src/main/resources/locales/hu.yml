@@ -27,9 +27,17 @@ protection:
         <aqua>Állapotot mutat
         minden fázishoz
         a Műveleti Sávban.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Szövegek Igénylése
+      description: |-
+        <aqua>Rang, amely az sziget
+        szintje kreditjét költheti
+        új szövegek igényléséhez.</aqua>
+      hint: "<red>A rangod nem tudja igényelni a szövegeket erre a szigetre!</red>"
 chunkblock:
   bossbar:
     title: Blokkok maradtak
+    title-prefix: "[title] | "
     status: '<green>Fázisblokkok </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -37,8 +45,106 @@ chunkblock:
   actionbar:
     status: "<green>Fázis: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blokkok: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Haladás: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Az akciósáv nem aktív ezen a szigeten</red>"
+  trophies:
+    awarded: "<gold><bold>Trófea szerzett: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>A szigeted megnyerte a </yellow>[title]<yellow> címet — kapcsold ki és be a </yellow><aqua>/ch title</aqua><yellow> paranccsal.</yellow>"
+  chunks:
+    entry-denied: "<red>Ez a szöveg zárolva van.</red>"
+    locked: "<red>Nem érintheted azt — a szöveg zárolva van.</red>"
+    claim-hint: "<yellow>Üss a határra ennek a szövegnek az igényléséhez </yellow><aqua>[cost] </aqua><yellow>szint(hez)! Van </yellow><aqua>[credit] </aqua><yellow>szinted kredid.</yellow>"
+    claim-confirm: "<yellow>Igényelj ezt a szöveget </yellow><aqua>[cost] </aqua><yellow>szint(ért)? Ez azt hagyja neked </yellow><aqua>[after] </aqua><yellow>szint kredid. </yellow><gold>Lopózz és üss ismét a határra </gold><yellow>belül </yellow><aqua>[seconds]s </aqua><yellow>hogy megerősítsd.</yellow>"
+    no-credit: "<red>Szükséged van </red><aqua>[needed] </aqua><red>több szint kreditre ennek a szövegnek az igényléséhez.</red>"
+    beyond-limit: "<red>Ez a szöveg a szigeted védelmi területe túl van.</red>"
+    claimed: "<green><bold>Szöveg igényelve! </bold>A szigeted most </green><aqua>[number] </aqua><green>szöveg. Megmaradt kredit: </green><aqua>[credit] </aqua><green>szint.</green>"
+    credit: "<green>Igényelhetiels </green><aqua>[count] </aqua><green>több szöveget! Menj a hatádhoz és ütsd meg ahol szeretnél növekedni.</green>"
+    relocked: "<red>A szigeted szintje csökkent — [count] szöveg lett ismét zárolva, legújabb elsőnek. Szerzj meg a szinteket hogy ismét igényelhesd!</red>"
+    ejected: "<red>A szöveg amit benned voltál ismét zárolva lett, így biztonságra kerültél.</red>"
+    max-reached: "<light_purple>A szigeted elérte a maximális méretét [number] szöveg!</light_purple>"
+    ring-complete: "<gold><bold>Gyűrű [ring] kész! </bold>Az egész gyűrű a szigeted körül a tiéd — </gold><aqua>[chunks] </aqua><gold>szöveg összesen.</gold>"
+    ring-broadcast: "<gold>[name] szigete lezárta a gyűrűt </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>szöveg és még növekszik!</gold>"
+    rings: "<green>Befejezett gyűrűk: </green><aqua>[rings] </aqua><green>a </green><aqua>[max]</aqua><green> közül.</green>"
+    ring-progress: "<yellow>Gyűrű [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> szöveg még.</yellow>"
+    sethome-denied: "<red>Nem állíthatod be a házad zárolva szövegben.</red>"
+    info: "<green>Szövegek: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredit: </green><aqua>[credit] </aqua><green>szint — egy szöveg költségei </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>A szigeted területe ([unlocked]/[max] szövegek):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ tiéd </green><yellow>▣ igényelhető ([cost] szint mindegyik) </yellow><gray>□ zárolva </gray><gold>◎ közép </gold><aqua>◆ te</aqua>"
+      you-are-here: "<aqua>A megjelölt szövegen vagy.</aqua>"
+    dialog:
+      close: "<white>Bezárás"
+      tooltip:
+        center: "<gold>A közép szöveg — a mágikus blokk itt van."
+        owned: "<green>Szöveg [x], [z] — tied."
+        claimable: "<yellow>Szöveg [x], [z] — igényelhető <aqua>[cost]</aqua> szintért. Menj arra a határra és ütsd meg."
+        no-credit: "<yellow>Szöveg [x], [z] — költségei <aqua>[cost]</aqua> szint. Szükséged van <red>[needed]</red> több szint kreditre."
+        locked: "<gray>Szöveg [x], [z] — zárolva. Igényelj ki magad oda."
+        you-are-here: "<aqua>Itt állsz."
   commands:
+    chunks:
+      description: "mutasd meg a feloldott szövegeket és a terület térképét"
+    ledger:
+      description: "mutasd meg a csapat tagjainak hozzájárulásait"
+      parameters: "[days]"
+      header: "<green>Sziget Hozzájárulás Főkönyv </green><gray>([window])</gray>"
+      all-time: "mind ideje"
+      last-days: "utolsó [days] nap"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blokk, </gray><green>[chunks]</green><gray> szöveg, </gray><green>[rings]</green><gray> gyűrűk</gray>"
+      total: "<gold>Összesen: </gold><green>[blocks]</green><gold> blokk, </gold><green>[chunks]</green><gold> szöveg, </gold><green>[rings]</green><gold> gyűrűk</gold>"
+      no-activity: "<gray>Nincs feljegyzett tevékenység.</gray>"
+    title:
+      description: "szerzd ki/szerzd ki a szigeted címét, vagy válassz egyet"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>A szigeted troféái:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — cím </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>A szigeted még nem szerzett meg trófeát.</gray>"
+      active: "<green>Aktív cím: </green>[title]"
+      no-active: "<gray>Nincs aktív cím. Válassz egyet a </gray><aqua>/ch title</aqua><gray> paranccsal.</gray>"
+      set: "<green>A szigeted címe most </green>[title]<green>.</green>"
+      cleared: "<green>A szigeted már nem jelenít meg címet.</green>"
+      toggled-on: "<green>Sziget cím </green>[title]<green> most megjelenik.</green>"
+      toggled-off: "<yellow>Sziget cím </yellow>[title]<yellow> most rejtett.</yellow>"
+      not-earned: "<red>A szigeted nem szerzett trófeát ezzel a címmel.</red>"
     admin:
+      bypass:
+        description: "szerzd ki/szerzd ki a szöveg zárolási kikényszerítést magadra"
+        "on": "<green>Most megkerülöd a szöveg zárolásokat. Határvizuális elemek rejtve vannak számodra.</green>"
+        "off": "<green>A szöveg zárolások ismét vonatkoznak rád.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "vizsgáld meg egy játékos feloldott szövegeit vagy zárd vissza őket az elejére"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>szövegek, </green><aqua>[spent] </aqua><green>szint(et) költött, </green><aqua>[credit] </aqua><green>kredit.</green>"
+        reset: "<green>[name]'s szövege visszáról csak a közép szövegre lett zárolva.</green>"
+      phases:
+        description: "nyitsd meg a fázis sorrendszerkesztőt"
+        no-index: "<red>Nincs betöltött fázisindex, így a fázisokat nem lehet átrendezni</red>"
+        saved: "<green>Fázis sorrend mentve és alkalmazva</green>"
+        save-failed: "<red>Nem sikerült menteni a fázis sorrendet! Lásd a konzolt a hibákért</red>"
+        gui:
+          title: "<dark_green>Fázis Sorrend</dark_green>"
+          info-title: "<white>Hogyan használd</white>"
+          instructions: |-
+            <gray>Kattints egy fázisra hogy felemelje,
+            majd kattints ahol kellene legyen.
+            Jobb kattintás egy fázis ki/bekapcsol.</gray>
+          repeat: "<gray>Az utolsó fázis után a szám ugrálása </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Kezdés: </gray><aqua>[number]</aqua>"
+          length: "<gray>Hossz: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Letiltva</red>"
+          version-locked: "<red>Minecraft [version]+ szükséges</red>"
+          pick-up: "<yellow>Kattints a mozgatáshoz</yellow>"
+          toggle: "<yellow>Jobb kattints a váltáshoz</yellow>"
+          set-length: "<yellow>Shift-bal kattints a hossz beállításához</yellow>"
+          drop-here: "<yellow>Kattints ide történő eldobáshoz</yellow>"
+          drop-at-end: "<green>Dobj a végén</green>"
+          held: "<yellow>Mozgatás: [name]</yellow>"
+          put-back: "<yellow>Kattints visszahelyezéshez</yellow>"
+          enter-length: "<yellow>Írj be egy új hosszt a csatban a </yellow><green>[name] </green><yellow>- jelenleg </yellow><aqua>[number] </aqua><yellow>blokk. Írj </yellow><red>cancel </red><yellow>hogy megtartsad.</yellow>"
+          invalid-length: "<red>A hossz egész szám 0-nál nagyobb kell legyen</red>"
+          length-cancelled: "<red>Hossz nem módosítva</red>"
+          cancel-word: "cancel"
       setcount:
         parameters: <név> <szám>
         description: állítsa be a játékos blokkszámát

@@ -209,6 +209,28 @@ public class ChunkManager {
 
     /**
      * @param island the island
+     * @param ring the ring radius to check
+     * @return how many chunks in the ring are still locked; 0 means the ring is complete
+     */
+    public int chunksRemainingInRing(Island island, int ring) {
+        if (ring <= 0) {
+            return 0;
+        }
+        OneBlockIslands data = addon.getOneBlocksIsland(island);
+        int missing = 0;
+        for (int d = -ring; d <= ring; d++) {
+            if (!data.isChunkUnlocked(d, -ring)) missing++;
+            if (!data.isChunkUnlocked(d, ring)) missing++;
+            if (d != -ring && d != ring) {
+                if (!data.isChunkUnlocked(-ring, d)) missing++;
+                if (!data.isChunkUnlocked(ring, d)) missing++;
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * @param island the island
      * @return the island's unlocked chunk offsets in unlock order (x and z are chunk
      *         offsets relative to the center chunk)
      */
