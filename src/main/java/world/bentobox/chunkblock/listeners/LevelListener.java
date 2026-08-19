@@ -27,6 +27,7 @@ import world.bentobox.chunkblock.events.ChunkRelockEvent;
 import world.bentobox.chunkblock.events.ChunkUnlockEvent;
 import world.bentobox.chunkblock.events.RingCompleteEvent;
 import world.bentobox.level.events.IslandLevelCalculatedEvent;
+import world.bentobox.level.events.IslandPreLevelEvent;
 
 /**
  * Watches island level changes from the Level addon. Levels are chunk currency here:
@@ -42,6 +43,27 @@ public class LevelListener implements Listener {
 
     public LevelListener(ChunkBlock addon) {
         this.addon = addon;
+    }
+
+    /**
+     * Shrinks the island's protection range to cover only the unlocked chunks so the
+     * Level addon scans the playable area instead of the entire 240-block default.
+     * The calculator reads the range in the same tick; the original is restored on
+     * the next tick.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onIslandPreLevel(IslandPreLevelEvent e) {
+        Island island = e.getIsland();
+        if (island == null || !addon.inWorld(island.getWorld())) {
+            return;
+        }
+        int ring = addon.getChunkManager().currentRing(island);
+        int needed = ring * 16 + ChunkManager.CHUNK_CENTER;
+        int stored = island.getProtectionRange();
+        if (needed < stored) {
+            island.setProtectionRange(needed);
+            Bukkit.getScheduler().runTask(addon.getPlugin(), () -> island.setProtectionRange(stored));
+        }
     }
 
     /**
