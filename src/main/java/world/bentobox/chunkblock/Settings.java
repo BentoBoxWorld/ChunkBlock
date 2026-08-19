@@ -314,8 +314,9 @@ public class Settings implements WorldSettings {
     @ConfigComment("Admins can change protection sizes for players individually using /chadmin range set <player> <new range>")
     @ConfigComment("or set this permission: chunkblock.island.range.<number>")
     @ConfigComment("ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).")
+    @ConfigComment("With max-chunks 441 (21x21, ring 10) the minimum needed is 168.")
     @ConfigEntry(path = "world.protection-range")
-    private int islandProtectionRange = 240;
+    private int islandProtectionRange = 168;
 
     @ConfigComment("Start islands at these coordinates. This is where new islands will start in the")
     @ConfigComment("world. These must be a factor of your island distance, but the plugin will auto")
