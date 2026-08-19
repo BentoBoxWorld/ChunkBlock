@@ -3,6 +3,7 @@ package world.bentobox.chunkblock.listeners;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,7 @@ import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.events.ChunkRelockEvent;
 import world.bentobox.chunkblock.events.ChunkUnlockEvent;
 import world.bentobox.chunkblock.events.RingCompleteEvent;
+import world.bentobox.level.events.IslandPreLevelEvent;
 
 /**
  * Tests the credit-announcement and LIFO re-lock flows in {@link LevelListener} and the
@@ -214,6 +216,45 @@ class LevelListenerTest extends CommonTestSetup {
         listener.onIslandResetted(event);
         assertEquals(0, data.getHighestRingRewarded());
         assertEquals(1, data.getUnlockedChunkCount());
+    }
+
+    @Test
+    void testPreLevelShrinksProtectionRangeToUnlockedArea() {
+        when(island.getProtectionRange()).thenReturn(240);
+        // Only center chunk is unlocked → ring 0 → needed = 8
+        IslandPreLevelEvent pre = new IslandPreLevelEvent(uuid, island);
+        listener.onIslandPreLevel(pre);
+        verify(island).setProtectionRange(ChunkManager.CHUNK_CENTER);
+        // Restore scheduled for next tick
+        verify(sch).runTask(any(), any(Runnable.class));
+    }
+
+    @Test
+    void testPreLevelRangeMatchesCurrentRing() {
+        when(island.getProtectionRange()).thenReturn(240);
+        level = 8;
+        claimRingOne();
+        // Ring 1 unlocked → needed = 1 * 16 + 8 = 24
+        IslandPreLevelEvent pre = new IslandPreLevelEvent(uuid, island);
+        listener.onIslandPreLevel(pre);
+        verify(island).setProtectionRange(24);
+    }
+
+    @Test
+    void testPreLevelSkipsWhenRangeAlreadySmallEnough() {
+        when(island.getProtectionRange()).thenReturn(8);
+        IslandPreLevelEvent pre = new IslandPreLevelEvent(uuid, island);
+        listener.onIslandPreLevel(pre);
+        verify(island, never()).setProtectionRange(anyInt());
+    }
+
+    @Test
+    void testPreLevelIgnoresOtherWorlds() {
+        when(addon.inWorld(world)).thenReturn(false);
+        when(island.getProtectionRange()).thenReturn(240);
+        IslandPreLevelEvent pre = new IslandPreLevelEvent(uuid, island);
+        listener.onIslandPreLevel(pre);
+        verify(island, never()).setProtectionRange(anyInt());
     }
 
     /** Claims and celebrates all eight chunks of ring 1, closing it with the last one */
