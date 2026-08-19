@@ -26,9 +26,17 @@ protection:
         <aqua>Muestra un estado
         para cada fase
         en la Barra de Acción.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Reclamar Bloques
+      description: |-
+        <aqua>Rango que puede gastar el
+        crédito de nivel de la isla
+        para reclamar nuevos bloques.</aqua>
+      hint: "<red>¡Tu rango no puede reclamar bloques para esta isla!</red>"
 chunkblock:
   bossbar:
     title: Bloques restantes
+    title-prefix: "[title] | "
     status: '<green>Bloques de fase </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,6 +44,41 @@ chunkblock:
   actionbar:
     status: "<green>Fase: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Bloques: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Progreso: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>La barra de acción no está activa para esta isla</red>"
+  trophies:
+    awarded: "<gold><bold>Trofeo ganado: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Tu isla ganó el título </yellow>[title]<yellow> — actívalo y desactívalo con </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Este bloque está bloqueado.</red>"
+    locked: "<red>No puedes tocar eso — el bloque está bloqueado.</red>"
+    claim-hint: "<yellow>Golpea el borde para reclamar este bloque por </yellow><aqua>[cost] </aqua><yellow>nivel(es)! Tienes </yellow><aqua>[credit] </aqua><yellow>nivel(es) de crédito.</yellow>"
+    claim-confirm: "<yellow>¿Reclamar este bloque por </yellow><aqua>[cost] </aqua><yellow>nivel(es)? Eso te deja </yellow><aqua>[after] </aqua><yellow>nivel(es) de crédito. </yellow><gold>Agáchate y golpea el borde de nuevo </gold><yellow>dentro de </yellow><aqua>[seconds]s </aqua><yellow>para confirmar.</yellow>"
+    no-credit: "<red>Necesitas </red><aqua>[needed] </aqua><red>más nivel(es) de crédito para reclamar este bloque.</red>"
+    beyond-limit: "<red>Este bloque está más allá del área de protección de tu isla.</red>"
+    claimed: "<green><bold>¡Bloque reclamado! </bold>Tu isla ahora tiene </green><aqua>[number] </aqua><green>bloques. Crédito restante: </green><aqua>[credit] </aqua><green>nivel(es).</green>"
+    credit: "<green>¡Puedes reclamar </green><aqua>[count] </aqua><green>bloque(s) más! Ve a tu borde y golpéalo donde quieras crecer.</green>"
+    relocked: "<red>El nivel de tu isla bajó — [count] bloque(s) re-bloqueado(s), el más nuevo primero. ¡Recupera los niveles para reclamarlos de nuevo!</red>"
+    ejected: "<red>El bloque en el que estabas se bloqueó de nuevo, así que fuiste trasladado a un lugar seguro.</red>"
+    max-reached: "<light_purple>¡Tu isla ha alcanzado su tamaño máximo de [number] bloques!</light_purple>"
+    ring-complete: "<gold><bold>¡Anillo [ring] completado! </bold>Todo el anillo alrededor de tu isla es tuyo — </gold><aqua>[chunks] </aqua><gold>bloques en total.</gold>"
+    ring-broadcast: "<gold>La isla de [name] ha cerrado el anillo </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>¡bloques y sigue creciendo!</gold>"
+    rings: "<green>Anillos completados: </green><aqua>[rings] </aqua><green>de </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Anillo [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> bloques restantes.</yellow>"
+    sethome-denied: "<red>No puedes establecer un hogar en un bloque bloqueado.</red>"
+    info: "<green>Bloques: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Crédito: </green><aqua>[credit] </aqua><green>nivel(es) — un bloque cuesta </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Territorio de tu isla ([unlocked]/[max] bloques):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ tuyo </green><yellow>▣ reclamable ([cost] nivel(es) cada uno) </yellow><gray>□ bloqueado </gray><gold>◎ centro </gold><aqua>◆ tú</aqua>"
+      you-are-here: "<aqua>Estás en el bloque marcado.</aqua>"
+    dialog:
+      close: "<white>Cerrar"
+      tooltip:
+        center: "<gold>El bloque central — tu bloque mágico está aquí.</gold>"
+        owned: "<green>Bloque [x], [z] — tuyo.</green>"
+        claimable: "<yellow>Bloque [x], [z] — reclamable por <aqua>[cost]</aqua> nivel(es). Ve a ese borde y golpéalo.</yellow>"
+        no-credit: "<yellow>Bloque [x], [z] — cuesta <aqua>[cost]</aqua> nivel(es). Necesitas <red>[needed]</red> más nivel(es) de crédito.</yellow>"
+        locked: "<gray>Bloque [x], [z] — bloqueado. Reclama tu camino hacia él.</gray>"
+        you-are-here: "<aqua>Estás parado aquí.</aqua>"
   commands:
     admin:
       setcount:
@@ -61,6 +104,45 @@ chunkblock:
           Muestra una comprobación de las probabilidades de la fase en la
           consola
         see-console: '<green>Revisa la consola para ver el informe</green>'
+      bypass:
+        description: "alternar la aplicación de bloqueos de bloques para ti mismo"
+        "on": "<green>Ahora evitas bloqueos de bloques. Los efectos visuales de los bordes se ocultan para ti.</green>"
+        "off": "<green>Los bloqueos de bloques se aplican a ti nuevamente.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "inspecciona los bloques desbloqueados de un jugador o reinícialos al inicio"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>bloques, </green><aqua>[spent] </aqua><green>nivel(es) gastado(s), </green><aqua>[credit] </aqua><green>crédito.</green>"
+        reset: "<green>Los bloques de [name] fueron re-bloqueados solo al bloque central.</green>"
+      phases:
+        description: "abre el editor de orden de fases"
+        no-index: "<red>No hay índice de fases cargado, por lo que las fases no se pueden reordenar</red>"
+        saved: "<green>Orden de fases guardado y aplicado</green>"
+        save-failed: "<red>¡No se pudo guardar el orden de fases! Ver consola para errores</red>"
+        gui:
+          title: "<dark_green>Orden de Fases</dark_green>"
+          info-title: "<white>Cómo usar</white>"
+          instructions: |-
+            <gray>Haz clic en una fase para levantarla,
+            luego haz clic donde debe ir.
+            Haz clic derecho para alternar una fase
+            encendida o apagada.</gray>
+          repeat: "<gray>Después de la última fase, el conteo salta a </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Inicio: </gray><aqua>[number]</aqua>"
+          length: "<gray>Longitud: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Deshabilitado</red>"
+          version-locked: "<red>Requiere Minecraft [version]+</red>"
+          pick-up: "<yellow>Haz clic para mover</yellow>"
+          toggle: "<yellow>Haz clic derecho para alternar</yellow>"
+          set-length: "<yellow>Shift+clic izquierdo para establecer longitud</yellow>"
+          drop-here: "<yellow>Haz clic para soltar aquí</yellow>"
+          drop-at-end: "<green>Soltar al final</green>"
+          held: "<yellow>Moviendo: [name]</yellow>"
+          put-back: "<yellow>Haz clic para devolver</yellow>"
+          enter-length: "<yellow>Ingresa una nueva longitud en el chat para </yellow><green>[name] </green><yellow>- actualmente es </yellow><aqua>[number] </aqua><yellow>bloques. Escribe </yellow><red>cancel </red><yellow>para mantenerlo.</yellow>"
+          invalid-length: "<red>La longitud debe ser un número entero mayor que 0</red>"
+          length-cancelled: "<red>Longitud no cambiada</red>"
+          cancel-word: "cancel"
     count:
       description: Muestra el número de bloques minados y la fase correspondiente
       info: '<green>Tienes </green><aqua>[number] bloques minados en la fase </aqua><green>[name]</green>'
@@ -89,6 +171,31 @@ chunkblock:
       description: reaparece el bloque mágico en situaciones en las que desaparece
       block-exist: '<green>Block existe, no requirió reaparición. Te lo marqué.</green>'
       block-respawned: '& un bloque reapareció.'
+    chunks:
+      description: "muestra tus bloques desbloqueados y un mapa de tu territorio"
+    ledger:
+      description: "mostrar las contribuciones de los miembros del equipo"
+      parameters: "[days]"
+      header: "<green>Registro de Contribuciones de la Isla </green><gray>([window])</gray>"
+      all-time: "todo el tiempo"
+      last-days: "últimos [days] días"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> bloques, </gray><green>[chunks]</green><gray> fragmentos, </gray><green>[rings]</green><gray> anillos</gray>"
+      total: "<gold>Total: </gold><green>[blocks]</green><gold> bloques, </gold><green>[chunks]</green><gold> fragmentos, </gold><green>[rings]</green><gold> anillos</gold>"
+      no-activity: "<gray>Aún no se ha registrado actividad.</gray>"
+    title:
+      description: "alternar el título de tu isla encendido/apagado, o elegir uno"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trofeos de tu isla:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — título </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Tu isla aún no ha ganado ningún trofeo.</gray>"
+      active: "<green>Título activo: </green>[title]"
+      no-active: "<gray>Ningún título está activo. Elige uno con </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>El título de tu isla es ahora </green>[title]<green>.</green>"
+      cleared: "<green>Tu isla ya no muestra un título.</green>"
+      toggled-on: "<green>El título de la isla </green>[title]<green> ahora se muestra.</green>"
+      toggled-off: "<yellow>El título de la isla </yellow>[title]<yellow> ahora está oculto.</yellow>"
+      not-earned: "<red>Tu isla no ha ganado un trofeo con ese título.</red>"
   phase:
     insufficient-level: '<red>¡Tu nivel de isla es demasiado bajo para seguir! Este debe ser de [number].</red>'
     insufficient-funds: '<red>¡Tus fondos son insuficientes! Debes tener [number].</red>'

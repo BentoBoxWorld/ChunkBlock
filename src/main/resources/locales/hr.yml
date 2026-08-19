@@ -26,9 +26,17 @@ protection:
         <aqua>Prikazuje status
         za svaku fazu
         u Traci Akcije.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Zahtjevi Dijelove
+      description: |-
+        <aqua>Rang koji može trošiti
+        otočnu razinu kredita
+        za zahtijevanje novih dijelova.</aqua>
+      hint: "<red>Vaš rang ne može zahtijevati dijelove za ovaj otok!</red>"
 chunkblock:
   bossbar:
     title: Preostali blokovi
+    title-prefix: "[title] | "
     status: '<green>Fazni blokovi </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,8 +44,106 @@ chunkblock:
   actionbar:
     status: "<green>Faza: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blokovi: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Napredak: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Akcijska traka nije aktivna za ovaj otok</red>"
+  trophies:
+    awarded: "<gold><bold>Trofej osvojen: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Vaš otok je osvojio naslov </yellow>[title]<yellow> — aktivirajte i deaktivirajte ga pomoću </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Taj dio je zaključan.</red>"
+    locked: "<red>Ne možeš to dodirnuti — dio je zaključan.</red>"
+    claim-hint: "<yellow>Udari granicu kako bi zahtijevao ovaj dio za </yellow><aqua>[cost] </aqua><yellow>razina(e)! Imaš </yellow><aqua>[credit] </aqua><yellow>razina(e) kredita.</yellow>"
+    claim-confirm: "<yellow>Zahtievaj ovaj dio za </yellow><aqua>[cost] </aqua><yellow>razina(e)? Ostaje ti </yellow><aqua>[after] </aqua><yellow>razina(e) kredita. </yellow><gold>Kradi se i ponovno udari granicu </gold><yellow>u roku </yellow><aqua>[seconds]s </aqua><yellow>da potvrdis.</yellow>"
+    no-credit: "<red>Trebas </red><aqua>[needed] </aqua><red>više razina(e) kredita za zahtijevanje ovog dijela.</red>"
+    beyond-limit: "<red>Taj dio je izvan zaštitnog područja vašeg otoka.</red>"
+    claimed: "<green><bold>Dio zahtjevljen! </bold>Vaš otok je sada </green><aqua>[number] </aqua><green>dijelova. Preostali kredit: </green><aqua>[credit] </aqua><green>razina(e).</green>"
+    credit: "<green>Možeš zahtijevati </green><aqua>[count] </aqua><green>više dijela(a)! Idi na svoju granicu i udari je gdje želiš rasti.</green>"
+    relocked: "<red>Razina vašeg otoka je pala — [count] dio(a) je ponovno zaključan, najnoviji prvi. Povrati razine da ih ponovno zahtijevaš!</red>"
+    ejected: "<red>Dio u kojem si bio je ponovno zaključan, pa si premješten na sigurno.</red>"
+    max-reached: "<light_purple>Vaš otok je dostigao maksimalnu veličinu od [number] dijelova!</light_purple>"
+    ring-complete: "<gold><bold>Prsten [ring] kompletan! </bold>Cijeli prsten oko vašeg otoka je tvoj — </gold><aqua>[chunks] </aqua><gold>dijelova ukupno.</gold>"
+    ring-broadcast: "<gold>[name]'s otok je zatvorio prsten </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>dijelova i nastavlja rasti!</gold>"
+    rings: "<green>Završeni prsteni: </green><aqua>[rings] </aqua><green>od </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Prsten [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> dijelova još.</yellow>"
+    sethome-denied: "<red>Ne možeš postaviti dom u zaključanom dijelu.</red>"
+    info: "<green>Dijelovi: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredit: </green><aqua>[credit] </aqua><green>razina(e) — dio stoji </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Vaše otočno područje ([unlocked]/[max] dijelova):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ tvoj </green><yellow>▣ zahtjeviv ([cost] razina(e) svaki) </yellow><gray>□ zaključan </gray><gold>◎ centar </gold><aqua>◆ ti</aqua>"
+      you-are-here: "<aqua>Nalazis se na označenom dijelu.</aqua>"
+    dialog:
+      close: "<white>Zatvori"
+      tooltip:
+        center: "<gold>Centralni dio — tvoj magični blok je ovdje."
+        owned: "<green>Dio [x], [z] — tvoj."
+        claimable: "<yellow>Dio [x], [z] — može se zahtijevati za <aqua>[cost]</aqua> razina(e). Idi na tu granicu i udari je."
+        no-credit: "<yellow>Dio [x], [z] — stoji <aqua>[cost]</aqua> razina(e). Trebas <red>[needed]</red> više razina(e) kredita."
+        locked: "<gray>Dio [x], [z] — zaključan. Zahtjevaj se prema njemu."
+        you-are-here: "<aqua>Stoji ovdje."
   commands:
+    chunks:
+      description: "prikaži svoje otključane dijelove i kartu vašeg teritorija"
+    ledger:
+      description: "prikaži doprinos članova tima"
+      parameters: "[days]"
+      header: "<green>Otočni Knjiga Doprinos </green><gray>([window])</gray>"
+      all-time: "svereme"
+      last-days: "zadnjih [days] dana"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> blokova, </gray><green>[chunks]</green><gray> dijelova, </gray><green>[rings]</green><gray> prstena</gray>"
+      total: "<gold>Ukupno: </gold><green>[blocks]</green><gold> blokova, </gold><green>[chunks]</green><gold> dijelova, </gold><green>[rings]</green><gold> prstena</gold>"
+      no-activity: "<gray>Nije zabilježena aktivnost.</gray>"
+    title:
+      description: "aktiviraj/deaktiviraj naslov vašeg otoka, ili odaberi jedan"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trofej vašeg otoka:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — naslov </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Vaš otok nije ainda osvojio nijedan trofej.</gray>"
+      active: "<green>Aktivni naslov: </green>[title]"
+      no-active: "<gray>Nema aktivnog naslova. Odaberi jedan s </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Naslov vašeg otoka je sada </green>[title]<green>.</green>"
+      cleared: "<green>Vaš otok više ne prikazuje naslov.</green>"
+      toggled-on: "<green>Otočni naslov </green>[title]<green> se sada prikazuje.</green>"
+      toggled-off: "<yellow>Otočni naslov </yellow>[title]<yellow> je sada skriven.</yellow>"
+      not-earned: "<red>Vaš otok nije osvojio trofej s tim naslovom.</red>"
     admin:
+      bypass:
+        description: "aktiviraj/deaktiviraj namjeru zaključavanja dijelova"
+        "on": "<green>Sada zaobilaziš zaključavanja dijelova. Vizualni elementi granice su skriveni za tebe.</green>"
+        "off": "<green>Zaključavanja dijelova se na tebe ponovno primjenjuju.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "ispitaj otključane dijelove igrača ili ih ponovno zaključaj na početak"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>dijelova, </green><aqua>[spent] </aqua><green>razina(e) potrošena, </green><aqua>[credit] </aqua><green>kredit.</green>"
+        reset: "<green>[name]'s dijelovi su ponovno zaključani samo na srednji dio.</green>"
+      phases:
+        description: "otvori uređivač reda faza"
+        no-index: "<red>Nema učitanog indeksa faza, pa faze ne mogu biti preuredene</red>"
+        saved: "<green>Red faza je sačuvan i primijenjen</green>"
+        save-failed: "<red>Nije moguće spremiti red faza! Pogledaj konzolu za greške</red>"
+        gui:
+          title: "<dark_green>Red Faza</dark_green>"
+          info-title: "<white>Kako se koristi</white>"
+          instructions: |-
+            <gray>Klikni na fazu da je podigneš,
+            zatim klikni gdje bi trebala ići.
+            Desni klik uključuje/isključuje fazu.</gray>
+          repeat: "<gray>Nakon posljednje faze brojač se premješta u </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Početak: </gray><aqua>[number]</aqua>"
+          length: "<gray>Dužina: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Onemogućeno</red>"
+          version-locked: "<red>Trebam Minecraft [version]+</red>"
+          pick-up: "<yellow>Klikni za pomicanje</yellow>"
+          toggle: "<yellow>Desni klik za prebacivanje</yellow>"
+          set-length: "<yellow>Shift-lijevi klik za postavljanje dužine</yellow>"
+          drop-here: "<yellow>Klikni za spuštanje ovdje</yellow>"
+          drop-at-end: "<green>Spusti na kraju</green>"
+          held: "<yellow>Pomicanje: [name]</yellow>"
+          put-back: "<yellow>Klikni za vraćanje</yellow>"
+          enter-length: "<yellow>Unesi novu dužinu u chat za </yellow><green>[name] </green><yellow>- trenutno je </yellow><aqua>[number] </aqua><yellow>blokova. Upiši </yellow><red>cancel </red><yellow>da ga održiš.</yellow>"
+          invalid-length: "<red>Dužina mora biti cijeli broj veći od 0</red>"
+          length-cancelled: "<red>Dužina nepromijenjena</red>"
+          cancel-word: "cancel"
       setcount:
         parameters: <ime> <broj>
         description: postavljanje broja blokova igrača

@@ -26,9 +26,17 @@ protection:
         <aqua>Hiển thị trạng thái
         cho mỗi giai đoạn
         trên Thanh Hành Động.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Yêu Cầu Khối
+      description: |-
+        <aqua>Cấp bậc có thể sử dụng
+        tín dụng cấp độ đảo để
+        yêu cầu những khối mới.</aqua>
+      hint: "<red>Cấp bậc của bạn không thể yêu cầu khối cho hòn đảo này!</red>"
 chunkblock:
   bossbar:
     title: Khối còn lại
+    title-prefix: "[title] | "
     status: '<green>Khối pha </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,7 +44,67 @@ chunkblock:
   actionbar:
     status: "<green>Giai đoạn: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Khối: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Tiến độ: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Thanh hành động không hoạt động cho hòn đảo này</red>"
+  trophies:
+    awarded: "<gold><bold>Chiến thắng được trao: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Hòn đảo của bạn đã kiếm được tiêu đề </yellow>[title]<yellow> — bật/tắt nó bằng cách sử dụng </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
+  chunks:
+    entry-denied: "<red>Khối đó bị khóa.</red>"
+    locked: "<red>Bạn không thể chạm vào đó — khối bị khóa.</red>"
+    claim-hint: "<yellow>Đánh vào biên giới để yêu cầu khối này cho </yellow><aqua>[cost] </aqua><yellow>cấp độ! Bạn có </yellow><aqua>[credit] </aqua><yellow>cấp độ tín dụng.</yellow>"
+    claim-confirm: "<yellow>Yêu cầu khối này cho </yellow><aqua>[cost] </aqua><yellow>cấp độ? Điều đó để lại cho bạn </yellow><aqua>[after] </aqua><yellow>cấp độ tín dụng. </yellow><gold>Ngồi xổm và đánh vào biên giới lần nữa </gold><yellow>trong </yellow><aqua>[seconds]s </aqua><yellow>để xác nhận.</yellow>"
+    no-credit: "<red>Bạn cần </red><aqua>[needed] </aqua><red>cấp độ tín dụng hơn để yêu cầu khối này.</red>"
+    beyond-limit: "<red>Khối đó vượt quá khu vực bảo vệ của hòn đảo bạn.</red>"
+    claimed: "<green><bold>Khối được yêu cầu! </bold>Hòn đảo của bạn bây giờ </green><aqua>[number] </aqua><green>khối. Tín dụng còn lại: </green><aqua>[credit] </aqua><green>cấp độ.</green>"
+    credit: "<green>Bạn có thể yêu cầu </green><aqua>[count] </aqua><green>khối nữa! Đi đến biên giới của bạn và đánh nó nơi bạn muốn phát triển.</green>"
+    relocked: "<red>Cấp độ hòn đảo của bạn đã giảm — [count] khối được khóa lại, những cái mới nhất trước. Lấy lại các cấp độ để yêu cầu lại!</red>"
+    ejected: "<red>Khối bạn đang ở bị khóa lại, nên bạn được di chuyển đến an toàn.</red>"
+    max-reached: "<light_purple>Hòn đảo của bạn đã đạt kích thước tối đa [number] khối!</light_purple>"
+    ring-complete: "<gold><bold>Vòng [ring] hoàn thành! </bold>Toàn bộ vòng quanh hòn đảo của bạn là của bạn — </gold><aqua>[chunks] </aqua><gold>khối tính cả.</gold>"
+    ring-broadcast: "<gold>Hòn đảo [name] đã đóng vòng </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>khối và vẫn đang phát triển!</gold>"
+    rings: "<green>Vòng hoàn thành: </green><aqua>[rings] </aqua><green> / </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Vòng [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> khối để đi.</yellow>"
+    sethome-denied: "<red>Bạn không thể đặt nhà ở khối bị khóa.</red>"
+    info: "<green>Khối: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Tín dụng: </green><aqua>[credit] </aqua><green>cấp độ — một khối chi phí </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Lãnh thổ hòn đảo của bạn ([unlocked]/[max] khối):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ của bạn </green><yellow>▣ có thể yêu cầu ([cost] cấp độ mỗi cái) </yellow><gray>□ khóa </gray><gold>◎ trung tâm </gold><aqua>◆ bạn</aqua>"
+      you-are-here: "<aqua>Bạn ở trên khối được đánh dấu.</aqua>"
+    dialog:
+      close: "<white>Đóng"
+      tooltip:
+        center: "<gold>Khối trung tâm — khối ma thuật của bạn ở đây.</gold>"
+        owned: "<green>Khối [x], [z] — của bạn.</green>"
+        claimable: "<yellow>Khối [x], [z] — có thể yêu cầu cho <aqua>[cost]</aqua> cấp độ. Đi đến biên giới đó và đánh nó.</yellow>"
+        no-credit: "<yellow>Khối [x], [z] — chi phí <aqua>[cost]</aqua> cấp độ. Bạn cần <red>[needed]</red> cấp độ tín dụng hơn.</yellow>"
+        locked: "<gray>Khối [x], [z] — khóa. Yêu cầu đường đi đến nó.</gray>"
+        you-are-here: "<aqua>Bạn đang đứng ở đây.</aqua>"
   commands:
+    chunks:
+      description: "hiển thị các khối đã mở khóa và bản đồ lãnh thổ của bạn"
+    ledger:
+      description: "hiển thị đóng góp thành viên nhóm"
+      parameters: "[ngày]"
+      header: "<green>Sổ Cái Đóng Góp Hòn Đảo </green><gray>([window])</gray>"
+      all-time: "tất cả thời gian"
+      last-days: "[days] ngày trước"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> khối, </gray><green>[chunks]</green><gray> khối, </gray><green>[rings]</green><gray> vòng</gray>"
+      total: "<gold>Tổng cộng: </gold><green>[blocks]</green><gold> khối, </gold><green>[chunks]</green><gold> khối, </gold><green>[rings]</green><gold> vòng</gold>"
+      no-activity: "<gray>Chưa có hoạt động nào được ghi lại.</gray>"
+    title:
+      description: "bật/tắt tiêu đề hòn đảo của bạn, hoặc chọn một"
+      parameters: "[danh sách | id-chiến thắng | không]"
+      header: "<green>Chiến thắng hòn đảo của bạn:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — tiêu đề </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Hòn đảo của bạn chưa kiếm được chiến thắng nào.</gray>"
+      active: "<green>Tiêu đề hoạt động: </green>[title]"
+      no-active: "<gray>Không có tiêu đề hoạt động. Chọn một với </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Tiêu đề hòn đảo của bạn bây giờ </green>[title]<green>.</green>"
+      cleared: "<green>Hòn đảo của bạn không còn hiển thị tiêu đề.</green>"
+      toggled-on: "<green>Tiêu đề hòn đảo </green>[title]<green> bây giờ đang hiển thị.</green>"
+      toggled-off: "<yellow>Tiêu đề hòn đảo </yellow>[title]<yellow> bây giờ bị ẩn.</yellow>"
+      not-earned: "<red>Hòn đảo của bạn chưa kiếm được chiến thắng với tiêu đề đó.</red>"
     admin:
       setcount:
         parameters: <tên> <số>
@@ -59,6 +127,45 @@ chunkblock:
           hiển thị kiểm tra sự đúng đắn của xác suất giao đoạn lên bảng điều
           khiển
         see-console: '<green>Xem bảng điều khiển cho báo cáo</green>'
+      bypass:
+        description: "bật/tắt thực thi khóa khối cho chính bạn"
+        "on": "<green>Bạn bây giờ bỏ qua khóa khối. Hình ảnh biên giới bị ẩn với bạn.</green>"
+        "off": "<green>Khóa khối áp dụng lại cho bạn.</green>"
+      chunks:
+        parameters: "<người chơi> [đặt lại]"
+        description: "kiểm tra các khối đã mở khóa của người chơi hoặc khóa lại chúng trở về lúc bắt đầu"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>khối, </green><aqua>[spent] </aqua><green>cấp độ đã sử dụng, </green><aqua>[credit] </aqua><green>tín dụng.</green>"
+        reset: "<green>Các khối của [name] được khóa lại quay trở về chỉ khối trung tâm.</green>"
+      phases:
+        description: "mở trình chỉnh sửa thứ tự giai đoạn"
+        no-index: "<red>Không có chỉ mục giai đoạn được tải, vì vậy không thể sắp xếp lại các giai đoạn</red>"
+        saved: "<green>Thứ tự giai đoạn được lưu và áp dụng</green>"
+        save-failed: "<red>Không thể lưu thứ tự giai đoạn! Xem bảng điều khiển để biết lỗi</red>"
+        gui:
+          title: "<dark_green>Thứ Tự Giai Đoạn</dark_green>"
+          info-title: "<white>Cách Sử Dụng</white>"
+          instructions: |-
+            <gray>Nhấp vào một giai đoạn để nhặt nó,
+            sau đó nhấp nơi nó sẽ đi.
+            Nhấp chuột phải để bật/tắt giai đoạn
+            bật hoặc tắt.</gray>
+          repeat: "<gray>Sau giai đoạn cuối cùng bộ đếm nhảy tới </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Bắt đầu: </gray><aqua>[number]</aqua>"
+          length: "<gray>Độ dài: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Vô Hiệu Hóa</red>"
+          version-locked: "<red>Cần Minecraft [version]+</red>"
+          pick-up: "<yellow>Nhấp để di chuyển</yellow>"
+          toggle: "<yellow>Nhấp chuột phải để bật/tắt</yellow>"
+          set-length: "<yellow>Shift+nhấp chuột trái để đặt độ dài</yellow>"
+          drop-here: "<yellow>Nhấp để thả ở đây</yellow>"
+          drop-at-end: "<green>Thả ở cuối</green>"
+          held: "<yellow>Di chuyển: [name]</yellow>"
+          put-back: "<yellow>Nhấp để đặt lại</yellow>"
+          enter-length: "<yellow>Nhập độ dài mới trong trò chuyện cho </yellow><green>[name] </green><yellow>- hiện tại là </yellow><aqua>[number] </aqua><yellow> khối. Nhập </yellow><red>cancel </red><yellow> để giữ nó.</yellow>"
+          invalid-length: "<red>Độ dài phải là một số nguyên lớn hơn 0</red>"
+          length-cancelled: "<red>Độ dài không thay đổi</red>"
+          cancel-word: "cancel"
     count:
       description: hiển thị số khối và giai đoạn
       info: '<green>Bạn đang ở trên khối </green><aqua>[number] trong giai đoạn </aqua><green>[name]</green>'

@@ -26,9 +26,17 @@ protection:
         <aqua>Zeigt einen Status
         für jede Phase
         in der Action-Leiste.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Chunks Beanspruchen
+      description: |-
+        <aqua>Rang, der die Levelguthaben
+        der Insel ausgeben kann,
+        um neue Chunks zu beanspruchen.</aqua>
+      hint: "<red>Dein Rang kann für diese Insel keine Chunks beanspruchen!</red>"
 chunkblock:
   bossbar:
     title: Verbleibende Blöcke
+    title-prefix: "[title] | "
     status: '<green>Phasenblöcke </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,6 +44,41 @@ chunkblock:
   actionbar:
     status: "<green>Phase: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Blöcke: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Fortschritt: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Action Bar ist für diese Insel nicht aktiv</red>"
+  trophies:
+    awarded: "<gold><bold>Trophäe verdient: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Ihre Insel hat den Titel </yellow>[title]<yellow> verdient — schalten Sie ihn mit </yellow><aqua>/ch title</aqua><yellow> ein und aus.</yellow>"
+  chunks:
+    entry-denied: "<red>Dieser Chunk ist gesperrt.</red>"
+    locked: "<red>Du kannst das nicht anfassen — der Chunk ist gesperrt.</red>"
+    claim-hint: "<yellow>Schlag die Grenze, um diesen Chunk für </yellow><aqua>[cost] </aqua><yellow>Level zu beanspruchen! Du hast </yellow><aqua>[credit] </aqua><yellow>Level Guthaben.</yellow>"
+    claim-confirm: "<yellow>Diesen Chunk für </yellow><aqua>[cost] </aqua><yellow>Level beanspruchen? Das hinterlässt dir </yellow><aqua>[after] </aqua><yellow>Level Guthaben. </yellow><gold>Schleichen und schlag die Grenze erneut </gold><yellow>innerhalb von </yellow><aqua>[seconds]s </aqua><yellow>um zu bestätigen.</yellow>"
+    no-credit: "<red>Du brauchst </red><aqua>[needed] </aqua><red>mehr Level Guthaben, um diesen Chunk zu beanspruchen.</red>"
+    beyond-limit: "<red>Dieser Chunk liegt über dem Schutzgebiet deiner Insel hinaus.</red>"
+    claimed: "<green><bold>Chunk beansprucht! </bold>Deine Insel hat jetzt </green><aqua>[number] </aqua><green>Chunks. Verbleibendes Guthaben: </green><aqua>[credit] </aqua><green>Level.</green>"
+    credit: "<green>Du kannst </green><aqua>[count] </aqua><green>weitere Chunk(s) beanspruchen! Geh zu deiner Grenze und schlag sie dort, wo du wachsen möchtest.</green>"
+    relocked: "<red>Dein Insellevel ist gesunken — [count] Chunk(s) erneut gesperrt, neueste zuerst. Gewinne die Level zurück, um sie erneut zu beanspruchen!</red>"
+    ejected: "<red>Der Chunk, in dem du warst, wurde erneut gesperrt, daher wurdest du in Sicherheit verlegt.</red>"
+    max-reached: "<light_purple>Deine Insel hat die maximale Größe von [number] Chunks erreicht!</light_purple>"
+    ring-complete: "<gold><bold>Ring [ring] vollständig! </bold>Der ganze Ring um deine Insel gehört dir — </gold><aqua>[chunks] </aqua><gold>Chunks insgesamt.</gold>"
+    ring-broadcast: "<gold>Die Insel von [name] hat Ring </gold><aqua>[ring] </aqua><gold>geschlossen — </gold><aqua>[chunks] </aqua><gold>Chunks und wächst noch immer!</gold>"
+    rings: "<green>Vervollständigte Ringe: </green><aqua>[rings] </aqua><green>von </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Ring [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> Chunks bis zum Ende.</yellow>"
+    sethome-denied: "<red>Du kannst keinen Heimatort in einem gesperrten Chunk setzen.</red>"
+    info: "<green>Chunks: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Guthaben: </green><aqua>[credit] </aqua><green>Level — ein Chunk kostet </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Dein Inselsgebiet ([unlocked]/[max] Chunks):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ dein </green><yellow>▣ zu beanspruchen ([cost] Level(s) je) </yellow><gray>□ gesperrt </gray><gold>◎ Mitte </gold><aqua>◆ du</aqua>"
+      you-are-here: "<aqua>Du bist auf dem markierten Chunk.</aqua>"
+    dialog:
+      close: "<white>Schließen"
+      tooltip:
+        center: "<gold>Der mittlere Chunk — dein Zauberblock ist hier.</gold>"
+        owned: "<green>Chunk [x], [z] — deiner.</green>"
+        claimable: "<yellow>Chunk [x], [z] — zu beanspruchen für <aqua>[cost]</aqua> Level. Geh zu dieser Grenze und schlag sie."
+        no-credit: "<yellow>Chunk [x], [z] — kostet <aqua>[cost]</aqua> Level. Du brauchst <red>[needed]</red> mehr Level Guthaben.</yellow>"
+        locked: "<gray>Chunk [x], [z] — gesperrt. Beanspruche deinen Weg dorthin.</gray>"
+        you-are-here: "<aqua>Du stehst hier.</aqua>"
   commands:
     admin:
       setcount:
@@ -61,6 +104,45 @@ chunkblock:
           Zeigen Sie eine Überprüfung der Phasenwahrscheinlichkeiten in der
           Konsole an
         see-console: '<green>Den Bericht finden Sie in der Konsole</green>'
+      bypass:
+        description: "Durchsetzung von Chunk-Locks für dich selbst umschalten"
+        "on": "<green>Du umgehst jetzt Chunk-Locks. Grenzenvisionen sind für dich verborgen.</green>"
+        "off": "<green>Chunk-Locks gelten wieder für dich.</green>"
+      chunks:
+        parameters: "<player> [reset]"
+        description: "freigeschaltete Chunks eines Spielers inspizieren oder auf den Anfang zurücksetzen"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>Chunks, </green><aqua>[spent] </aqua><green>Level ausgegeben, </green><aqua>[credit] </aqua><green>Guthaben.</green>"
+        reset: "<green>Chunks von [name] wurden auf nur den mittleren Chunk zurückgesetzt.</green>"
+      phases:
+        description: "öffne den Editor für die Reihenfolge der Phasen"
+        no-index: "<red>Kein Phasenindex geladen, daher können Phasen nicht neu geordnet werden</red>"
+        saved: "<green>Phasenreihenfolge gespeichert und angewendet</green>"
+        save-failed: "<red>Phasenreihenfolge konnte nicht gespeichert werden! Fehler in der Konsole</red>"
+        gui:
+          title: "<dark_green>Reihenfolge der Phasen</dark_green>"
+          info-title: "<white>Wie man es benutzt</white>"
+          instructions: |-
+            <gray>Klicke auf eine Phase um sie zu nehmen,
+            dann klicke wo sie hin sollte.
+            Rechtsklick schaltet eine Phase
+            ein oder aus.</gray>
+          repeat: "<gray>Nach der letzten Phase springt die Zählung zu </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Start: </gray><aqua>[number]</aqua>"
+          length: "<gray>Länge: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Deaktiviert</red>"
+          version-locked: "<red>Benötigt Minecraft [version]+</red>"
+          pick-up: "<yellow>Klick um zu verschieben</yellow>"
+          toggle: "<yellow>Rechtsklick zum Umschalten</yellow>"
+          set-length: "<yellow>Shift+Linksklick zum Einstellen der Länge</yellow>"
+          drop-here: "<yellow>Klick um hier zu fallen</yellow>"
+          drop-at-end: "<green>Am Ende fallen lassen</green>"
+          held: "<yellow>Verschieben: [name]</yellow>"
+          put-back: "<yellow>Klick zum Zurückgeben</yellow>"
+          enter-length: "<yellow>Geben Sie eine neue Länge im Chat für </yellow><green>[name] </green><yellow>ein - derzeit </yellow><aqua>[number] </aqua><yellow>Blöcke. Geben Sie </yellow><red>cancel </red><yellow>ein um zu behalten.</yellow>"
+          invalid-length: "<red>Die Länge muss eine ganze Zahl größer als 0 sein</red>"
+          length-cancelled: "<red>Länge nicht geändert</red>"
+          cancel-word: "cancel"
     count:
       description: Zeige die Blockanzahl und Phase
       info: '<green>Sie befinden sich in der Phase [name] in Block </green><aqua>[number]</aqua>'
@@ -91,6 +173,31 @@ chunkblock:
         verschwindet
       block-exist: '<yellow>in Block existiert, musste nicht neu gestartet werden. Ich habe es für dich markiert.</yellow>'
       block-respawned: '<green>Block wieder aufgetaucht.</green>'
+    chunks:
+      description: "zeige deine freigeschalteten Chunks und eine Karte deines Gebiets"
+    ledger:
+      description: "zeige die Beiträge der Teammitglieder"
+      parameters: "[days]"
+      header: "<green>Inselkontributionsbuch </green><gray>([window])</gray>"
+      all-time: "die ganze Zeit"
+      last-days: "letzte [days] Tage"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> Blöcke, </gray><green>[chunks]</green><gray> Chunks, </gray><green>[rings]</green><gray> Ringe</gray>"
+      total: "<gold>Gesamt: </gold><green>[blocks]</green><gold> Blöcke, </gold><green>[chunks]</green><gold> Chunks, </gold><green>[rings]</green><gold> Ringe</gold>"
+      no-activity: "<gray>Bislang keine Aktivität aufgezeichnet.</gray>"
+    title:
+      description: "den Titel deiner Insel ein/ausschalten oder einen auswählen"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trophäen deiner Insel:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — Titel </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Deine Insel hat noch keine Trophäen verdient.</gray>"
+      active: "<green>Aktiver Titel: </green>[title]"
+      no-active: "<gray>Kein Titel ist aktiv. Wählen Sie einen mit </gray><aqua>/ch title</aqua><gray> aus.</gray>"
+      set: "<green>Der Titel deiner Insel ist jetzt </green>[title]<green>.</green>"
+      cleared: "<green>Deine Insel zeigt keinen Titel mehr.</green>"
+      toggled-on: "<green>Inseltitel </green>[title]<green> wird jetzt angezeigt.</green>"
+      toggled-off: "<yellow>Inseltitel </yellow>[title]<yellow> ist jetzt verborgen.</yellow>"
+      not-earned: "<red>Deine Insel hat eine Trophäe mit diesem Titel nicht verdient.</red>"
   phase:
     insufficient-level: '<red>Ihr Insellevel ist zu niedrig, um fortzufahren! Es muss [number] sein.</red>'
     insufficient-funds: '<red>Ihr Guthaben ist zu gering, um fortzufahren! Sie müssen [number] sein.</red>'

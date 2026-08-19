@@ -26,9 +26,17 @@ protection:
         <aqua>Pokazuje status
         dla każdej fazy
         na Pasku Akcji.</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Rościj Kawałki
+      description: |-
+        <aqua>Ranga, która może wydać
+        kredyt poziomu wyspy
+        do roszczenia nowych kawałków.</aqua>
+      hint: "<red>Twoja ranga nie może rościć kawałków dla tej wyspy!</red>"
 chunkblock:
   bossbar:
     title: Pozostałe bloki
+    title-prefix: "[title] | "
     status: '<green>Bloki fazowe </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -36,6 +44,41 @@ chunkblock:
   actionbar:
     status: "<green>Faza: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>Bloki: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>Postęp: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>Pasek akcji nie jest aktywny dla tej wyspy</red>"
+  chunks:
+    entry-denied: "<red>Ten kawałek jest zablokowany.</red>"
+    locked: "<red>Nie możesz go dotknąć — kawałek jest zablokowany.</red>"
+    claim-hint: "<yellow>Uderz w granicę, aby rościć ten kawałek za </yellow><aqua>[cost] </aqua><yellow>poziomu! Masz </yellow><aqua>[credit] </aqua><yellow>poziomów kredytu.</yellow>"
+    claim-confirm: "<yellow>Rościć ten kawałek za </yellow><aqua>[cost] </aqua><yellow>poziomu? Zostawia Ci </yellow><aqua>[after] </aqua><yellow>poziomów kredytu. </yellow><gold>Ukradkiem i uderz w granicę ponownie </gold><yellow>w ciągu </yellow><aqua>[seconds]s </aqua><yellow>aby potwierdzić.</yellow>"
+    no-credit: "<red>Potrzebujesz </red><aqua>[needed] </aqua><red>więcej poziomów kredytu, aby rościć ten kawałek.</red>"
+    beyond-limit: "<red>Ten kawałek jest poza obszarem ochrony Twojej wyspy.</red>"
+    claimed: "<green><bold>Kawałek roścignięty! </bold>Twoja wyspa ma teraz </green><aqua>[number] </aqua><green>kawałków. Pozostały kredyt: </green><aqua>[credit] </aqua><green>poziomów.</green>"
+    credit: "<green>Możesz rościć </green><aqua>[count] </aqua><green>więcej kawałków! Idź do swojej granicy i uderz tam, gdzie chcesz rosnąć.</green>"
+    relocked: "<red>Poziom Twojej wyspy spadł — [count] kawałków ponownie zablokowanych, najnowsze najpierw. Odzyskaj poziomy, aby je odblokować!</red>"
+    ejected: "<red>Kawałek, w którym byłeś, ponownie się zablokował, więc zostałeś przeniesiony w bezpieczne miejsce.</red>"
+    max-reached: "<light_purple>Wyspa osiągnęła maksymalny rozmiar [number] kawałków!</light_purple>"
+    ring-complete: "<gold><bold>Pierścień [ring] ukończony! </bold>Cały pierścień wokół Twojej wyspy jest Twój — </gold><aqua>[chunks] </aqua><gold>kawałków w sumie.</gold>"
+    ring-broadcast: "<gold>Wyspa [name] zamknęła pierścień </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>kawałków i wciąż rośnie!</gold>"
+    rings: "<green>Pierścienie ukończone: </green><aqua>[rings] </aqua><green>z </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Pierścień [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> kawałków zostało.</yellow>"
+    sethome-denied: "<red>Nie możesz ustawić domu w zablokowanym kawałku.</red>"
+    info: "<green>Kawałki: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Kredyt: </green><aqua>[credit] </aqua><green>poziomów — kawałek kosztuje </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Terytorium Twojej wyspy ([unlocked]/[max] kawałków):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ Twój </green><yellow>▣ Możliwy do roszczenia ([cost] poziomu każdy) </yellow><gray>□ Zablokowany </gray><gold>◎ Centrum </gold><aqua>◆ Ty</aqua>"
+      you-are-here: "<aqua>Jesteś na zaznaczonym kawałku.</aqua>"
+    dialog:
+      close: "<white>Zamknij"
+      tooltip:
+        center: "<gold>Kawałek centralny — Twój magiczny blok jest tutaj."
+        owned: "<green>Kawałek [x], [z] — Twój."
+        claimable: "<yellow>Kawałek [x], [z] — możliwy do roszczenia za <aqua>[cost]</aqua> poziomów. Idź do tej granicy i uderz ją."
+        no-credit: "<yellow>Kawałek [x], [z] — kosztuje <aqua>[cost]</aqua> poziomów. Potrzebujesz <red>[needed]</red> więcej poziomów kredytu."
+        locked: "<gray>Kawałek [x], [z] — zablokowany. Rość swoją ścieżkę do niego."
+        you-are-here: "<aqua>Stoisz tutaj."
+  trophies:
+    awarded: "<gold><bold>Trofeum uzyskane: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Twoja wyspa uzyskała tytuł </yellow>[title]<yellow> — przełączaj go w </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
   commands:
     admin:
       setcount:
@@ -57,6 +100,70 @@ chunkblock:
         parameters: <faza>
         description: wyświetlać kontrolę poprawności prawdopodobieństwa fazy w konsoli
         see-console: '<green>Zobacz raport w konsoli</green>'
+      bypass:
+        description: "przełącz egzekwowanie blokady kawałków na siebie"
+        'on': "<green>Teraz omijasz blokady kawałków. Wizualne granice są ukryte dla Ciebie.</green>"
+        'off': "<green>Blokady kawałków ponownie się do Ciebie stosują.</green>"
+      chunks:
+        parameters: "<gracz> [reset]"
+        description: "zbadaj odblokowane kawałki gracza lub zablokuj je z powrotem do początku"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>kawałków, </green><aqua>[spent] </aqua><green>wydanych poziomów, </green><aqua>[credit] </aqua><green>kredytu.</green>"
+        reset: "<green>Kawałki [name] zostały ponownie zablokowane do tylko kawałka centralnego.</green>"
+      phases:
+        description: "otwórz edytor kolejności faz"
+        no-index: "<red>Indeks fazy nie jest załadowany, więc nie można zmienić kolejności faz</red>"
+        saved: "<green>Kolejność faz została zapisana i zastosowana</green>"
+        save-failed: "<red>Nie udało się zapisać kolejności faz! Sprawdź błędy w konsoli</red>"
+        gui:
+          title: "<dark_green>Kolejność Faz</dark_green>"
+          info-title: "<white>Jak używać</white>"
+          instructions: |-
+            <gray>Kliknij fazę, aby ją podnieść,
+            a następnie kliknij miejsce, gdzie powinna być.
+            Prawy przycisk myszy przełącza fazę
+            w tę/tamtą stronę.</gray>
+          repeat: "<gray>Po ostatniej fazie liczba przechodzi do </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Start: </gray><aqua>[number]</aqua>"
+          length: "<gray>Długość: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Wyłączone</red>"
+          version-locked: "<red>Wymaga Minecraft [version]+</red>"
+          pick-up: "<yellow>Kliknij, aby przenieść</yellow>"
+          toggle: "<yellow>Prawy klik, aby przełączyć</yellow>"
+          set-length: "<yellow>Shift + lewy klik, aby ustawić długość</yellow>"
+          drop-here: "<yellow>Kliknij, aby upuścić tutaj</yellow>"
+          drop-at-end: "<green>Upuść na koniec</green>"
+          held: "<yellow>Przenoszenie: [name]</yellow>"
+          put-back: "<yellow>Kliknij, aby odłożyć</yellow>"
+          enter-length: "<yellow>Wprowadź nową długość na czacie dla </yellow><green>[name] </green><yellow>- aktualnie </yellow><aqua>[number] </aqua><yellow>bloków. Wpisz </yellow><red>cancel </red><yellow>aby zachować.</yellow>"
+          invalid-length: "<red>Długość musi być liczbą całkowitą większą od 0</red>"
+          length-cancelled: "<red>Długość nie zmieniona</red>"
+          cancel-word: "cancel"
+    chunks:
+      description: "pokaż swoje odblokowane kawałki i mapę swojego terytorium"
+    ledger:
+      description: "pokaż wkład członków zespołu"
+      parameters: "[days]"
+      header: "<green>Rejestr Wkład Wyspy </green><gray>([window])</gray>"
+      all-time: "cały czas"
+      last-days: "ostatnie [days] dni"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> bloków, </gray><green>[chunks]</green><gray> kawałków, </gray><green>[rings]</green><gray> pierścieni</gray>"
+      total: "<gold>Razem: </gold><green>[blocks]</green><gold> bloków, </gold><green>[chunks]</green><gold> kawałków, </gold><green>[rings]</green><gold> pierścieni</gold>"
+      no-activity: "<gray>Nie zarejestowano jeszcze żadnej aktywności.</gray>"
+    title:
+      description: "przełącz tytuł wyspy lub wybierz jeden"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Trofea Twojej wyspy:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — tytuł </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Twoja wyspa nie uzyskała jeszcze żadnych trofeów.</gray>"
+      active: "<green>Aktywny tytuł: </green>[title]"
+      no-active: "<gray>Brak aktywnego tytułu. Wybierz jeden za pomocą </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Tytuł Twojej wyspy to teraz </green>[title]<green>.</green>"
+      cleared: "<green>Twoja wyspa nie wyświetla już tytułu.</green>"
+      toggled-on: "<green>Tytuł wyspy </green>[title]<green> jest teraz widoczny.</green>"
+      toggled-off: "<yellow>Tytuł wyspy </yellow>[title]<yellow> jest teraz ukryty.</yellow>"
+      not-earned: "<red>Twoja wyspa nie uzyskała trofeum z tym tytułem.</red>"
     count:
       description: pokaż liczbę bloków i fazę
       info: '<green>Jesteś na bloku </green><aqua>[number] w fazie </aqua><green>[name]</green>'

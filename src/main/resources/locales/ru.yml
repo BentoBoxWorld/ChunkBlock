@@ -24,9 +24,17 @@ protection:
     CHUNKBLOCK_ACTIONBAR:
       name: Панель действий
       description: Показывает статус фазы в панели действий
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: Захват Чанков
+      description: |-
+        <aqua>Ранг, который может потратить
+        кредит уровня острова
+        для захвата новых чанков.</aqua>
+      hint: "<red>Ваш ранг не может захватывать чанки для этого острова!</red>"
 chunkblock:
   bossbar:
     title: Осталось блоков
+    title-prefix: "[title] | "
     # статус: "<green>Статус фазы <aqua>[total]</aqua>. Осталось: <aqua>[todo]</aqua></green>"
     # статус: "<green>[phase-name] : [percent-done]</green>"
     status: <green>Статус фазы <aqua>[done] <light_purple>/</light_purple> [total]</aqua></green>
@@ -38,6 +46,41 @@ chunkblock:
   actionbar:
     status: '<green>Фаза: <aqua>[phase-name]</aqua> <light_purple>|</light_purple> Блоков: <aqua>[done] <light_purple>/</light_purple> [total]</aqua> <light_purple>|</light_purple> Прогресс: <aqua>[percent-done]</aqua></green>'
     not-active: <red>Панель действий отключена на этом острове.</red>
+  chunks:
+    entry-denied: "<red>Этот чанк заблокирован.</red>"
+    locked: "<red>Вы не можете это трогать — чанк заблокирован.</red>"
+    claim-hint: "<yellow>Ударьте границу, чтобы захватить этот чанк за </yellow><aqua>[cost] </aqua><yellow>уровень(ей)! У вас есть </yellow><aqua>[credit] </aqua><yellow>уровень(ей) кредита.</yellow>"
+    claim-confirm: "<yellow>Захватить этот чанк за </yellow><aqua>[cost] </aqua><yellow>уровень(ей)? Это оставит вас </yellow><aqua>[after] </aqua><yellow>уровень(ей) кредита. </yellow><gold>Встаньте на корточки и ударьте границу еще раз </gold><yellow>в течение </yellow><aqua>[seconds]s </aqua><yellow>для подтверждения.</yellow>"
+    no-credit: "<red>Вам нужно </red><aqua>[needed] </aqua><red>больше уровень(ей) кредита, чтобы захватить этот чанк.</red>"
+    beyond-limit: "<red>Этот чанк находится за пределами области защиты вашего острова.</red>"
+    claimed: "<green><bold>Чанк захвачен! </bold>Ваш остров теперь </green><aqua>[number] </aqua><green>чанков. Остаток кредита: </green><aqua>[credit] </aqua><green>уровень(ей).</green>"
+    credit: "<green>Вы можете захватить еще </green><aqua>[count] </aqua><green>чанк(ов)! Идите на границу и ударьте там, где хотите расти.</green>"
+    relocked: "<red>Уровень вашего острова упал — [count] чанк(ов) повторно заблокирован, новые первыми. Вернитесь к уровням, чтобы повторно их захватить!</red>"
+    ejected: "<red>Чанк, в котором вы были, повторно заблокировался, поэтому вас переместили в безопасное место.</red>"
+    max-reached: "<light_purple>Ваш остров достиг максимального размера [number] чанков!</light_purple>"
+    ring-complete: "<gold><bold>Кольцо [ring] завершено! </bold>Все кольцо вокруг вашего острова принадлежит вам — </gold><aqua>[chunks] </aqua><gold>чанков всего.</gold>"
+    ring-broadcast: "<gold>Остров [name] закрыл кольцо </gold><aqua>[ring] </aqua><gold>— </gold><aqua>[chunks] </aqua><gold>чанков и продолжает расти!</gold>"
+    rings: "<green>Завершенные кольца: </green><aqua>[rings] </aqua><green>из </green><aqua>[max]</aqua><green>.</green>"
+    ring-progress: "<yellow>Кольцо [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> чанков осталось.</yellow>"
+    sethome-denied: "<red>Вы не можете установить дом в заблокированном чанке.</red>"
+    info: "<green>Чанки: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>. Кредит: </green><aqua>[credit] </aqua><green>уровень(ей) — чанк стоит </green><aqua>[cost]</aqua><green>.</green>"
+    map:
+      title: "<green>Территория вашего острова ([unlocked]/[max] чанков):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ ваш </green><yellow>▣ доступный для захвата ([cost] уровень(ей) каждый) </yellow><gray>□ заблокирован </gray><gold>◎ центр </gold><aqua>◆ вы</aqua>"
+      you-are-here: "<aqua>Вы находитесь на отмеченном чанке.</aqua>"
+    dialog:
+      close: "<white>Закрыть"
+      tooltip:
+        center: "<gold>Центральный чанк — ваш магический блок здесь.</gold>"
+        owned: "<green>Чанк [x], [z] — ваш.</green>"
+        claimable: "<yellow>Чанк [x], [z] — доступен для захвата за <aqua>[cost]</aqua> уровень(ей). Идите на эту границу и ударьте.</yellow>"
+        no-credit: "<yellow>Чанк [x], [z] — стоит <aqua>[cost]</aqua> уровень(ей). Вам нужно <red>[needed]</red> больше уровень(ей) кредита.</yellow>"
+        locked: "<gray>Чанк [x], [z] — заблокирован. Захватите себе путь к нему.</gray>"
+        you-are-here: "<aqua>Вы стоите здесь.</aqua>"
+  trophies:
+    awarded: "<gold><bold>Трофей заработан: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>Ваш остров заработал звание </yellow>[title]<yellow> — переключайте его с помощью </yellow><aqua>/ch title</aqua><yellow>.</yellow>"
   commands:
     admin:
       setcount:
@@ -59,6 +102,70 @@ chunkblock:
         parameters: <фаза>
         description: вывести в консоль проверку вероятностей фазы
         see-console: <green>Смотрите отчёт в консоли.</green>
+      bypass:
+        description: "переключать принудительное применение блокировки чанков для себя"
+        'on': "<green>Вы теперь обходите блокировки чанков. Визуальные границы скрыты от вас.</green>"
+        'off': "<green>Блокировки чанков снова применяются к вам.</green>"
+      chunks:
+        parameters: "<игрок> [reset]"
+        description: "проверить разблокированные чанки игрока или заблокировать их обратно в начало"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>чанков, </green><aqua>[spent] </aqua><green>потраченных уровней, </green><aqua>[credit] </aqua><green>кредита.</green>"
+        reset: "<green>Чанки [name] были повторно заблокированы только для центрального чанка.</green>"
+      phases:
+        description: "открыть редактор порядка фаз"
+        no-index: "<red>Индекс фаз не загружен, поэтому фазы не могут быть переупорядочены</red>"
+        saved: "<green>Порядок фаз сохранен и применен</green>"
+        save-failed: "<red>Не удалось сохранить порядок фаз! Проверьте консоль на наличие ошибок</red>"
+        gui:
+          title: "<dark_green>Порядок Фаз</dark_green>"
+          info-title: "<white>Как использовать</white>"
+          instructions: |-
+            <gray>Нажмите на фазу, чтобы поднять ее,
+            затем нажмите, где она должна быть.
+            Щелкните правой кнопкой мыши, чтобы переключить фазу
+            включении или отключении.</gray>
+          repeat: "<gray>После последней фазы счетчик переходит на </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>Начало: </gray><aqua>[number]</aqua>"
+          length: "<gray>Длина: </gray><aqua>[number]</aqua>"
+          disabled: "<red>Отключено</red>"
+          version-locked: "<red>Требуется Minecraft [version]+</red>"
+          pick-up: "<yellow>Нажмите, чтобы переместить</yellow>"
+          toggle: "<yellow>Щелкните правой кнопкой мыши, чтобы переключить</yellow>"
+          set-length: "<yellow>Shift + левый клик, чтобы установить длину</yellow>"
+          drop-here: "<yellow>Нажмите, чтобы поместить здесь</yellow>"
+          drop-at-end: "<green>Поместить в конец</green>"
+          held: "<yellow>Перемещение: [name]</yellow>"
+          put-back: "<yellow>Нажмите, чтобы положить обратно</yellow>"
+          enter-length: "<yellow>Введите новую длину в чат для </yellow><green>[name] </green><yellow>- в настоящее время </yellow><aqua>[number] </aqua><yellow>блоков. Введите </yellow><red>cancel </red><yellow>чтобы сохранить.</yellow>"
+          invalid-length: "<red>Длина должна быть целым числом больше 0</red>"
+          length-cancelled: "<red>Длина не изменена</red>"
+          cancel-word: "cancel"
+    chunks:
+      description: "показать ваши разблокированные чанки и карту вашей территории"
+    ledger:
+      description: "показать взносы членов команды"
+      parameters: "[days]"
+      header: "<green>Реестр вклада острова </green><gray>([window])</gray>"
+      all-time: "за все время"
+      last-days: "последние [days] дней"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> блоков, </gray><green>[chunks]</green><gray> чанков, </gray><green>[rings]</green><gray> колец</gray>"
+      total: "<gold>Итого: </gold><green>[blocks]</green><gold> блоков, </gold><green>[chunks]</green><gold> чанков, </gold><green>[rings]</green><gold> колец</gold>"
+      no-activity: "<gray>Пока нет записей об активности.</gray>"
+    title:
+      description: "переключать звание острова или выбрать один"
+      parameters: "[list | trophy-id | none]"
+      header: "<green>Трофеи вашего острова:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — звание </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>Ваш остров еще не заработал ни одного трофея.</gray>"
+      active: "<green>Активное звание: </green>[title]"
+      no-active: "<gray>Нет активного звания. Выберите один с помощью </gray><aqua>/ch title</aqua><gray>.</gray>"
+      set: "<green>Звание вашего острова теперь </green>[title]<green>.</green>"
+      cleared: "<green>Ваш остров больше не показывает звание.</green>"
+      toggled-on: "<green>Звание острова </green>[title]<green> теперь отображается.</green>"
+      toggled-off: "<yellow>Звание острова </yellow>[title]<yellow> теперь скрыто.</yellow>"
+      not-earned: "<red>Ваш остров не заработал трофей с этим званием.</red>"
     count:
       description: показать количество вскопано блоков и фазу
       info: <green>Вскопано <aqua>[number]</aqua> блоков на фазе [name]</green>

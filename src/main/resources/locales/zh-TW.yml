@@ -43,6 +43,7 @@ protection:
 chunkblock:
   bossbar:
     title: 剩餘的塊
+    title-prefix: "[title] | "
     status: '<green>階段方塊</green><aqua> [done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -50,7 +51,33 @@ chunkblock:
   actionbar:
     status: '<green>階段: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>方塊數: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>進度: </green><aqua>[percent-done]</aqua>'
     not-active: '<red>該島嶼的動作欄未啟用</red>'
+  trophies:
+    awarded: '<gold><bold>獲得獎杯: </bold></gold>[name]<gold>!</gold>'
+    title-available: '<yellow>你的島嶼獲得了頭銜 </yellow>[title]<yellow> — 使用 </yellow><aqua>/ch title</aqua><yellow> 來開啟或關閉。</yellow>'
   commands:
+    ledger:
+      description: "顯示團隊成員的貢獻"
+      parameters: "[天]"
+      header: '<green>島嶼貢獻帳簿 </green><gray>([window])</gray>'
+      all-time: "全部時間"
+      last-days: "最後 [days] 天"
+      row: '<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> 個方塊, </gray><green>[chunks]</green><gray> 個區塊, </gray><green>[rings]</green><gray> 圈</gray>'
+      total: '<gold>總計: </gold><green>[blocks]</green><gold> 個方塊, </gold><green>[chunks]</green><gold> 個區塊, </gold><green>[rings]</green><gold> 圈</gold>'
+      no-activity: '<gray>尚未記錄任何活動。</gray>'
+    title:
+      description: "開啟或關閉你島嶼的頭銜，或選擇一個"
+      parameters: "[列表 | 獎杯-id | 無]"
+      header: '<green>你島嶼的獎杯:</green>'
+      trophy-entry: '<gray> - </gray>[name]'
+      title-entry: '<gray> - </gray>[name]<gray> — 頭銜 </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>'
+      none-earned-yet: '<gray>你的島嶼還沒有獲得任何獎杯。</gray>'
+      active: '<green>活躍的頭銜: </green>[title]'
+      no-active: '<gray>沒有活躍的頭銜。用 </gray><aqua>/ch title</aqua><gray> 選擇一個。</gray>'
+      set: '<green>你的島嶼的頭銜現在是 </green>[title]<green>。</green>'
+      cleared: '<green>你的島嶼不再顯示頭銜。</green>'
+      toggled-on: '<green>島嶼頭銜 </green>[title]<green> 現在顯示。</green>'
+      toggled-off: '<yellow>島嶼頭銜 </yellow>[title]<yellow> 現在隱藏。</yellow>'
+      not-earned: '<red>你的島嶼還沒有獲得這個頭銜的獎杯。</red>'
     admin:
       setcount:
         parameters: <名稱> <計數>
@@ -215,4 +242,5 @@ chunkblock:
     ring-broadcast: '<gold>[name] 的島嶼已完成第 </gold><aqua>[ring] </aqua><gold>圈 — </gold><aqua>[chunks] </aqua><gold>個區塊，而且還在成長！</gold>'
     ring-complete: '<gold><bold>第 [ring] 圈完成！</bold>島嶼周圍的整圈都是你的了 — 總共 </gold><aqua>[chunks] </aqua><gold>個區塊。</gold>'
     rings: '<green>已完成圈數：</green><aqua> [rings] </aqua><green>/ </green><aqua>[max]</aqua><green>。</green>'
+    ring-progress: '<yellow>圈 [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> 個區塊待完成。</yellow>'
     sethome-denied: '<red>你不能在已鎖定的區塊內設定重生點。</red>'

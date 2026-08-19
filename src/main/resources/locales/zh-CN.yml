@@ -25,9 +25,17 @@ protection:
         <aqua>在动作栏中
         显示每个阶段
         的状态。</aqua>
+    CHUNKBLOCK_CLAIM_CHUNKS:
+      name: 领地块
+      description: |-
+        <aqua>可以消耗岛屿的等级
+        信用来领地新块的
+        等级。</aqua>
+      hint: "<red>您的等级无法为此岛屿领地块！</red>"
 chunkblock:
   bossbar:
     title: 剩余的块
+    title-prefix: "[title] | "
     status: '<green>相位块</green><aqua> [done] </aqua><light_purple>/ </light_purple><aqua>[total]</aqua>'
     color: RED
     style: SEGMENTED_20
@@ -35,7 +43,67 @@ chunkblock:
   actionbar:
     status: "<green>阶段: </green><aqua>[phase-name] </aqua><light_purple>| </light_purple><green>方块数: </green><aqua>[done] </aqua><light_purple>/ </light_purple><aqua>[total] </aqua><light_purple>| </light_purple><green>进度: </green><aqua>[percent-done]</aqua>"
     not-active: "<red>该岛屿的动作栏未激活</red>"
+  trophies:
+    awarded: "<gold><bold>奖杯获得: </bold></gold>[name]<gold>!</gold>"
+    title-available: "<yellow>您的岛屿获得了头衔 </yellow>[title]<yellow> — 使用 </yellow><aqua>/ch title</aqua><yellow> 来开/关。</yellow>"
+  chunks:
+    entry-denied: "<red>这个块被锁定了。</red>"
+    locked: "<red>您无法碰触这个 — 块被锁定了。</red>"
+    claim-hint: "<yellow>击中边界来领地此块 </yellow><aqua>[cost] </aqua><yellow> 级(别)! 您有 </yellow><aqua>[credit] </aqua><yellow> 级(别)的信用。</yellow>"
+    claim-confirm: "<yellow>领地此块 </yellow><aqua>[cost] </aqua><yellow> 级(别)? 这样您将剩下 </yellow><aqua>[after] </aqua><yellow> 级(别)的信用。 </yellow><gold>潜行并再次击中边界 </gold><yellow>在 </yellow><aqua>[seconds]s </aqua><yellow> 内以确认。</yellow>"
+    no-credit: "<red>您需要更多 </red><aqua>[needed] </aqua><red> 级(别)的信用来领地此块。</red>"
+    beyond-limit: "<red>这个块超出了您岛屿的保护区。</red>"
+    claimed: "<green><bold>块已领地! </bold>您的岛屿现在有 </green><aqua>[number] </aqua><green> 块。剩余信用: </green><aqua>[credit] </aqua><green> 级(别)。</green>"
+    credit: "<green>您还可以领地 </green><aqua>[count] </aqua><green> 块! 去您的边界并击中您想要扩展的地方。</green>"
+    relocked: "<red>您岛屿的等级下降 — [count] 块被重新锁定，最新的优先。重新获得等级来领地它们!</red>"
+    ejected: "<red>您所在的块被重新锁定，所以您被传送到安全地点。</red>"
+    max-reached: "<light_purple>您的岛屿已达到最大大小 [number] 块!</light_purple>"
+    ring-complete: "<gold><bold>环 [ring] 完成! </bold>您岛屿周围的整个环都是您的 — </gold><aqua>[chunks] </aqua><gold> 块共计。</gold>"
+    ring-broadcast: "<gold>[name] 的岛屿已关闭环 </gold><aqua>[ring] </aqua><gold> — </gold><aqua>[chunks] </aqua><gold> 块并继续增长!</gold>"
+    rings: "<green>完成的环: </green><aqua>[rings] </aqua><green> / </green><aqua>[max]</aqua><green>。</green>"
+    ring-progress: "<yellow>环 [ring]: </yellow><aqua>[remaining]</aqua><yellow>/</yellow><aqua>[total]</aqua><yellow> 块待完成。</yellow>"
+    sethome-denied: "<red>您无法在锁定的块中设置家。</red>"
+    info: "<green>块: </green><aqua>[unlocked]</aqua><green>/</green><aqua>[max]</aqua><green>。信用: </green><aqua>[credit] </aqua><green> 级(别) — 领地一个块花费 </green><aqua>[cost]</aqua><green>。</green>"
+    map:
+      title: "<green>您的岛屿领地 ([unlocked]/[max] 块):</green>"
+      row: "<green>[row]</green>"
+      legend: "<green>■ 您的 </green><yellow>▣ 可领地 ([cost] 级(别)每个) </yellow><gray>□ 锁定 </gray><gold>◎ 中心 </gold><aqua>◆ 您</aqua>"
+      you-are-here: "<aqua>您在标记的块上。</aqua>"
+    dialog:
+      close: "<white>关闭"
+      tooltip:
+        center: "<gold>中心块 — 您的魔法块在这里。</gold>"
+        owned: "<green>块 [x], [z] — 您的。</green>"
+        claimable: "<yellow>块 [x], [z] — 可以 <aqua>[cost]</aqua> 级(别)领地。去那个边界并击中它。</yellow>"
+        no-credit: "<yellow>块 [x], [z] — 花费 <aqua>[cost]</aqua> 级(别)。您需要 <red>[needed]</red> 更多级(别)的信用。</yellow>"
+        locked: "<gray>块 [x], [z] — 锁定。领地您的方式到它。</gray>"
+        you-are-here: "<aqua>您正站在这里。</aqua>"
   commands:
+    chunks:
+      description: "显示您已领地的块和您领地的地图"
+    ledger:
+      description: "显示团队成员的贡献"
+      parameters: "[天]"
+      header: "<green>岛屿贡献分类账 </green><gray>([window])</gray>"
+      all-time: "所有时间"
+      last-days: "最后 [days] 天"
+      row: "<gray> - </gray><aqua>[name]</aqua><gray>: </gray><green>[blocks]</green><gray> 块, </gray><green>[chunks]</green><gray> 块, </gray><green>[rings]</green><gray> 环</gray>"
+      total: "<gold>总计: </gold><green>[blocks]</green><gold> 块, </gold><green>[chunks]</green><gold> 块, </gold><green>[rings]</green><gold> 环</gold>"
+      no-activity: "<gray>还没有记录任何活动。</gray>"
+    title:
+      description: "开/关您岛屿的头衔，或选择一个"
+      parameters: "[列表 | 奖杯-id | 无]"
+      header: "<green>您岛屿的奖杯:</green>"
+      trophy-entry: "<gray> - </gray>[name]"
+      title-entry: "<gray> - </gray>[name]<gray> — 头衔 </gray>[title]<gray> (</gray><aqua>/ch title [id]</aqua><gray>)</gray>"
+      none-earned-yet: "<gray>您的岛屿还没有获得任何奖杯。</gray>"
+      active: "<green>活跃头衔: </green>[title]"
+      no-active: "<gray>没有活跃的头衔。用 </gray><aqua>/ch title</aqua><gray> 选择一个。</gray>"
+      set: "<green>您岛屿的头衔现在是 </green>[title]<green>。</green>"
+      cleared: "<green>您的岛屿不再显示头衔。</green>"
+      toggled-on: "<green>岛屿头衔 </green>[title]<green> 现在显示。</green>"
+      toggled-off: "<yellow>岛屿头衔 </yellow>[title]<yellow> 现在隐藏。</yellow>"
+      not-earned: "<red>您的岛屿还没有获得这个头衔的奖杯。</red>"
     admin:
       setcount:
         parameters: <玩家名称> <数量>
@@ -56,6 +124,45 @@ chunkblock:
         parameters: <阶段>
         description: 在后台生成一份关于各阶段所占百分比的完整报告
         see-console: '<green>报告已在后台生成</green>'
+      bypass:
+        description: "切换对自己是否应用块锁定执行"
+        "on": "<green>您现在绕过块锁定。边界视觉效果对您隐藏。</green>"
+        "off": "<green>块锁定重新应用到您。</green>"
+      chunks:
+        parameters: "<玩家> [重置]"
+        description: "检查玩家的已领地块或将其重新锁定回开始"
+        info: "<green>[name]: </green><aqua>[number]</aqua><green>/</green><aqua>[max] </aqua><green>块, </green><aqua>[spent] </aqua><green>等级已花费, </green><aqua>[credit] </aqua><green>信用。</green>"
+        reset: "<green>[name] 的块已重新锁定回仅中心块。</green>"
+      phases:
+        description: "打开阶段顺序编辑器"
+        no-index: "<red>没有加载阶段索引，所以无法重新排序阶段</red>"
+        saved: "<green>阶段顺序已保存并应用</green>"
+        save-failed: "<red>无法保存阶段顺序! 查看控制台以获取错误</red>"
+        gui:
+          title: "<dark_green>阶段顺序</dark_green>"
+          info-title: "<white>如何使用</white>"
+          instructions: |-
+            <gray>单击一个阶段以拿起它，
+            然后单击应该放置的位置。
+            右键单击以切换阶段
+            打开或关闭。</gray>
+          repeat: "<gray>最后一个阶段后计数跳转到 </gray><aqua>[number]</aqua>"
+          phase-name: "<green>[name]</green>"
+          start: "<gray>开始: </gray><aqua>[number]</aqua>"
+          length: "<gray>长度: </gray><aqua>[number]</aqua>"
+          disabled: "<red>禁用</red>"
+          version-locked: "<red>需要 Minecraft [version]+</red>"
+          pick-up: "<yellow>单击以移动</yellow>"
+          toggle: "<yellow>右键单击以切换</yellow>"
+          set-length: "<yellow>Shift+左键单击以设置长度</yellow>"
+          drop-here: "<yellow>单击以放在这里</yellow>"
+          drop-at-end: "<green>放在最后</green>"
+          held: "<yellow>移动: [name]</yellow>"
+          put-back: "<yellow>单击以放回</yellow>"
+          enter-length: "<yellow>在聊天中为 </yellow><green>[name] </green><yellow> 输入新长度 - 当前为 </yellow><aqua>[number] </aqua><yellow> 块。输入 </yellow><red>cancel </red><yellow> 以保持原样。</yellow>"
+          invalid-length: "<red>长度必须是大于 0 的整数</red>"
+          length-cancelled: "<red>长度未更改</red>"
+          cancel-word: "cancel"
     count:
       description: 显示方块数量和阶段
       info: '<green>您当前挖掘的方块数量是 </green><aqua>[number], 为 </aqua><green>[name] 阶段</green>'
