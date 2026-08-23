@@ -134,15 +134,6 @@ class ChunkManagerTest {
     }
 
     @Test
-    void testClaimBeyondMaxChunksDenied() {
-        level = 100000;
-        settings.setMaxChunks(3);
-        assertEquals(ClaimResult.OK, cm.claim(island, 1, 0));
-        assertEquals(ClaimResult.OK, cm.claim(island, -1, 0));
-        assertEquals(ClaimResult.BEYOND_LIMIT, cm.claim(island, 0, 1));
-    }
-
-    @Test
     void testLevelsPerChunkCost() {
         settings.setLevelsPerChunk(10);
         level = 19;
@@ -210,13 +201,15 @@ class ChunkManagerTest {
     }
 
     @Test
-    void testMaxChunksCappedByProtectionRange() {
-        assertEquals(441, cm.getMaxChunks(island));
-        when(island.getProtectionRange()).thenReturn(50);
-        assertEquals(25, cm.getMaxChunks(island));
-        settings.setMaxChunks(-1);
-        when(island.getProtectionRange()).thenReturn(240);
+    void testMaxChunksDerivedFromProtectionRange() {
+        // Default setup: protectionRange=240, maxRingRadius=(240-8)/16=14, (2*14+1)^2=841
         assertEquals(841, cm.getMaxChunks(island));
+        when(island.getProtectionRange()).thenReturn(50);
+        // (50-8)/16=2, (2*2+1)^2=25
+        assertEquals(25, cm.getMaxChunks(island));
+        when(island.getProtectionRange()).thenReturn(168);
+        // (168-8)/16=10, (2*10+1)^2=441
+        assertEquals(441, cm.getMaxChunks(island));
     }
 
     @Test

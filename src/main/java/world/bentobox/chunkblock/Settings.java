@@ -116,13 +116,6 @@ public class Settings implements WorldSettings {
     @ConfigEntry(path = "chunkblock.levels-per-chunk")
     private int levelsPerChunk = 1;
 
-    @ConfigComment("Maximum number of chunks an island can claim, including the center chunk.")
-    @ConfigComment("441 chunks is a full 21 x 21 chunk square. Use -1 for no limit beyond what the")
-    @ConfigComment("island protection range can hold. The effective maximum is always capped so")
-    @ConfigComment("claimed chunks fit inside the protection range.")
-    @ConfigEntry(path = "chunkblock.max-chunks")
-    private int maxChunks = 441;
-
     @ConfigComment("Require confirmation before level credit is spent on a chunk. When true, the")
     @ConfigComment("first hit on the border previews the target chunk and its cost; the player")
     @ConfigComment("must then sneak and hit the border again to actually claim it. This stops a")
@@ -313,8 +306,8 @@ public class Settings implements WorldSettings {
     @ConfigComment("Default protection range radius in blocks. Cannot be larger than distance.")
     @ConfigComment("Admins can change protection sizes for players individually using /chadmin range set <player> <new range>")
     @ConfigComment("or set this permission: chunkblock.island.range.<number>")
-    @ConfigComment("ChunkBlock: this must cover the largest unlockable ring of chunks (see chunkblock.max-chunks).")
-    @ConfigComment("With max-chunks 441 (21x21, ring 10) the minimum needed is 168.")
+    @ConfigComment("ChunkBlock: the protection range determines how many chunks can be claimed.")
+    @ConfigComment("With range 168 the largest ring is 10, giving a 21x21 = 441 chunk square.")
     @ConfigEntry(path = "world.protection-range")
     private int islandProtectionRange = 168;
 
@@ -2622,20 +2615,6 @@ public class Settings implements WorldSettings {
      */
     public void setLevelsPerChunk(int levelsPerChunk) {
         this.levelsPerChunk = levelsPerChunk;
-    }
-
-    /**
-     * @return the configured maximum number of unlockable chunks including the center; -1 means unlimited
-     */
-    public int getMaxChunks() {
-        return maxChunks;
-    }
-
-    /**
-     * @param maxChunks the maxChunks to set
-     */
-    public void setMaxChunks(int maxChunks) {
-        this.maxChunks = maxChunks;
     }
 
     /**

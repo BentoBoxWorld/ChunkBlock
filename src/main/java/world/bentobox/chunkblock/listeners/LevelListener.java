@@ -189,9 +189,6 @@ public class LevelListener implements Listener {
             if (user.isOnline() && addon.inWorld(user.getWorld())) {
                 user.sendMessage("chunkblock.chunks.claimed", "[number]", String.valueOf(count),
                         "[credit]", String.valueOf(creditLeft));
-                if (count >= cm.getMaxChunks(island)) {
-                    user.sendMessage("chunkblock.chunks.max-reached", "[number]", String.valueOf(count));
-                }
                 user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
             }
         });
