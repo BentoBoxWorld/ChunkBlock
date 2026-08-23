@@ -24,7 +24,7 @@ import world.bentobox.chunkblock.CommonTestSetup;
  * @author tastybento
  *
  */
-public class NoBlockHandlerTest extends CommonTestSetup {
+class NoBlockHandlerTest extends CommonTestSetup {
 
     private static final UUID ID = UUID.randomUUID();
 

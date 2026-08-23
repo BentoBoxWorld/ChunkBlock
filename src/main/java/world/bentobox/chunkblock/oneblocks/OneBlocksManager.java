@@ -97,6 +97,11 @@ public class OneBlocksManager {
     private static final String ADMIN_LENGTHS = "adminLengths";
     private static final String CHESTS_YML_SUFFIX = "_chests.yml";
     private static final String WEIGHT = "weight";
+    private static final String LOG_SKIPPING_PHASE = "Skipping phase ";
+    private static final String LOG_REQUIRES_MC = ": it requires Minecraft ";
+    private static final String LOG_OR_LATER = " or later.";
+    private static final String LOG_LOADING = "Loading ";
+    private static final String LOG_SKIPPING_ITEM = "Skipping item ";
     /**
      * Length used for a phase whose index entry has no valid length.
      */
@@ -722,12 +727,12 @@ public class OneBlocksManager {
     private int loadIndexedPhase(File phaseFolder, PhaseIndexEntry entry, int startBlock) {
         String name = entry.getName();
         if (!entry.isEnabled()) {
-            addon.log("Skipping phase " + name + ": disabled in " + PHASES_INDEX_YML + ".");
+            addon.log(LOG_SKIPPING_PHASE + name + ": disabled in " + PHASES_INDEX_YML + ".");
             return startBlock;
         }
         String requiredVersion = Objects.toString(entry.getRequiredMinecraftVersion(), "");
         if (!requiredVersion.isEmpty() && !isVersionAtLeast(Bukkit.getMinecraftVersion(), requiredVersion)) {
-            addon.log("Skipping phase " + name + ": it requires Minecraft " + requiredVersion + " or later.");
+            addon.log(LOG_SKIPPING_PHASE + name + LOG_REQUIRES_MC + requiredVersion + LOG_OR_LATER);
             return startBlock;
         }
         File mainFile = new File(phaseFolder, entry.getFile() + ".yml");
@@ -743,7 +748,7 @@ public class OneBlocksManager {
             obPhase.setRequiredMinecraftVersion(requiredVersion);
         }
         try {
-            addon.log("Loading " + mainFile.getName());
+            addon.log(LOG_LOADING + mainFile.getName());
             ConfigurationSection phaseConfig = getPhaseSection(mainFile, entry.getSection());
             if (phaseConfig == null) {
                 addon.logError(mainFile.getName() + " has no phase section. Skipping phase " + name + ".");
@@ -845,7 +850,7 @@ public class OneBlocksManager {
     private @Nullable ItemStack chestItem(Map<?, ?> raw, String fileName) {
         String id = Objects.toString(raw.get("id"), Objects.toString(raw.get("type"), null));
         if (id != null && Material.matchMaterial(id) == null) {
-            addon.log("Skipping item " + id + " in " + fileName + ": it does not exist on this server version.");
+            addon.log(LOG_SKIPPING_ITEM + id + " in " + fileName + ": it does not exist on this server version.");
             return null;
         }
         try {
@@ -1637,7 +1642,7 @@ public class OneBlocksManager {
         try {
             // Save
             File phaseFile = new File(addon.getDataFolder() + File.separator + PHASES,
-                    getPhaseFileName(p) + "_chests.yml");
+                    getPhaseFileName(p) + CHESTS_YML_SUFFIX);
             oneBlocks.save(phaseFile);
         } catch (IOException e) {
             addon.logError("Could not save chest phase " + p.getPhaseName() + " " + e.getMessage());

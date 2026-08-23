@@ -22,7 +22,7 @@ import world.bentobox.chunkblock.oneblocks.OneBlockObject;
  * @author tastybento
  *
  */
-public class OneBlockIslandsTest extends CommonTestSetup {
+class OneBlockIslandsTest extends CommonTestSetup {
     
     private OneBlockIslands obi;
     private String id;

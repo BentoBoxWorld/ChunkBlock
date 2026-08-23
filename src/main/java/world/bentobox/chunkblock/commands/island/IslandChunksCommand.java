@@ -106,7 +106,7 @@ public class IslandChunksCommand extends CompositeCommand {
         int radius = Math.min(MAX_MAP_RADIUS, cm.currentRing(island) + 1);
         int width = 2 * radius + 1;
         List<Cell> cells = ChunkMap.cells(addon, island, user.getLocation(), radius);
-        user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), "[max]",
+        user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), PLACEHOLDER_MAX,
                 String.valueOf(max));
         for (int row = 0; row < width; row++) {
             // A row goes into the [row] variable of a translation, so it has to be text by

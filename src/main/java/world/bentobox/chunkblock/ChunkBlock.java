@@ -521,9 +521,9 @@ public class ChunkBlock extends GameModeAddon {
         this.saveResource("trophies.yml", false);
     }
 
-    /*
+    /**
      * (non-Javadoc)
-     * 
+     *
      * @see world.bentobox.bentobox.api.addons.Addon#allLoaded()
      */
     @Override

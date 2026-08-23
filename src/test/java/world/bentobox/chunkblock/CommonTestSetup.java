@@ -224,7 +224,8 @@ public abstract class CommonTestSetup {
 
         //Util
         mockedUtil = Mockito.mockStatic(Util.class, Mockito.CALLS_REAL_METHODS);
-        mockedUtil.when(() -> Util.getWorld(any())).thenReturn(mock(World.class));
+        World mockWorld = mock(World.class);
+        mockedUtil.when(() -> Util.getWorld(any())).thenReturn(mockWorld);
         Util.setPlugin(plugin);
 
         // Util

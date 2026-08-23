@@ -43,7 +43,7 @@ import world.bentobox.chunkblock.oneblocks.OneBlocksManager;
  * config.yml settings turn them off (https://github.com/BentoBoxWorld/ChunkBlock/issues/537).
  * @author tastybento
  */
-public class BossBarListenerTest extends CommonTestSetup {
+class BossBarListenerTest extends CommonTestSetup {
 
     private ChunkBlock addon;
     private Settings settings;

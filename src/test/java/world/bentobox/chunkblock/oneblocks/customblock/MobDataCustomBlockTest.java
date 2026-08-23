@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,7 +69,7 @@ class MobDataCustomBlockTest {
     void fromMapFallsBackToNullWhenUnderlyingBlockInvalid() {
         // BentoBox.getInstance() is called to log a warning; stub it statically so the
         // test doesn't require a full CommonTestSetup.
-        BentoBox mockBentoBox = Mockito.mock(BentoBox.class);
+        BentoBox mockBentoBox = mock(BentoBox.class);
         try (MockedStatic<BentoBox> mocked = Mockito.mockStatic(BentoBox.class)) {
             mocked.when(BentoBox::getInstance).thenReturn(mockBentoBox);
 
@@ -80,7 +82,7 @@ class MobDataCustomBlockTest {
             assertTrue(result.isPresent());
             assertNull(result.get().getUnderlyingBlock());
             // Ensure a warning was emitted
-            Mockito.verify(mockBentoBox).logWarning(Mockito.contains("NOT_A_REAL_MATERIAL"));
+            verify(mockBentoBox).logWarning(Mockito.contains("NOT_A_REAL_MATERIAL"));
         }
     }
 

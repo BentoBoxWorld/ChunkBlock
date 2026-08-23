@@ -282,7 +282,7 @@ public class LevelListener implements Listener {
             return;
         }
         for (String command : commands) {
-            String toRun = command.replace("[ring]", ring).replace("[chunks]", chunks).replace(nameKey, name);
+            String toRun = command.replace(PLACEHOLDER_RING, ring).replace(PLACEHOLDER_CHUNKS, chunks).replace(nameKey, name);
             if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), toRun)) {
                 addon.logError("Ring reward command failed: " + toRun);
             }

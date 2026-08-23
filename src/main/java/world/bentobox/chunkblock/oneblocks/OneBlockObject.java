@@ -185,7 +185,9 @@ public class OneBlockObject {
         this.prob = prob;
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     *
      * @see java.lang.Object#toString()
      */
     @Override

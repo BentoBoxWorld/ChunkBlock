@@ -1237,7 +1237,7 @@ public class Settings implements WorldSettings {
     public void setIslandDistance(int islandDistance) {
         int snapped = Math.max(8, Math.round(islandDistance / 8F) * 8);
         if (snapped != islandDistance) {
-            Logger.getLogger("ChunkBlock").warning(
+            Logger.getLogger("ChunkBlock").warning(() ->
                     String.format("distance-between-islands must be a multiple of 8 for ChunkBlock; adjusted from %d to %d",
                             islandDistance, snapped));
         }

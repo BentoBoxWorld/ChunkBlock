@@ -46,7 +46,7 @@ import world.bentobox.level.Level;
  * @author tastybento
  *
  */
-public class BlockListenerTest extends CommonTestSetup {
+class BlockListenerTest extends CommonTestSetup {
 
     // Class under test
     private BlockListener bl;

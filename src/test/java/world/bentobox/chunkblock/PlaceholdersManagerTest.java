@@ -24,7 +24,7 @@ import world.bentobox.bentobox.database.objects.Island;
  * @author tastybento
  *
  */
-public class PlaceholdersManagerTest extends CommonTestSetup {
+class PlaceholdersManagerTest extends CommonTestSetup {
     @Mock
     private ChunkBlock addon;
     @Mock

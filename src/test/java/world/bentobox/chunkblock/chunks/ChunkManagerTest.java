@@ -52,7 +52,8 @@ class ChunkManagerTest {
         level = 0;
         when(addon.getSettings()).thenReturn(settings);
         when(addon.getOneBlocksIsland(island)).thenReturn(data);
-        when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        BlockListener blockListener = mock(BlockListener.class);
+        when(addon.getBlockListener()).thenReturn(blockListener);
         when(addon.getIslandLevel(island)).thenAnswer(i -> level);
         // Island center chunk-centered at chunk (0, 0)
         when(center.getBlockX()).thenReturn(8);

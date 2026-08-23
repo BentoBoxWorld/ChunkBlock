@@ -9,7 +9,9 @@ public class AdminCommand extends DefaultAdminCommand {
         super(addon);
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     *
      * @see world.bentobox.bentobox.api.commands.admin.DefaultAdminCommand#setup()
      */
     @Override

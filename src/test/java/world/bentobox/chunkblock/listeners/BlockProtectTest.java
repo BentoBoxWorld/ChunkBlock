@@ -47,7 +47,7 @@ import world.bentobox.chunkblock.Settings;
  * @author tastybento
  *
  */
-public class BlockProtectTest extends CommonTestSetup {
+class BlockProtectTest extends CommonTestSetup {
     
     private BlockProtect bp;
     @Mock

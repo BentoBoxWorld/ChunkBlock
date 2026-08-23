@@ -10,7 +10,9 @@ public class PlayerCommand extends DefaultPlayerCommand {
         super(addon);
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     *
      * @see world.bentobox.bentobox.api.commands.island.DefaultPlayerCommand#setup()
      */
     @Override

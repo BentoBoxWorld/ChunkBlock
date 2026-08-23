@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +53,7 @@ import world.bentobox.bentobox.managers.FlagsManager;
  * @author tastybento
  *
  */
-public class ChunkBlockTest extends CommonTestSetup {
+class ChunkBlockTest extends CommonTestSetup {
 
     @Mock
     private User user;
@@ -262,8 +263,8 @@ public class ChunkBlockTest extends CommonTestSetup {
         addon.createWorlds();
         verify(plugin).log("[chunkblock] Creating ChunkBlock world ...");
         // Nether and end are disabled by default in ChunkBlock
-        verify(plugin, Mockito.never()).log("[chunkblock] Creating ChunkBlock's Nether...");
-        verify(plugin, Mockito.never()).log("[chunkblock] Creating ChunkBlock's End World...");
+        verify(plugin, never()).log("[chunkblock] Creating ChunkBlock's Nether...");
+        verify(plugin, never()).log("[chunkblock] Creating ChunkBlock's End World...");
 
     }
 

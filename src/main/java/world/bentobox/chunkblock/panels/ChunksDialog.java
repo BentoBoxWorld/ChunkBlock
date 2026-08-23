@@ -306,9 +306,9 @@ public class ChunksDialog {
             long credit = cm.getCredit(island);
             yield credit >= cost
                     ? text(REFERENCE + "tooltip.claimable", "[x]", offset(cell.dx()), "[z]", offset(cell.dz()),
-                            "[cost]", String.valueOf(cost))
+                            PLACEHOLDER_COST, String.valueOf(cost))
                     : text(REFERENCE + "tooltip.no-credit", "[x]", offset(cell.dx()), "[z]", offset(cell.dz()),
-                            "[cost]", String.valueOf(cost), "[needed]", String.valueOf(cost - credit));
+                            PLACEHOLDER_COST, String.valueOf(cost), "[needed]", String.valueOf(cost - credit));
         }
         case LOCKED -> text(REFERENCE + "tooltip.locked", "[x]", offset(cell.dx()), "[z]", offset(cell.dz()));
         };
