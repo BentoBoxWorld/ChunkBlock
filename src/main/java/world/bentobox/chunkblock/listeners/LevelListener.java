@@ -191,9 +191,6 @@ public class LevelListener implements Listener {
                 user.sendMessage("chunkblock.chunks.claimed", TextVariables.NAME, claimerName,
                         "[number]", String.valueOf(count),
                         "[credit]", String.valueOf(creditLeft));
-                if (count >= cm.getMaxChunks(island)) {
-                    user.sendMessage("chunkblock.chunks.max-reached", "[number]", String.valueOf(count));
-                }
                 user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
             }
         });
