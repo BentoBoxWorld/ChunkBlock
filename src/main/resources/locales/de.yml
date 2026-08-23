@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Du bist auf dem markierten Chunk.</aqua>"
     dialog:
       close: "<white>Schließen"
+      view-island: "<gold>Auf Insel zentrieren"
+      view-player: "<aqua>Auf deine Position zentrieren"
+      arrow-to-island: "<gold>Dein Inselzentrum ist in dieser Richtung"
+      arrow-to-player: "<aqua>Du bist in dieser Richtung"
       tooltip:
         center: "<gold>Der mittlere Chunk — dein Zauberblock ist hier.</gold>"
         owned: "<green>Chunk [x], [z] — deiner.</green>"

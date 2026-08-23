@@ -47,7 +47,6 @@ import world.bentobox.chunkblock.requests.MemberActivityHandler;
 import world.bentobox.chunkblock.requests.UnlockedChunksHandler;
 import world.bentobox.chunkblock.requests.LocationStatsHandler;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
-import world.bentobox.bentobox.api.addons.Addon.State;
 import world.bentobox.bentobox.api.configuration.Config;
 import world.bentobox.bentobox.api.configuration.WorldSettings;
 import world.bentobox.bentobox.api.flags.Flag;

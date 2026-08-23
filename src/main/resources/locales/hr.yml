@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Nalazis se na označenom dijelu.</aqua>"
     dialog:
       close: "<white>Zatvori"
+      view-island: "<gold>Centriraj na otok"
+      view-player: "<aqua>Centriraj na tvoju poziciju"
+      arrow-to-island: "<gold>Centar tvog otoka je u ovom smjeru"
+      arrow-to-player: "<aqua>Ti si u ovom smjeru"
       tooltip:
         center: "<gold>Centralni dio — tvoj magični blok je ovdje."
         owned: "<green>Dio [x], [z] — tvoj."

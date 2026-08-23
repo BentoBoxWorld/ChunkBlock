@@ -220,6 +220,10 @@ chunkblock:
     credit: '<green>你還可以認領 </green><aqua>[count] </aqua><green>個區塊！前往你的邊界，朝想擴張的方向撞擊它。</green>'
     dialog:
       close: '<white>關閉'
+      view-island: "<gold>以島嶼為中心"
+      view-player: "<aqua>以你的位置為中心"
+      arrow-to-island: "<gold>你的島嶼中心在這個方向"
+      arrow-to-player: "<aqua>你在這個方向"
       tooltip:
         center: '<gold>中心區塊 — 你的魔法方塊就在這裡。'
         owned: '<green>區塊 [x], [z] — 你的。'

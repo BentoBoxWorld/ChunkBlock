@@ -109,7 +109,7 @@ public class ChunkGuardListener implements Listener {
     public void onPlayerMove(PlayerMoveEvent e) {
         Location from = e.getFrom();
         Location to = e.getTo();
-        if (to == null || !addon.inWorld(to.getWorld())
+        if (!addon.inWorld(to.getWorld())
                 // Head-only movement cannot change chunk
                 || from.toVector().multiply(XZ).equals(to.toVector().multiply(XZ))
                 // Only evaluate when the chunk changes
@@ -251,7 +251,7 @@ public class ChunkGuardListener implements Listener {
     public void onPlayerTeleport(PlayerTeleportEvent e) {
         Location to = e.getTo();
         Player player = e.getPlayer();
-        if (to == null || !addon.inWorld(to.getWorld()) || isExempt(player)) {
+        if (!addon.inWorld(to.getWorld()) || isExempt(player)) {
             return;
         }
         TeleportCause cause = e.getCause();

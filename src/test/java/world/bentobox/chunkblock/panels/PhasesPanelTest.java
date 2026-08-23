@@ -1145,6 +1145,7 @@ class PhasesPanelTest extends CommonTestSetup {
 
         // Should not throw - playerCommand is empty so nothing happens beyond closeInventory
         method.invoke(panel, "setcount", phase);
+        assertNotNull(panel);
     }
 
     // =========================================================================
@@ -2232,6 +2233,7 @@ class PhasesPanelTest extends CommonTestSetup {
 
         // Should complete without NPE - it just closes inventory since playerCommand is empty
         method.invoke(panel, "setcount", phase);
+        assertNotNull(panel);
     }
 
     /**

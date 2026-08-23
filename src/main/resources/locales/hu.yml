@@ -73,6 +73,10 @@ chunkblock:
       you-are-here: "<aqua>A megjelölt szövegen vagy.</aqua>"
     dialog:
       close: "<white>Bezárás"
+      view-island: "<gold>Középre a szigetedre"
+      view-player: "<aqua>Középre a pozíciódra"
+      arrow-to-island: "<gold>A szigeted közepe erre van"
+      arrow-to-player: "<aqua>Te erre vagy"
       tooltip:
         center: "<gold>A közép szöveg — a mágikus blokk itt van."
         owned: "<green>Szöveg [x], [z] — tied."

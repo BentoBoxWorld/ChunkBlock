@@ -71,6 +71,10 @@ chunkblock:
       you-are-here: "<aqua>您在标记的块上。</aqua>"
     dialog:
       close: "<white>关闭"
+      view-island: "<gold>以岛屿为中心"
+      view-player: "<aqua>以你的位置为中心"
+      arrow-to-island: "<gold>你的岛屿中心在这个方向"
+      arrow-to-player: "<aqua>你在这个方向"
       tooltip:
         center: "<gold>中心块 — 您的魔法块在这里。</gold>"
         owned: "<green>块 [x], [z] — 您的。</green>"

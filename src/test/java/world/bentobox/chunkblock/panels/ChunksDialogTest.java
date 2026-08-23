@@ -16,7 +16,6 @@ import world.bentobox.chunkblock.ChunkBlock;
 import world.bentobox.chunkblock.CommonTestSetup;
 import world.bentobox.chunkblock.Settings;
 import world.bentobox.chunkblock.chunks.ChunkManager;
-import world.bentobox.chunkblock.chunks.ChunkMap.Cell;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.listeners.BlockListener;
 
@@ -44,7 +43,8 @@ class ChunksDialogTest extends CommonTestSetup {
         Settings settings = new Settings();
         when(addon.getSettings()).thenReturn(settings);
         when(addon.getOneBlocksIsland(island)).thenReturn(new OneBlockIslands("test"));
-        when(addon.getBlockListener()).thenReturn(mock(BlockListener.class));
+        BlockListener blockListener = mock(BlockListener.class);
+        when(addon.getBlockListener()).thenReturn(blockListener);
         level = 0;
         when(addon.getIslandLevel(island)).thenAnswer(i -> level);
         cm = new ChunkManager(addon);

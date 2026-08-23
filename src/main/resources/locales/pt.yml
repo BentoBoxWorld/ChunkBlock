@@ -69,6 +69,10 @@ chunkblock:
       you-are-here: "<aqua>Você está no bloco marcado.</aqua>"
     dialog:
       close: "<white>Fechar"
+      view-island: "<gold>Centralizar na ilha"
+      view-player: "<aqua>Centralizar na sua posição"
+      arrow-to-island: "<gold>O centro da sua ilha está nesta direção"
+      arrow-to-player: "<aqua>Você está nesta direção"
       tooltip:
         center: "<gold>O bloco do centro — seu bloco mágico está aqui."
         owned: "<green>Bloco [x], [z] — seu."

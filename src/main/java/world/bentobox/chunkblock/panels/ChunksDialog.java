@@ -61,6 +61,8 @@ public class ChunksDialog {
     private static final Duration CALLBACK_LIFETIME = Duration.ofMinutes(5);
 
     private static final String REFERENCE = "chunkblock.chunks.dialog.";
+    private static final String PLACEHOLDER_COST = "[cost]";
+    private static final String PLACEHOLDER_MAX = "[max]";
 
     /** Direction glyphs indexed by sector (0 = east, rotating counter-clockwise). */
     private static final String[] ARROWS = { "▶", "↗", "▲", "↖", "◀", "↙", "▼", "↘" };
@@ -124,7 +126,7 @@ public class ChunksDialog {
      */
     private static boolean show(ChunkBlock addon, User user, Island island, ViewMode viewMode,
             @Nullable Component selection) {
-        if (!Dialogs.isSupported() || !user.isPlayer() || user.getPlayer() == null) {
+        if (!Dialogs.isSupported() || !user.isPlayer()) {
             return false;
         }
         try {
@@ -145,15 +147,15 @@ public class ChunksDialog {
             body.add(DialogBody.plainMessage(selection));
         }
         body.add(DialogBody.plainMessage(text("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked),
-                "[max]", String.valueOf(max), "[credit]", String.valueOf(Math.max(0, cm.getCredit(island))), "[cost]",
+                PLACEHOLDER_MAX, String.valueOf(max), "[credit]", String.valueOf(Math.max(0, cm.getCredit(island))), PLACEHOLDER_COST,
                 String.valueOf(cm.getChunkCost()))));
         body.add(DialogBody.plainMessage(text("chunkblock.chunks.rings", "[rings]",
-                String.valueOf(cm.completedRings(island)), "[max]", String.valueOf(cm.maxRingRadius(island)))));
+                String.valueOf(cm.completedRings(island)), PLACEHOLDER_MAX, String.valueOf(cm.maxRingRadius(island)))));
         body.add(DialogBody.plainMessage(
-                text("chunkblock.chunks.map.legend", "[cost]", String.valueOf(cm.getChunkCost()))));
+                text("chunkblock.chunks.map.legend", PLACEHOLDER_COST, String.valueOf(cm.getChunkCost()))));
 
         DialogBase base = DialogBase
-                .builder(text("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), "[max]",
+                .builder(text("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), PLACEHOLDER_MAX,
                         String.valueOf(max)))
                 .canCloseWithEscape(true).afterAction(DialogBase.DialogAfterAction.CLOSE).body(body).build();
 
@@ -322,8 +324,7 @@ public class ChunksDialog {
     }
 
     private boolean isPlayerOnIsland() {
-        return user.getLocation() != null && island.getWorld() != null
-                && Util.sameWorld(island.getWorld(), user.getLocation().getWorld());
+        return island.getWorld() != null && Util.sameWorld(island.getWorld(), user.getLocation().getWorld());
     }
 
     boolean isScrollable() {

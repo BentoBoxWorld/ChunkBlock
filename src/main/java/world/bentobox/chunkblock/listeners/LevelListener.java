@@ -40,6 +40,8 @@ import world.bentobox.level.events.IslandPreLevelEvent;
 public class LevelListener implements Listener {
 
     private final ChunkBlock addon;
+    private static final String PLACEHOLDER_RING = "[ring]";
+    private static final String PLACEHOLDER_CHUNKS = "[chunks]";
 
     public LevelListener(ChunkBlock addon) {
         this.addon = addon;
@@ -236,15 +238,15 @@ public class LevelListener implements Listener {
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);
             if (user.isOnline() && addon.inWorld(user.getWorld())) {
-                user.sendMessage("chunkblock.chunks.ring-complete", "[ring]", ringText, "[chunks]", chunkText);
+                user.sendMessage("chunkblock.chunks.ring-complete", PLACEHOLDER_RING, ringText, PLACEHOLDER_CHUNKS, chunkText);
                 user.getPlayer().playSound(user.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F);
             }
         });
         if (addon.getSettings().isRingBroadcast()) {
             String ownerName = playerName(island.getOwner());
             Bukkit.getOnlinePlayers().forEach(player -> User.getInstance(player).sendMessage(
-                    "chunkblock.chunks.ring-broadcast", TextVariables.NAME, ownerName, "[ring]", ringText,
-                    "[chunks]", chunkText));
+                    "chunkblock.chunks.ring-broadcast", TextVariables.NAME, ownerName, PLACEHOLDER_RING, ringText,
+                    PLACEHOLDER_CHUNKS, chunkText));
         }
         celebrateRing(island, ring);
         if (addon.getActivityManager() != null) {
