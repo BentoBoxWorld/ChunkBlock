@@ -116,13 +116,16 @@ public class BorderDisplay implements Listener {
             hideBorder(player);
             return;
         }
-        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(player.getLocation());
+        Location loc = player.getLocation();
+        if (loc == null) {
+            return;
+        }
+        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(loc);
         if (optionalIsland.isEmpty()) {
             return;
         }
         Island island = optionalIsland.get();
         ChunkManager cm = addon.getChunkManager();
-        Location loc = player.getLocation();
         int pcx = loc.getBlockX() >> 4;
         int pcz = loc.getBlockZ() >> 4;
         // Check the 3x3 chunk neighborhood; locked chunks with an unlocked neighbor
