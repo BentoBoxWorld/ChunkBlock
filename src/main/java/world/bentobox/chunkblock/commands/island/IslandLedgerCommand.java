@@ -99,7 +99,7 @@ public class IslandLedgerCommand extends CompositeCommand {
             return 0;
         }
         try {
-            return Math.max(0, Integer.parseInt(args.get(0)));
+            return Math.max(0, Integer.parseInt(args.getFirst()));
         } catch (NumberFormatException e) {
             return 0;
         }

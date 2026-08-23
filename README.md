@@ -37,12 +37,12 @@ commands, and permissions.
 The player command is `/ch` (alias `/chunkblock`), the admin command `/chadmin`
 (aliases `/chunkblockadmin`, `/cba`). Beyond the standard BentoBox island commands:
 
-| Command | Description |
-|---|---|
-| `/ch chunks` | Your chunk count, spendable credit, and a chat map of your territory |
-| `/ch count` | Magic block count and phase |
-| `/chadmin chunks <player> [reset]` | Inspect a player's chunks and credit, or re-lock them back to the start |
-| `/chadmin bypass` | Toggle chunk-lock enforcement for yourself (needs `chunkblock.mod.bypasschunks`) |
+| Command                            | Description                                                                      |
+|------------------------------------|----------------------------------------------------------------------------------|
+| `/ch chunks`                       | Your chunk count, spendable credit, and a chat map of your territory             |
+| `/ch count`                        | Magic block count and phase                                                      |
+| `/chadmin chunks <player> [reset]` | Inspect a player's chunks and credit, or re-lock them back to the start          |
+| `/chadmin bypass`                  | Toggle chunk-lock enforcement for yourself (needs `chunkblock.mod.bypasschunks`) |
 
 ## How claiming works
 
@@ -79,13 +79,13 @@ The player command is `/ch` (alias `/chunkblock`), the admin command `/chadmin`
 In addition to the phase placeholders inherited from the magic-block engine
 (`chunkblock_my_island_phase`, `chunkblock_my_island_count`, ...):
 
-| Placeholder | Value |
-|---|---|
-| `chunkblock_island_chunks` | Unlocked chunk count |
-| `chunkblock_island_max_chunks` | Maximum claimable chunks |
-| `chunkblock_island_chunk_credit` | Level credit available to spend |
+| Placeholder                          | Value                                              |
+|--------------------------------------|----------------------------------------------------|
+| `chunkblock_island_chunks`           | Unlocked chunk count                               |
+| `chunkblock_island_max_chunks`       | Maximum claimable chunks                           |
+| `chunkblock_island_chunk_credit`     | Level credit available to spend                    |
 | `chunkblock_island_next_chunk_level` | Total island level needed to afford the next chunk |
-| `chunkblock_island_ring` | Ring number of the outermost claimed chunk |
+| `chunkblock_island_ring`             | Ring number of the outermost claimed chunk         |
 
 ## For developers
 

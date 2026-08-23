@@ -62,11 +62,11 @@ public class IslandTitleCommand extends CompositeCommand {
         if (args.isEmpty()) {
             return toggleTitle(user, island);
         }
-        if ("list".equalsIgnoreCase(args.get(0))) {
+        if ("list".equalsIgnoreCase(args.getFirst())) {
             showTitles(user, island);
             return true;
         }
-        String id = args.get(0);
+        String id = args.getFirst();
         if (CLEAR.equalsIgnoreCase(id)) {
             addon.getTrophyManager().setActiveTitle(island, null);
             user.sendMessage("chunkblock.commands.title.cleared");
@@ -138,7 +138,7 @@ public class IslandTitleCommand extends CompositeCommand {
         options.add(CLEAR);
         addon.getTrophyManager().getEarned(island).stream().filter(t -> t.title() != null)
                 .map(Trophy::id).forEach(options::add);
-        String last = args.isEmpty() ? "" : args.get(args.size() - 1);
+        String last = args.isEmpty() ? "" : args.getLast();
         return Optional.of(Util.tabLimit(options, last));
     }
 }
