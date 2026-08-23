@@ -66,6 +66,10 @@ chunkblock:
     # These are MiniMessage, which is what new text should use — the old &-codes still work.
     dialog:
       close: "<white>Close"
+      view-island: "<gold>Center on your island"
+      view-player: "<aqua>Center on your position"
+      arrow-to-island: "<gold>Your island center is this way"
+      arrow-to-player: "<aqua>You are this way"
       tooltip:
         center: "<gold>The center chunk — your magic block is here."
         owned: "<green>Chunk [x], [z] — yours."

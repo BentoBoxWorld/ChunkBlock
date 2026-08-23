@@ -57,26 +57,43 @@ public final class ChunkMap {
 
     /**
      * Maps the territory around an island, row by row from north to south and west to east
-     * within a row — the order both maps draw in.
+     * within a row — the order both maps draw in. The viewport is centered on the island
+     * center chunk.
      *
      * @param addon the addon
      * @param island the island whose territory is mapped
      * @param viewer where the player is standing, or null if they are nowhere on the map
-     * @param radius how many chunks out from the center the map reaches
+     * @param radius how many chunks out from the viewport center the map reaches
      * @return the cells of a square map (2 * radius + 1) chunks across
      */
     public static List<Cell> cells(@NonNull ChunkBlock addon, @NonNull Island island, @Nullable Location viewer,
             int radius) {
+        return cells(addon, island, viewer, radius, 0, 0);
+    }
+
+    /**
+     * Maps the territory around an island with a shifted viewport center. The viewport is
+     * centered on the chunk at {@code (viewDx, viewDz)} relative to the island center.
+     *
+     * @param addon the addon
+     * @param island the island whose territory is mapped
+     * @param viewer where the player is standing, or null if they are nowhere on the map
+     * @param radius how many chunks out from the viewport center the map reaches
+     * @param viewDx viewport center chunk offset east of the island center
+     * @param viewDz viewport center chunk offset south of the island center
+     * @return the cells of a square map (2 * radius + 1) chunks across
+     */
+    public static List<Cell> cells(@NonNull ChunkBlock addon, @NonNull Island island, @Nullable Location viewer,
+            int radius, int viewDx, int viewDz) {
         ChunkManager cm = addon.getChunkManager();
         int centerChunkX = island.getCenter().getBlockX() >> 4;
         int centerChunkZ = island.getCenter().getBlockZ() >> 4;
-        // A player who is not in this world stands on no chunk of the map
         boolean sameWorld = viewer != null && Util.sameWorld(island.getWorld(), viewer.getWorld());
         int playerDx = sameWorld ? (viewer.getBlockX() >> 4) - centerChunkX : Integer.MIN_VALUE;
         int playerDz = sameWorld ? (viewer.getBlockZ() >> 4) - centerChunkZ : Integer.MIN_VALUE;
         List<Cell> cells = new ArrayList<>();
-        for (int dz = -radius; dz <= radius; dz++) {
-            for (int dx = -radius; dx <= radius; dx++) {
+        for (int dz = viewDz - radius; dz <= viewDz + radius; dz++) {
+            for (int dx = viewDx - radius; dx <= viewDx + radius; dx++) {
                 Kind kind;
                 if (dx == 0 && dz == 0) {
                     kind = Kind.CENTER;
