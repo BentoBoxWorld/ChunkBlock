@@ -46,7 +46,7 @@ chunkblock:
     claim-confirm: "<yellow>Claim this chunk for </yellow><aqua>[cost] </aqua><yellow>level(s)? That leaves you </yellow><aqua>[after] </aqua><yellow>level(s) of credit. </yellow><gold>Sneak and hit the border again </gold><yellow>within </yellow><aqua>[seconds]s </aqua><yellow>to confirm.</yellow>"
     no-credit: "<red>You need </red><aqua>[needed] </aqua><red>more level(s) of credit to claim this chunk.</red>"
     beyond-limit: "<red>That chunk is beyond your island's protection area.</red>"
-    claimed: "<green><bold>Chunk claimed! </bold>Your island is now </green><aqua>[number] </aqua><green>chunks. Credit left: </green><aqua>[credit] </aqua><green>level(s).</green>"
+    claimed: "<green><bold>[name] claimed a chunk! </bold>Your island is now </green><aqua>[number] </aqua><green>chunks. Credit left: </green><aqua>[credit] </aqua><green>level(s).</green>"
     credit: "<green>You can claim </green><aqua>[count] </aqua><green>more chunk(s)! Go to your border and hit it where you want to grow.</green>"
     relocked: "<red>Your island level dropped — [count] chunk(s) re-locked, newest first. Regain the levels to claim them back!</red>"
     ejected: "<red>The chunk you were in re-locked, so you were moved to safety.</red>"
