@@ -184,10 +184,12 @@ public class LevelListener implements Listener {
                 chunkZ - (island.getCenter().getBlockZ() >> 4));
         Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, offset, count - 1, claimer));
         long creditLeft = Math.max(0, cm.getCredit(island));
+        String claimerName = playerName(claimer);
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);
             if (user.isOnline() && addon.inWorld(user.getWorld())) {
-                user.sendMessage("chunkblock.chunks.claimed", "[number]", String.valueOf(count),
+                user.sendMessage("chunkblock.chunks.claimed", TextVariables.NAME, claimerName,
+                        "[number]", String.valueOf(count),
                         "[credit]", String.valueOf(creditLeft));
                 user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
             }
