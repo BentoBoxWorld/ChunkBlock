@@ -108,18 +108,6 @@ class PhasesPanelTest extends CommonTestSetup {
         return phase;
     }
 
-    private OneBlockPhase createTestPhaseWithRequirements(String phaseName) {
-        OneBlockPhase phase = createTestPhase(phaseName);
-        List<Requirement> reqs = new ArrayList<>();
-        reqs.add(new Requirement(ReqType.ECO, 100.0));
-        reqs.add(new Requirement(ReqType.BANK, 50.0));
-        reqs.add(new Requirement(ReqType.LEVEL, 10L));
-        reqs.add(new Requirement(ReqType.PERMISSION, "permission.test"));
-        reqs.add(new Requirement(ReqType.COOLDOWN, 60L));
-        phase.setRequirements(reqs);
-        return phase;
-    }
-
     private NavigableMap<Integer, OneBlockPhase> createBlockProbs() {
         NavigableMap<Integer, OneBlockPhase> probs = new TreeMap<>();
         OneBlockPhase phase1 = createTestPhase("Plains");
@@ -1145,6 +1133,7 @@ class PhasesPanelTest extends CommonTestSetup {
 
         // Should not throw - playerCommand is empty so nothing happens beyond closeInventory
         method.invoke(panel, "setcount", phase);
+        assertNotNull(panel);
     }
 
     // =========================================================================
@@ -1184,7 +1173,7 @@ class PhasesPanelTest extends CommonTestSetup {
      * Test openPanel public method with empty phases.
      */
     @Test
-    void testOpenPanelEmptyPhases() throws Exception {
+    void testOpenPanelEmptyPhases() {
         setUpAddonMocks();
         User user = User.getInstance(mockPlayer);
         when(im.getIsland(world, user)).thenReturn(null);
@@ -2232,6 +2221,7 @@ class PhasesPanelTest extends CommonTestSetup {
 
         // Should complete without NPE - it just closes inventory since playerCommand is empty
         method.invoke(panel, "setcount", phase);
+        assertNotNull(panel);
     }
 
     /**

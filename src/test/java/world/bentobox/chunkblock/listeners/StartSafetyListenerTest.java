@@ -36,7 +36,7 @@ import world.bentobox.bentobox.api.user.User;
 /**
  * @author tastybento
  */
-public class StartSafetyListenerTest extends CommonTestSetup {
+class StartSafetyListenerTest extends CommonTestSetup {
 
     private StartSafetyListener ssl;
     @Mock

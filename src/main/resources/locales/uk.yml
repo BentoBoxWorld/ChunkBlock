@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Ви на позначеному чанку.</aqua>"
     dialog:
       close: "<white>Закрити"
+      view-island: "<gold>Центрувати на острові"
+      view-player: "<aqua>Центрувати на вашій позиції"
+      arrow-to-island: "<gold>Центр вашого острова в цьому напрямку"
+      arrow-to-player: "<aqua>Ви знаходитесь у цьому напрямку"
       tooltip:
         center: "<gold>Центральний чанк — ваш магічний блок тут.</gold>"
         owned: "<green>Чанк [x], [z] — ваш.</green>"

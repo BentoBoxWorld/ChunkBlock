@@ -17,11 +17,11 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 public class PhaseIndexEntry {
 
-    private static final String FILE = "file";
-    private static final String SECTION = "section";
-    private static final String NAME = "name";
-    private static final String LENGTH = "length";
-    private static final String ENABLED = "enabled";
+    private static final String KEY_FILE = "file";
+    private static final String KEY_SECTION = "section";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_LENGTH = "length";
+    private static final String KEY_ENABLED = "enabled";
     private static final String REQUIRED_MC_VERSION = "requiredMinecraftVersion";
 
     private String file;
@@ -39,16 +39,16 @@ public class PhaseIndexEntry {
      */
     @Nullable
     public static PhaseIndexEntry fromMap(Map<?, ?> map) {
-        String file = Objects.toString(map.get(FILE), null);
+        String file = Objects.toString(map.get(KEY_FILE), null);
         if (file == null) {
             return null;
         }
         PhaseIndexEntry entry = new PhaseIndexEntry();
         entry.file = file;
-        entry.section = Objects.toString(map.get(SECTION), null);
-        entry.name = Objects.toString(map.get(NAME), file);
-        entry.length = map.get(LENGTH) instanceof Number number ? number.intValue() : 0;
-        entry.enabled = !Boolean.FALSE.equals(map.get(ENABLED));
+        entry.section = Objects.toString(map.get(KEY_SECTION), null);
+        entry.name = Objects.toString(map.get(KEY_NAME), file);
+        entry.length = map.get(KEY_LENGTH) instanceof Number number ? number.intValue() : 0;
+        entry.enabled = !Boolean.FALSE.equals(map.get(KEY_ENABLED));
         String version = Objects.toString(map.get(REQUIRED_MC_VERSION), "");
         entry.requiredMinecraftVersion = version.isEmpty() ? null : version;
         return entry;
@@ -59,14 +59,14 @@ public class PhaseIndexEntry {
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put(FILE, file);
+        map.put(KEY_FILE, file);
         if (section != null) {
-            map.put(SECTION, section);
+            map.put(KEY_SECTION, section);
         }
-        map.put(NAME, name);
-        map.put(LENGTH, length);
+        map.put(KEY_NAME, name);
+        map.put(KEY_LENGTH, length);
         if (!enabled) {
-            map.put(ENABLED, false);
+            map.put(KEY_ENABLED, false);
         }
         if (requiredMinecraftVersion != null) {
             map.put(REQUIRED_MC_VERSION, requiredMinecraftVersion);

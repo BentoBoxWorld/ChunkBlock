@@ -44,7 +44,7 @@ import world.bentobox.level.Level;
  * @author tastybento
  *
  */
-public class CheckPhaseTest extends CommonTestSetup {
+class CheckPhaseTest extends CommonTestSetup {
 
     @Mock
     ChunkBlock addon;

@@ -40,6 +40,8 @@ import world.bentobox.level.events.IslandPreLevelEvent;
 public class LevelListener implements Listener {
 
     private final ChunkBlock addon;
+    private static final String PLACEHOLDER_RING = "[ring]";
+    private static final String PLACEHOLDER_CHUNKS = "[chunks]";
 
     public LevelListener(ChunkBlock addon) {
         this.addon = addon;
@@ -184,14 +186,13 @@ public class LevelListener implements Listener {
                 chunkZ - (island.getCenter().getBlockZ() >> 4));
         Bukkit.getPluginManager().callEvent(new ChunkUnlockEvent(island, offset, count - 1, claimer));
         long creditLeft = Math.max(0, cm.getCredit(island));
+        String claimerName = playerName(claimer);
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);
             if (user.isOnline() && addon.inWorld(user.getWorld())) {
-                user.sendMessage("chunkblock.chunks.claimed", "[number]", String.valueOf(count),
+                user.sendMessage("chunkblock.chunks.claimed", TextVariables.NAME, claimerName,
+                        "[number]", String.valueOf(count),
                         "[credit]", String.valueOf(creditLeft));
-                if (count >= cm.getMaxChunks(island)) {
-                    user.sendMessage("chunkblock.chunks.max-reached", "[number]", String.valueOf(count));
-                }
                 user.getPlayer().playSound(user.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
             }
         });
@@ -237,15 +238,15 @@ public class LevelListener implements Listener {
         island.getMemberSet().forEach(uuid -> {
             User user = User.getInstance(uuid);
             if (user.isOnline() && addon.inWorld(user.getWorld())) {
-                user.sendMessage("chunkblock.chunks.ring-complete", "[ring]", ringText, "[chunks]", chunkText);
+                user.sendMessage("chunkblock.chunks.ring-complete", PLACEHOLDER_RING, ringText, PLACEHOLDER_CHUNKS, chunkText);
                 user.getPlayer().playSound(user.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F);
             }
         });
         if (addon.getSettings().isRingBroadcast()) {
             String ownerName = playerName(island.getOwner());
             Bukkit.getOnlinePlayers().forEach(player -> User.getInstance(player).sendMessage(
-                    "chunkblock.chunks.ring-broadcast", TextVariables.NAME, ownerName, "[ring]", ringText,
-                    "[chunks]", chunkText));
+                    "chunkblock.chunks.ring-broadcast", TextVariables.NAME, ownerName, PLACEHOLDER_RING, ringText,
+                    PLACEHOLDER_CHUNKS, chunkText));
         }
         celebrateRing(island, ring);
         if (addon.getActivityManager() != null) {
@@ -281,7 +282,7 @@ public class LevelListener implements Listener {
             return;
         }
         for (String command : commands) {
-            String toRun = command.replace("[ring]", ring).replace("[chunks]", chunks).replace(nameKey, name);
+            String toRun = command.replace(PLACEHOLDER_RING, ring).replace(PLACEHOLDER_CHUNKS, chunks).replace(nameKey, name);
             if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), toRun)) {
                 addon.logError("Ring reward command failed: " + toRun);
             }

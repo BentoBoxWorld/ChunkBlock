@@ -52,7 +52,7 @@ import world.bentobox.bentobox.util.Util;
  * @author tastybento
  *
  */
-public class HoloListenerTest extends CommonTestSetup {
+class HoloListenerTest extends CommonTestSetup {
     @Mock
     ChunkBlock addon;
     private HoloListener hl;

@@ -93,7 +93,7 @@ public class OneBlockIslands implements DataObject {
     private String activeTitle = "";
 
     /** Fast membership view of {@link #unlockedChunks}; rebuilt lazily after loads/edits */
-    private transient Set<Long> unlockedSet;
+    private Set<Long> unlockedSet;
 
     private Queue<OneBlockObject> queue = new LinkedList<>();
 
@@ -166,7 +166,7 @@ public class OneBlockIslands implements DataObject {
         if (list.size() <= 1) {
             return null;
         }
-        String entry = list.remove(list.size() - 1);
+        String entry = list.removeLast();
         unlockedSet = null;
         int comma = entry.indexOf(',');
         return new int[] { Integer.parseInt(entry.substring(0, comma)),
@@ -309,9 +309,9 @@ public class OneBlockIslands implements DataObject {
         this.hologram = hologramLine;
     }
 
-    /*
+    /**
      * (non-Javadoc)
-     * 
+     *
      * @see world.bentobox.bentobox.database.objects.DataObject#getUniqueId()
      */
     @Override
@@ -319,12 +319,11 @@ public class OneBlockIslands implements DataObject {
         return uniqueId;
     }
 
-    /*
+    /**
      * (non-Javadoc)
-     * 
+     *
      * @see
-     * world.bentobox.bentobox.database.objects.DataObject#setUniqueId(java.lang.
-     * String)
+     * world.bentobox.bentobox.database.objects.DataObject#setUniqueId(java.lang.String)
      */
     @Override
     public void setUniqueId(String uniqueId) {

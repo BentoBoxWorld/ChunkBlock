@@ -28,7 +28,7 @@ import world.bentobox.bentobox.api.user.User;
  * @author tastybento
  *
  */
-public class InfoListenerTest extends CommonTestSetup {
+class InfoListenerTest extends CommonTestSetup {
     @Mock
     private ChunkBlock addon;
     @Mock

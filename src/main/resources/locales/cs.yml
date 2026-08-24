@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Stojíš na označeném kusu.</aqua>"
     dialog:
       close: "<white>Zavřít"
+      view-island: "<gold>Vycentrovat na ostrov"
+      view-player: "<aqua>Vycentrovat na vaši pozici"
+      arrow-to-island: "<gold>Střed vašeho ostrova je tímto směrem"
+      arrow-to-player: "<aqua>Jste tímto směrem"
       tooltip:
         center: "<gold>Střední kus — tvůj kouzelný blok je zde."
         owned: "<green>Kus [x], [z] — tvůj."

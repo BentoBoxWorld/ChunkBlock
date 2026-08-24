@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +60,7 @@ import world.bentobox.bentobox.multilib.MultiLib;
  *
  */
 @SuppressWarnings("java:S3577")
-public class OneBlocksManagerTest3 extends CommonTestSetup {
+class OneBlocksManagerTest3 extends CommonTestSetup {
 
 	private static File jFile;
 	private static YamlConfiguration oneBlocks;
@@ -71,7 +72,7 @@ public class OneBlocksManagerTest3 extends CommonTestSetup {
 	private @NonNull OneBlockIslands obi;
 
 	@BeforeAll
-	public static void beforeClass() throws IOException, InvalidConfigurationException {
+	static void beforeClass() throws IOException, InvalidConfigurationException {
 		// Make the addon jar
 		jFile = new File("addon.jar");
 		// Dummy oneblocks.yml
@@ -131,14 +132,14 @@ public class OneBlocksManagerTest3 extends CommonTestSetup {
 	public void setUp() throws Exception {
 	    super.setUp();
 		// Database
-		AbstractDatabaseHandler<Object> h = Mockito.mock(AbstractDatabaseHandler.class);
+		AbstractDatabaseHandler<Object> h = mock(AbstractDatabaseHandler.class);
 		MockedStatic<DatabaseSetup> mockDb = Mockito.mockStatic(DatabaseSetup.class);
-		DatabaseSetup dbSetup = Mockito.mock(DatabaseSetup.class);
+		DatabaseSetup dbSetup = mock(DatabaseSetup.class);
 		mockDb.when(DatabaseSetup::getDatabase).thenReturn(dbSetup);
 		when(dbSetup.getHandler(Mockito.any())).thenReturn(h);
 		when(h.saveObject(Mockito.any())).thenReturn(CompletableFuture.completedFuture(true));
 		// Commands manager
-		CommandsManager cm = Mockito.mock(CommandsManager.class);
+		CommandsManager cm = mock(CommandsManager.class);
 		when(plugin.getCommandsManager()).thenReturn(cm);
 		// MultiLib - prevent BukkitImpl from checking Paper classloader
 		Mockito.mockStatic(MultiLib.class);
@@ -171,7 +172,7 @@ public class OneBlocksManagerTest3 extends CommonTestSetup {
 	}
 
 	@AfterAll
-	public static void cleanUp() throws Exception {
+	static void cleanUp() throws Exception {
 
 		new File("addon.jar").delete();
 		new File("config.yml").delete();
@@ -819,7 +820,7 @@ public class OneBlocksManagerTest3 extends CommonTestSetup {
 
 		public static EnchantmentStorageMeta deserialize(Map<String, Object> args) {
 			lastArgs = args;
-			EnchantmentStorageMeta meta = Mockito.mock(EnchantmentStorageMeta.class);
+			EnchantmentStorageMeta meta = mock(EnchantmentStorageMeta.class);
 			// ItemStack hands back a clone of its meta
 			when(meta.clone()).thenReturn(meta);
 			return meta;

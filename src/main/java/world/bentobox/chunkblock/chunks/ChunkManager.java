@@ -50,7 +50,7 @@ public class ChunkManager {
         ALREADY_UNLOCKED,
         /** The chunk does not touch the island's unlocked territory */
         NOT_ADJACENT,
-        /** The chunk is outside the island's protection range or over max-chunks */
+        /** The chunk is outside the island's protection range */
         BEYOND_LIMIT,
         /** Not enough level credit */
         NO_CREDIT
@@ -301,9 +301,7 @@ public class ChunkManager {
         if (data.isChunkUnlocked(dx, dz)) {
             return ClaimResult.ALREADY_UNLOCKED;
         }
-        if (Math.max(Math.abs(dx), Math.abs(dz)) > maxRingRadius(island)
-                || (addon.getSettings().getMaxChunks() >= 0
-                        && data.getUnlockedChunkCount() >= addon.getSettings().getMaxChunks())) {
+        if (Math.max(Math.abs(dx), Math.abs(dz)) > maxRingRadius(island)) {
             return ClaimResult.BEYOND_LIMIT;
         }
         // Must share a face with territory the island already owns
@@ -379,18 +377,15 @@ public class ChunkManager {
     }
 
     /**
-     * Returns the effective maximum number of chunks this island can unlock: the
-     * configured max-chunks, additionally capped by what fits inside the island's
-     * protection range.
+     * Returns the maximum number of chunks this island can unlock, determined by
+     * what fits inside the island's protection range.
      *
      * @param island the island
      * @return the maximum unlockable chunk count, always &gt;= 1
      */
     public int getMaxChunks(Island island) {
         int rangeRadius = maxRingRadius(island);
-        int rangeCap = (2 * rangeRadius + 1) * (2 * rangeRadius + 1);
-        int configured = addon.getSettings().getMaxChunks();
-        return Math.max(1, configured < 0 ? rangeCap : Math.min(configured, rangeCap));
+        return Math.max(1, (2 * rangeRadius + 1) * (2 * rangeRadius + 1));
     }
 
     /**

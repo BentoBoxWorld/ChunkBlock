@@ -22,7 +22,7 @@ import world.bentobox.chunkblock.listeners.BlockListener;
  * @author tastybento
  *
  */
-public class SettingsTest extends CommonTestSetup {
+class SettingsTest extends CommonTestSetup {
 
     private Settings s;
 

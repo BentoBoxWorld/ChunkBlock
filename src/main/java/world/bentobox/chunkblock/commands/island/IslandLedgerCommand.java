@@ -99,7 +99,7 @@ public class IslandLedgerCommand extends CompositeCommand {
             return 0;
         }
         try {
-            return Math.max(0, Integer.parseInt(args.get(0)));
+            return Math.max(0, Integer.parseInt(args.getFirst()));
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -114,7 +114,7 @@ public class IslandLedgerCommand extends CompositeCommand {
             long rings = am.getCount(island, uuid, CounterType.RINGS_COMPLETED, window);
             if (blocks > 0 || chunks > 0 || rings > 0) {
                 String name = addon.getPlayers().getName(uuid);
-                rows.add(new MemberRow(name == null || name.isEmpty() ? uuid.toString() : name,
+                rows.add(new MemberRow(name.isEmpty() ? uuid.toString() : name,
                         blocks, chunks, rings));
             }
         }

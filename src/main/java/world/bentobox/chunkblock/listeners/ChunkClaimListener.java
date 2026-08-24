@@ -102,10 +102,14 @@ public class ChunkClaimListener implements Listener {
             return;
         }
         Player player = e.getPlayer();
-        if (!addon.inWorld(player.getWorld())) {
+        if (player == null || !addon.inWorld(player.getWorld())) {
             return;
         }
-        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(player.getLocation());
+        Location playerLoc = player.getLocation();
+        if (playerLoc == null) {
+            return;
+        }
+        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(playerLoc);
         if (optionalIsland.isEmpty()) {
             return;
         }
@@ -129,7 +133,7 @@ public class ChunkClaimListener implements Listener {
         } else {
             target = findTargetLockedChunk(player, island);
         }
-        if (target == null) {
+        if (target == null || target.length == 0) {
             return;
         }
         // Only now that this is genuinely a claim gesture is rank worth raising: who may
@@ -180,6 +184,7 @@ public class ChunkClaimListener implements Listener {
      *
      * @return {chunkX, chunkZ} world chunk coordinates, or null
      */
+    @SuppressWarnings("java:S1168")
     private int[] findTargetLockedChunk(Player player, Island island) {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection();
@@ -198,10 +203,10 @@ public class ChunkClaimListener implements Listener {
             Block block = point.getBlock();
             if (block != null && !block.isPassable()) {
                 // The aim line is blocked by the player's own blocks before the border
-                return null;
+                return new int[0];
             }
         }
-        return null;
+        return new int[0];
     }
 
     /**

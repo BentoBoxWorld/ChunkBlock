@@ -46,9 +46,9 @@ public class AdminChunksCommand extends CompositeCommand {
 
     @Override
     public boolean execute(User user, String label, List<String> args) {
-        UUID targetUUID = Util.getUUID(args.get(0));
+        UUID targetUUID = Util.getUUID(args.getFirst());
         if (targetUUID == null) {
-            user.sendMessage("general.errors.unknown-player", TextVariables.NAME, args.get(0));
+            user.sendMessage("general.errors.unknown-player", TextVariables.NAME, args.getFirst());
             return false;
         }
         Island island = getIslands().getIsland(getWorld(), targetUUID);
@@ -58,7 +58,7 @@ public class AdminChunksCommand extends CompositeCommand {
         }
         ChunkManager cm = addon.getChunkManager();
         if (args.size() == 1) {
-            user.sendMessage("chunkblock.commands.admin.chunks.info", TextVariables.NAME, args.get(0),
+            user.sendMessage("chunkblock.commands.admin.chunks.info", TextVariables.NAME, args.getFirst(),
                     TextVariables.NUMBER, String.valueOf(cm.getUnlockedChunkCount(island)),
                     "[max]", String.valueOf(cm.getMaxChunks(island)),
                     "[spent]", String.valueOf(cm.getSpentLevels(island)),
@@ -68,7 +68,7 @@ public class AdminChunksCommand extends CompositeCommand {
         if ("reset".equals(args.get(1).toLowerCase(Locale.ENGLISH))) {
             addon.getOneBlocksIsland(island).resetUnlockedChunks();
             addon.getBlockListener().saveIsland(island);
-            user.sendMessage("chunkblock.commands.admin.chunks.reset", TextVariables.NAME, args.get(0));
+            user.sendMessage("chunkblock.commands.admin.chunks.reset", TextVariables.NAME, args.getFirst());
             return true;
         }
         showHelp(this, user);

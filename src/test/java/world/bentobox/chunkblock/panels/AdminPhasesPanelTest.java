@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -100,7 +101,7 @@ class AdminPhasesPanelTest extends CommonTestSetup {
      * Dropping at the end position appends the held phase.
      */
     @Test
-    void testDropAtEnd() throws IOException {
+    void testDropAtEnd() {
         panel.pickUp(0);
         panel.dropAt(2);
         assertEquals(List.of("Beta", "Gamma", "Alpha"), names());
@@ -219,7 +220,7 @@ class AdminPhasesPanelTest extends CommonTestSetup {
      */
     @Test
     void testReloadFailure() throws IOException {
-        org.mockito.Mockito.doThrow(new IOException("boom")).when(obm).loadPhases();
+        doThrow(new IOException("boom")).when(obm).loadPhases();
         panel.pickUp(0);
         panel.dropAt(2);
         verify(addon).logError("Could not reload phases: boom");

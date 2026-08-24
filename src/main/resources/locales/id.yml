@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Anda berada di chunk yang ditandai.</aqua>"
     dialog:
       close: "<white>Tutup"
+      view-island: "<gold>Pusatkan ke pulau"
+      view-player: "<aqua>Pusatkan ke posisi Anda"
+      arrow-to-island: "<gold>Pusat pulau Anda ada di arah ini"
+      arrow-to-player: "<aqua>Anda ada di arah ini"
       tooltip:
         center: "<gold>Chunk pusat — blok ajaib Anda ada di sini."
         owned: "<green>Chunk [x], [z] — milik Anda."

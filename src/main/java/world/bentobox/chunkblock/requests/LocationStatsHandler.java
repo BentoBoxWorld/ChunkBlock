@@ -32,7 +32,9 @@ public class LocationStatsHandler extends AddonRequestHandler {
         this.addon = addon;
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     *
      * @see world.bentobox.bentobox.api.addons.request.AddonRequestHandler#handle(java.util.Map)
      */
     @Override

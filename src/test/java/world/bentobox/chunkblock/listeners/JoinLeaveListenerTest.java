@@ -23,7 +23,7 @@ import world.bentobox.chunkblock.CommonTestSetup;
 /**
  * @author tastybento
  */
-public class JoinLeaveListenerTest extends CommonTestSetup {
+class JoinLeaveListenerTest extends CommonTestSetup {
     
     @Mock
     private ChunkBlock aob;

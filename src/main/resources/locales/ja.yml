@@ -69,6 +69,10 @@ chunkblock:
       you-are-here: "<aqua>あなたはマークされたチャンク上にいます。</aqua>"
     dialog:
       close: "<white>閉じる"
+      view-island: "<gold>島の中心に表示"
+      view-player: "<aqua>現在地に表示"
+      arrow-to-island: "<gold>島の中心はこの方向です"
+      arrow-to-player: "<aqua>あなたはこの方向にいます"
       tooltip:
         center: "<gold>中央チャンク — あなたの魔法ブロックはここにあります。"
         owned: "<green>チャンク [x], [z] — あなたのもの。"

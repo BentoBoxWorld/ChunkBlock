@@ -36,6 +36,7 @@ public class IslandChunksCommand extends CompositeCommand {
      * in the normal font.
      */
     private static final Key MONOSPACE_FONT = Key.key("minecraft", "uniform");
+    private static final String PLACEHOLDER_MAX = "[max]";
 
     private ChunkBlock addon;
 
@@ -77,12 +78,12 @@ public class IslandChunksCommand extends CompositeCommand {
         int unlocked = cm.getUnlockedChunkCount(island);
         int max = cm.getMaxChunks(island);
         long credit = Math.max(0, cm.getCredit(island));
-        user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), "[max]",
+        user.sendMessage("chunkblock.chunks.info", "[unlocked]", String.valueOf(unlocked), PLACEHOLDER_MAX,
                 String.valueOf(max), "[credit]", String.valueOf(credit), "[cost]",
                 String.valueOf(cm.getChunkCost()));
         int completedRings = cm.completedRings(island);
         int maxRing = cm.maxRingRadius(island);
-        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(completedRings), "[max]",
+        user.sendMessage("chunkblock.chunks.rings", "[rings]", String.valueOf(completedRings), PLACEHOLDER_MAX,
                 String.valueOf(maxRing));
         int nextRing = completedRings + 1;
         if (nextRing <= maxRing) {
@@ -105,7 +106,7 @@ public class IslandChunksCommand extends CompositeCommand {
         int radius = Math.min(MAX_MAP_RADIUS, cm.currentRing(island) + 1);
         int width = 2 * radius + 1;
         List<Cell> cells = ChunkMap.cells(addon, island, user.getLocation(), radius);
-        user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), "[max]",
+        user.sendMessage("chunkblock.chunks.map.title", "[unlocked]", String.valueOf(unlocked), PLACEHOLDER_MAX,
                 String.valueOf(max));
         for (int row = 0; row < width; row++) {
             // A row goes into the [row] variable of a translation, so it has to be text by

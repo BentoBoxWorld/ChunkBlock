@@ -2,6 +2,7 @@ package world.bentobox.chunkblock.listeners;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -73,9 +74,12 @@ public class HoloListener implements Listener {
         }
 
         if (newIsland) {
-            String startingText = User.getInstance(island.getOwner())
-                .getTranslation("chunkblock.island.starting-hologram");
-            is.setHologram(startingText == null ? "" : startingText);
+            UUID owner = island.getOwner();
+            if (owner != null) {
+                String startingText = User.getInstance(owner)
+                    .getTranslation("chunkblock.island.starting-hologram");
+                is.setHologram(startingText == null ? "" : startingText);
+            }
         }
         updateHologram(island, is.getHologram());
     }

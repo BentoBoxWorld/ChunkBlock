@@ -11,7 +11,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -127,10 +126,10 @@ class IslandLedgerCommandTest extends CommonTestSetup {
         assertTrue(command.execute(user, "ledger", Collections.emptyList()));
         verify(user).sendMessage(eq("chunkblock.commands.ledger.header"), anyString(), anyString());
         verify(user, never()).sendMessage("chunkblock.commands.ledger.no-activity");
-        verify(user).sendMessage(eq("chunkblock.commands.ledger.total"),
-                eq("[blocks]"), eq("150"),
-                eq("[chunks]"), eq("4"),
-                eq("[rings]"), eq("1"));
+        verify(user).sendMessage("chunkblock.commands.ledger.total",
+                "[blocks]", "150",
+                "[chunks]", "4",
+                "[rings]", "1");
     }
 
     @Test

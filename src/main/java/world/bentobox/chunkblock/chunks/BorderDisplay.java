@@ -116,13 +116,16 @@ public class BorderDisplay implements Listener {
             hideBorder(player);
             return;
         }
-        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(player.getLocation());
+        Location loc = player.getLocation();
+        if (loc == null) {
+            return;
+        }
+        Optional<Island> optionalIsland = addon.getIslands().getIslandAt(loc);
         if (optionalIsland.isEmpty()) {
             return;
         }
         Island island = optionalIsland.get();
         ChunkManager cm = addon.getChunkManager();
-        Location loc = player.getLocation();
         int pcx = loc.getBlockX() >> 4;
         int pcz = loc.getBlockZ() >> 4;
         // Check the 3x3 chunk neighborhood; locked chunks with an unlocked neighbor
@@ -131,27 +134,29 @@ public class BorderDisplay implements Listener {
             for (int dcz = -1; dcz <= 1; dcz++) {
                 int cx = pcx + dcx;
                 int cz = pcz + dcz;
-                if (cm.isUnlocked(island, cx, cz)) {
-                    continue;
-                }
-                // West face (x = cx*16) shows if the west neighbor is unlocked;
-                // the locked-side block of that plane is at x = wallX
-                if (cm.isUnlocked(island, cx - 1, cz)) {
-                    drawWallX(player, cx << 4, cz << 4, 0);
-                }
-                // East face (x = cx*16+16); locked side is at x = wallX - 1
-                if (cm.isUnlocked(island, cx + 1, cz)) {
-                    drawWallX(player, (cx << 4) + 16, cz << 4, -1);
-                }
-                // North face (z = cz*16)
-                if (cm.isUnlocked(island, cx, cz - 1)) {
-                    drawWallZ(player, cx << 4, cz << 4, 0);
-                }
-                // South face (z = cz*16+16)
-                if (cm.isUnlocked(island, cx, cz + 1)) {
-                    drawWallZ(player, cx << 4, (cz << 4) + 16, -1);
-                }
+                drawLockedChunkFaces(player, island, cm, cx, cz);
             }
+        }
+    }
+
+    /**
+     * Draws all four faces of a locked chunk that border unlocked territory.
+     */
+    private void drawLockedChunkFaces(Player player, Island island, ChunkManager cm, int cx, int cz) {
+        if (cm.isUnlocked(island, cx, cz)) {
+            return;
+        }
+        if (cm.isUnlocked(island, cx - 1, cz)) {
+            drawWallX(player, cx << 4, cz << 4, 0);
+        }
+        if (cm.isUnlocked(island, cx + 1, cz)) {
+            drawWallX(player, (cx << 4) + 16, cz << 4, -1);
+        }
+        if (cm.isUnlocked(island, cx, cz - 1)) {
+            drawWallZ(player, cx << 4, cz << 4, 0);
+        }
+        if (cm.isUnlocked(island, cx, cz + 1)) {
+            drawWallZ(player, cx << 4, (cz << 4) + 16, -1);
         }
     }
 
@@ -194,23 +199,22 @@ public class BorderDisplay implements Listener {
         World world = player.getWorld();
         int yFrom = Math.max(world.getMinHeight() - OUT_OF_WORLD_DEPTH, player.getLocation().getBlockY() - BARRIER_RADIUS);
         int yTo = Math.min(world.getMaxHeight() + 2 * OUT_OF_WORLD_DEPTH, player.getLocation().getBlockY() + BARRIER_RADIUS);
-        boolean particles = addon.getSettings().isBorderShowParticles();
-        boolean barriers = addon.getSettings().isBorderBarrierBlocks();
         for (int y = yFrom; y <= yTo; y++) {
-            if (particles) {
-                boolean outOfWorld = y < world.getMinHeight() || y > world.getMaxHeight();
-                Color color = outOfWorld ? OUT_OF_WORLD_COLOR : addon.getSettings().getBorderParticleColor();
-                // The wall plane runs along block boundaries; offset the dust onto the plane
-                double px = alongZ ? x : x + 0.5D;
-                double pz = alongZ ? z + 0.5D : z;
-                player.spawnParticle(Particle.DUST, px, y + 0.5D, pz, 1, 0, 0, 0, 0,
-                        new Particle.DustOptions(color, 1.0F));
-            }
-            if (barriers && y >= world.getMinHeight() && y < world.getMaxHeight()) {
-                // Barrier blocks go just inside the locked chunk so they never obstruct
-                // the player's own territory
-                sendBarrier(player, new Location(world, barrierX, y, barrierZ));
-            }
+            drawColumnSegment(player, x, y, z, alongZ, barrierX, barrierZ, world);
+        }
+    }
+
+    private void drawColumnSegment(Player player, int x, int y, int z, boolean alongZ, int barrierX, int barrierZ, World world) {
+        if (addon.getSettings().isBorderShowParticles()) {
+            boolean outOfWorld = y < world.getMinHeight() || y > world.getMaxHeight();
+            Color color = outOfWorld ? OUT_OF_WORLD_COLOR : addon.getSettings().getBorderParticleColor();
+            double px = alongZ ? x : x + 0.5D;
+            double pz = alongZ ? z + 0.5D : z;
+            player.spawnParticle(Particle.DUST, px, y + 0.5D, pz, 1, 0, 0, 0, 0,
+                    new Particle.DustOptions(color, 1.0F));
+        }
+        if (addon.getSettings().isBorderBarrierBlocks() && y >= world.getMinHeight() && y < world.getMaxHeight()) {
+            sendBarrier(player, new Location(world, barrierX, y, barrierZ));
         }
     }
 

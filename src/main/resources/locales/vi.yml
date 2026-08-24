@@ -72,6 +72,10 @@ chunkblock:
       you-are-here: "<aqua>Bạn ở trên khối được đánh dấu.</aqua>"
     dialog:
       close: "<white>Đóng"
+      view-island: "<gold>Căn giữa theo đảo"
+      view-player: "<aqua>Căn giữa theo vị trí của bạn"
+      arrow-to-island: "<gold>Trung tâm đảo của bạn ở hướng này"
+      arrow-to-player: "<aqua>Bạn ở hướng này"
       tooltip:
         center: "<gold>Khối trung tâm — khối ma thuật của bạn ở đây.</gold>"
         owned: "<green>Khối [x], [z] — của bạn.</green>"
