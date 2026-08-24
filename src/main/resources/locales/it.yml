@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Chiudi"
       view-island: "<gold>Centra sulla tua isola"
       view-player: "<aqua>Centra sulla tua posizione"
+      pan-north: "<white>Scorri la mappa a nord"
+      pan-south: "<white>Scorri la mappa a sud"
+      pan-east: "<white>Scorri la mappa a est"
+      pan-west: "<white>Scorri la mappa a ovest"
       arrow-to-island: "<gold>Il centro della tua isola è in questa direzione"
       arrow-to-player: "<aqua>Ti trovi in questa direzione"
       tooltip:

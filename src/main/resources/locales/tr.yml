@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Kapat"
       view-island: "<gold>Adanıza ortala"
       view-player: "<aqua>Konumunuza ortala"
+      pan-north: "<white>Haritayı kuzeye kaydır"
+      pan-south: "<white>Haritayı güneye kaydır"
+      pan-east: "<white>Haritayı doğuya kaydır"
+      pan-west: "<white>Haritayı batıya kaydır"
       arrow-to-island: "<gold>Ada merkeziniz bu yönde"
       arrow-to-player: "<aqua>Bu yöndesiniz"
       tooltip:

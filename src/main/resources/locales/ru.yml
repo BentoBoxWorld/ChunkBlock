@@ -73,6 +73,10 @@ chunkblock:
       close: "<white>Закрыть"
       view-island: "<gold>Центрировать на острове"
       view-player: "<aqua>Центрировать на вашей позиции"
+      pan-north: "<white>Прокрутить карту на север"
+      pan-south: "<white>Прокрутить карту на юг"
+      pan-east: "<white>Прокрутить карту на восток"
+      pan-west: "<white>Прокрутить карту на запад"
       arrow-to-island: "<gold>Центр вашего острова в этом направлении"
       arrow-to-player: "<aqua>Вы находитесь в этом направлении"
       tooltip:

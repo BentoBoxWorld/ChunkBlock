@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Zatvori"
       view-island: "<gold>Centriraj na otok"
       view-player: "<aqua>Centriraj na tvoju poziciju"
+      pan-north: "<white>Pomakni kartu na sjever"
+      pan-south: "<white>Pomakni kartu na jug"
+      pan-east: "<white>Pomakni kartu na istok"
+      pan-west: "<white>Pomakni kartu na zapad"
       arrow-to-island: "<gold>Centar tvog otoka je u ovom smjeru"
       arrow-to-player: "<aqua>Ti si u ovom smjeru"
       tooltip:

@@ -30,19 +30,13 @@ import world.bentobox.chunkblock.chunks.ChunkMap.Cell;
 /**
  * The territory map of {@code /ch chunks} drawn as a dialog: one button per chunk, laid
  * out in a grid. When the island's territory can exceed the 13-wide viewport, a control
- * row is prepended with two view-mode buttons (island center / player position) and a
- * directional arrow pointing toward the off-screen target.
+ * row is prepended: pan arrows that slide the viewport half a screen per click, a jump
+ * button to the island center, a jump button to the player's own position, and an
+ * indicator in the middle that points at whichever of those two is off-screen.
  *
  * @author tastybento
  */
 public class ChunksDialog {
-
-    /**
-     * Whether the viewport is centered on the island center or on the player's position.
-     */
-    enum ViewMode {
-        ISLAND_CENTER, PLAYER_CENTER
-    }
 
     /**
      * Widest map that still fits the dialog. A grid this wide is {@value #MAX_RADIUS} * 2
@@ -50,6 +44,9 @@ public class ChunksDialog {
      * columns are squeezed off.
      */
     static final int MAX_RADIUS = 6;
+
+    /** How many chunks one pan-arrow click slides the viewport: half a screen. */
+    static final int PAN_STEP = MAX_RADIUS;
 
     /** Button size in dialog units. Roughly square once the client adds its own padding. */
     private static final int BUTTON_WIDTH = 26;
@@ -71,35 +68,35 @@ public class ChunksDialog {
     private final User user;
     private final Island island;
     private final int radius;
-    private final ViewMode viewMode;
     private final int viewDx;
     private final int viewDz;
     private final boolean scrollable;
 
     ChunksDialog(ChunkBlock addon, User user, Island island) {
-        this(addon, user, island, ViewMode.ISLAND_CENTER);
+        this(addon, user, island, 0, 0);
     }
 
-    ChunksDialog(ChunkBlock addon, User user, Island island, ViewMode viewMode) {
+    /**
+     * @param viewDx requested viewport center, chunks east of the island center
+     * @param viewDz requested viewport center, chunks south of the island center; both are
+     *            clamped so the viewport never scrolls past the edge of the claimable map
+     */
+    ChunksDialog(ChunkBlock addon, User user, Island island, int viewDx, int viewDz) {
         this.addon = addon;
         this.user = user;
         this.island = island;
-        this.viewMode = viewMode;
 
         ChunkManager cm = addon.getChunkManager();
-        this.scrollable = cm.maxRingRadius(island) > MAX_RADIUS;
+        int maxRing = cm.maxRingRadius(island);
+        this.scrollable = maxRing > MAX_RADIUS;
 
         if (scrollable) {
             this.radius = MAX_RADIUS;
-            if (viewMode == ViewMode.PLAYER_CENTER && isPlayerOnIsland()) {
-                int centerChunkX = island.getCenter().getBlockX() >> 4;
-                int centerChunkZ = island.getCenter().getBlockZ() >> 4;
-                this.viewDx = (user.getLocation().getBlockX() >> 4) - centerChunkX;
-                this.viewDz = (user.getLocation().getBlockZ() >> 4) - centerChunkZ;
-            } else {
-                this.viewDx = 0;
-                this.viewDz = 0;
-            }
+            // The viewport center stops radius short of the edge so the last screen ends
+            // exactly on the outermost ring instead of scrolling into the void
+            int limit = Math.max(0, maxRing - radius);
+            this.viewDx = Math.clamp(viewDx, -limit, limit);
+            this.viewDz = Math.clamp(viewDz, -limit, limit);
         } else {
             this.radius = Math.min(MAX_RADIUS, cm.currentRing(island) + 1);
             this.viewDx = 0;
@@ -117,20 +114,21 @@ public class ChunksDialog {
      *         which case the caller should fall back to the chat map
      */
     public static boolean show(@NonNull ChunkBlock addon, @NonNull User user, @NonNull Island island) {
-        return show(addon, user, island, ViewMode.ISLAND_CENTER, null);
+        return show(addon, user, island, 0, 0, null);
     }
 
     /**
-     * @param viewMode which point the viewport is centered on
+     * @param viewDx viewport center chunk offset east of the island center
+     * @param viewDz viewport center chunk offset south of the island center
      * @param selection the chunk description to show above the map, or null for none
      */
-    private static boolean show(ChunkBlock addon, User user, Island island, ViewMode viewMode,
+    private static boolean show(ChunkBlock addon, User user, Island island, int viewDx, int viewDz,
             @Nullable Component selection) {
         if (!Dialogs.isSupported() || !user.isPlayer()) {
             return false;
         }
         try {
-            new ChunksDialog(addon, user, island, viewMode).open(selection);
+            new ChunksDialog(addon, user, island, viewDx, viewDz).open(selection);
             return true;
         } catch (Exception | LinkageError e) {
             addon.logError("Could not show the chunks dialog: " + e.getMessage());
@@ -173,20 +171,27 @@ public class ChunksDialog {
     }
 
     // ------------------------------------------------------------------
-    // Control row (view-mode toggle + directional arrow)
+    // Control row: [◎] ─ ─ ─ [◀] [▲] [•] [▼] [▶] ─ ─ ─ [◇]
     // ------------------------------------------------------------------
 
     private List<ActionButton> controlRow(int columns) {
+        int mid = columns / 2;
         List<ActionButton> row = new ArrayList<>(columns);
         for (int i = 0; i < columns; i++) {
             if (i == 0) {
-                row.add(modeButton(ViewMode.ISLAND_CENTER, "◎", "◉", NamedTextColor.GOLD,
-                        REFERENCE + "view-island"));
+                row.add(islandJumpButton());
             } else if (i == columns - 1) {
-                row.add(modeButton(ViewMode.PLAYER_CENTER, "◇", "◆", NamedTextColor.AQUA,
-                        REFERENCE + "view-player"));
-            } else if (i == columns / 2) {
-                row.add(directionArrowButton());
+                row.add(playerJumpButton());
+            } else if (i == mid - 2) {
+                row.add(panButton("◀", -PAN_STEP, 0, "pan-west", canPan(-1, 0)));
+            } else if (i == mid - 1) {
+                row.add(panButton("▲", 0, -PAN_STEP, "pan-north", canPan(0, -1)));
+            } else if (i == mid) {
+                row.add(indicatorButton());
+            } else if (i == mid + 1) {
+                row.add(panButton("▼", 0, PAN_STEP, "pan-south", canPan(0, 1)));
+            } else if (i == mid + 2) {
+                row.add(panButton("▶", PAN_STEP, 0, "pan-east", canPan(1, 0)));
             } else {
                 row.add(spacerButton());
             }
@@ -194,14 +199,51 @@ public class ChunksDialog {
         return row;
     }
 
-    private ActionButton modeButton(ViewMode mode, String inactiveGlyph, String activeGlyph,
-            NamedTextColor color, String tooltipKey) {
-        boolean active = viewMode == mode;
-        String glyph = active ? activeGlyph : inactiveGlyph;
-        NamedTextColor buttonColor = active ? NamedTextColor.WHITE : color;
-        return ActionButton.builder(Component.text(glyph, buttonColor))
+    /**
+     * Whether panning one step toward (signX, signZ) would reveal anything: the viewport
+     * must not already touch that edge of the claimable map.
+     */
+    private boolean canPan(int signX, int signZ) {
+        int maxRing = addon.getChunkManager().maxRingRadius(island);
+        if (signX != 0) {
+            return signX < 0 ? viewDx - radius > -maxRing : viewDx + radius < maxRing;
+        }
+        return signZ < 0 ? viewDz - radius > -maxRing : viewDz + radius < maxRing;
+    }
+
+    private ActionButton panButton(String glyph, int stepX, int stepZ, String tooltipKey, boolean enabled) {
+        if (!enabled) {
+            return spacerButton();
+        }
+        return ActionButton.builder(Component.text(glyph, NamedTextColor.WHITE))
+                .tooltip(text(REFERENCE + tooltipKey)).width(BUTTON_WIDTH)
+                .action(DialogAction.customClick((view, audience) -> moveViewport(viewDx + stepX, viewDz + stepZ),
+                        ClickCallback.Options.builder().uses(1).lifetime(CALLBACK_LIFETIME).build()))
+                .build();
+    }
+
+    private ActionButton islandJumpButton() {
+        boolean active = viewDx == 0 && viewDz == 0;
+        return jumpButton(active ? "◉" : "◎", active, NamedTextColor.GOLD, REFERENCE + "view-island", 0, 0);
+    }
+
+    private ActionButton playerJumpButton() {
+        int[] player = playerChunkOffset();
+        if (player == null) {
+            return spacerButton();
+        }
+        // Compare against where the jump would actually land, which is the clamped spot
+        ChunksDialog target = new ChunksDialog(addon, user, island, player[0], player[1]);
+        boolean active = viewDx == target.viewDx && viewDz == target.viewDz;
+        return jumpButton(active ? "◆" : "◇", active, NamedTextColor.AQUA, REFERENCE + "view-player", player[0],
+                player[1]);
+    }
+
+    private ActionButton jumpButton(String glyph, boolean active, NamedTextColor color, String tooltipKey,
+            int targetDx, int targetDz) {
+        return ActionButton.builder(Component.text(glyph, active ? NamedTextColor.WHITE : color))
                 .tooltip(text(tooltipKey)).width(BUTTON_WIDTH)
-                .action(DialogAction.customClick((view, audience) -> switchMode(mode),
+                .action(DialogAction.customClick((view, audience) -> moveViewport(targetDx, targetDz),
                         ClickCallback.Options.builder().uses(1).lifetime(CALLBACK_LIFETIME).build()))
                 .build();
     }
@@ -210,42 +252,32 @@ public class ChunksDialog {
         return ActionButton.builder(Component.text("─", NamedTextColor.DARK_GRAY)).width(BUTTON_WIDTH).build();
     }
 
-    private ActionButton directionArrowButton() {
-        int targetDx;
-        int targetDz;
-        NamedTextColor arrowColor;
-        String tooltipKey;
-        ViewMode targetMode;
-
-        if (viewMode == ViewMode.ISLAND_CENTER) {
-            if (!isPlayerOnIsland()) {
-                return spacerButton();
-            }
-            int centerChunkX = island.getCenter().getBlockX() >> 4;
-            int centerChunkZ = island.getCenter().getBlockZ() >> 4;
-            targetDx = (user.getLocation().getBlockX() >> 4) - centerChunkX;
-            targetDz = (user.getLocation().getBlockZ() >> 4) - centerChunkZ;
-            arrowColor = NamedTextColor.AQUA;
-            tooltipKey = REFERENCE + "arrow-to-player";
-            targetMode = ViewMode.PLAYER_CENTER;
-        } else {
-            targetDx = 0;
-            targetDz = 0;
-            arrowColor = NamedTextColor.GOLD;
-            tooltipKey = REFERENCE + "arrow-to-island";
-            targetMode = ViewMode.ISLAND_CENTER;
+    /**
+     * The middle of the control row: an arrow pointing at the island center when it has
+     * been panned off-screen (clicking jumps home), otherwise at the player when they are
+     * off-screen (clicking jumps to them), otherwise a plain dot.
+     */
+    private ActionButton indicatorButton() {
+        if (offScreen(0, 0)) {
+            return indicatorArrow(-viewDx, -viewDz, NamedTextColor.GOLD, REFERENCE + "arrow-to-island", 0, 0);
         }
-
-        int relDx = targetDx - viewDx;
-        int relDz = targetDz - viewDz;
-        if (Math.abs(relDx) <= radius && Math.abs(relDz) <= radius) {
-            return ActionButton.builder(Component.text("•", NamedTextColor.DARK_GRAY)).width(BUTTON_WIDTH).build();
+        int[] player = playerChunkOffset();
+        if (player != null && offScreen(player[0], player[1])) {
+            return indicatorArrow(player[0] - viewDx, player[1] - viewDz, NamedTextColor.AQUA,
+                    REFERENCE + "arrow-to-player", player[0], player[1]);
         }
+        return ActionButton.builder(Component.text("•", NamedTextColor.DARK_GRAY)).width(BUTTON_WIDTH).build();
+    }
 
-        String arrow = directionGlyph(relDx, relDz);
-        return ActionButton.builder(Component.text(arrow, arrowColor))
+    private boolean offScreen(int dx, int dz) {
+        return Math.abs(dx - viewDx) > radius || Math.abs(dz - viewDz) > radius;
+    }
+
+    private ActionButton indicatorArrow(int relDx, int relDz, NamedTextColor color, String tooltipKey,
+            int targetDx, int targetDz) {
+        return ActionButton.builder(Component.text(directionGlyph(relDx, relDz), color))
                 .tooltip(text(tooltipKey)).width(BUTTON_WIDTH)
-                .action(DialogAction.customClick((view, audience) -> switchMode(targetMode),
+                .action(DialogAction.customClick((view, audience) -> moveViewport(targetDx, targetDz),
                         ClickCallback.Options.builder().uses(1).lifetime(CALLBACK_LIFETIME).build()))
                 .build();
     }
@@ -258,6 +290,18 @@ public class ChunksDialog {
         double angle = Math.atan2(-relDz, relDx);
         int sector = (int) Math.round(angle / (Math.PI / 4));
         return ARROWS[((sector % 8) + 8) % 8];
+    }
+
+    /**
+     * @return the chunk the player is standing on as an offset from the island center, or
+     *         null when the player is not in the island's world
+     */
+    private int @Nullable [] playerChunkOffset() {
+        if (island.getWorld() == null || !Util.sameWorld(island.getWorld(), user.getLocation().getWorld())) {
+            return null;
+        }
+        return new int[] { (user.getLocation().getBlockX() >> 4) - (island.getCenter().getBlockX() >> 4),
+                (user.getLocation().getBlockZ() >> 4) - (island.getCenter().getBlockZ() >> 4) };
     }
 
     // ------------------------------------------------------------------
@@ -281,15 +325,19 @@ public class ChunksDialog {
     }
 
     /**
-     * Puts the map back up with the clicked chunk named at the top. Clicking any button
-     * closes the dialog, so a map that stays put has to be shown again.
+     * Puts the map back up with the clicked chunk named at the top, keeping the panned
+     * position. Clicking any button closes the dialog, so a map that stays put has to be
+     * shown again.
      */
     private void reopen(Component selection) {
-        Bukkit.getScheduler().runTask(addon.getPlugin(), () -> show(addon, user, island, viewMode, selection));
+        Bukkit.getScheduler().runTask(addon.getPlugin(), () -> show(addon, user, island, viewDx, viewDz, selection));
     }
 
-    private void switchMode(ViewMode mode) {
-        Bukkit.getScheduler().runTask(addon.getPlugin(), () -> show(addon, user, island, mode, null));
+    /**
+     * Reopens the map with the viewport centered on the given offset (clamped to the map).
+     */
+    private void moveViewport(int newDx, int newDz) {
+        Bukkit.getScheduler().runTask(addon.getPlugin(), () -> show(addon, user, island, newDx, newDz, null));
     }
 
     /**
@@ -323,12 +371,16 @@ public class ChunksDialog {
         return value > 0 ? "+" + value : String.valueOf(value);
     }
 
-    private boolean isPlayerOnIsland() {
-        return island.getWorld() != null && Util.sameWorld(island.getWorld(), user.getLocation().getWorld());
-    }
-
     boolean isScrollable() {
         return scrollable;
+    }
+
+    int getViewDx() {
+        return viewDx;
+    }
+
+    int getViewDz() {
+        return viewDz;
     }
 
     /**
