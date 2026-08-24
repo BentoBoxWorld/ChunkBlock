@@ -1,6 +1,6 @@
 # ChunkBlock
 
-A BentoBox gamemode by tastybento. Magic-block engine based on AOneBlock; original OneBlock idea by IJAminecraft.
+One block, one chunk.
 
 [![Build Status](https://ci.codemc.org/buildStatus/icon?job=BentoBoxWorld/ChunkBlock)](https://ci.codemc.org/job/BentoBoxWorld/job/ChunkBlock/)[
 ![Bugs](https://sonarcloud.io/api/project_badges/measure?project=BentoBoxWorld_ChunkBlock&metric=bugs)](https://sonarcloud.io/dashboard?id=BentoBoxWorld_ChunkBlock)
