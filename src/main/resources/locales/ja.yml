@@ -71,6 +71,10 @@ chunkblock:
       close: "<white>閉じる"
       view-island: "<gold>島の中心に表示"
       view-player: "<aqua>現在地に表示"
+      pan-north: "<white>マップを北へスクロール"
+      pan-south: "<white>マップを南へスクロール"
+      pan-east: "<white>マップを東へスクロール"
+      pan-west: "<white>マップを西へスクロール"
       arrow-to-island: "<gold>島の中心はこの方向です"
       arrow-to-player: "<aqua>あなたはこの方向にいます"
       tooltip:

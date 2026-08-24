@@ -88,24 +88,31 @@ class ChunksDialogTest extends CommonTestSetup {
     }
 
     @Test
-    void testPlayerCenteredViewportShiftsMap() {
+    void testPannedViewportShiftsMap() {
         when(island.getProtectionRange()).thenReturn(240);
-        when(playerLocation.getBlockX()).thenReturn(8 + 160);
-        when(playerLocation.getBlockZ()).thenReturn(8);
-        level = 100000;
-        // Claim enough to reach ring 10
-        for (int d = 1; d <= 10; d++) {
-            cm.claim(island, d, 0);
-        }
-        ChunksDialog dialog = new ChunksDialog(addon, user, island, ChunksDialog.ViewMode.PLAYER_CENTER);
+        // Pan the viewport 8 chunks east: visible range is dx 2..14, island center off-screen
+        ChunksDialog dialog = new ChunksDialog(addon, user, island, 8, 0);
         int width = 2 * ChunksDialog.MAX_RADIUS + 1;
         assertEquals(width * width, dialog.cells().size());
-        // The player is at chunk offset +10, so the viewport should be centered there.
-        // The center chunk (0,0) should be visible if it's within radius of the viewport center.
-        // viewDx=10, radius=6 → visible range is 4..16, so island center at 0 is NOT visible.
-        boolean centerVisible = dialog.cells().stream()
-                .anyMatch(c -> c.dx() == 0 && c.dz() == 0);
-        assertFalse(centerVisible);
+        assertFalse(dialog.cells().stream().anyMatch(c -> c.dx() == 0 && c.dz() == 0));
+        assertTrue(dialog.cells().stream().anyMatch(c -> c.dx() == 14 && c.dz() == 0));
+    }
+
+    @Test
+    void testViewportClampsAtMapEdge() {
+        when(island.getProtectionRange()).thenReturn(240);
+        // maxRingRadius = (240-8)/16 = 14; clamp limit = 14 - 6 = 8
+        ChunksDialog dialog = new ChunksDialog(addon, user, island, 100, -100);
+        assertEquals(8, dialog.getViewDx());
+        assertEquals(-8, dialog.getViewDz());
+    }
+
+    @Test
+    void testNonScrollableIgnoresRequestedViewport() {
+        when(island.getProtectionRange()).thenReturn(100);
+        ChunksDialog dialog = new ChunksDialog(addon, user, island, 5, 5);
+        assertEquals(0, dialog.getViewDx());
+        assertEquals(0, dialog.getViewDz());
     }
 
     @Test
@@ -143,13 +150,9 @@ class ChunksDialogTest extends CommonTestSetup {
     }
 
     @Test
-    void testPlayerCenteredFallsBackToIslandCenterWhenNotOnIsland() {
+    void testDefaultViewportShowsIslandCenter() {
         when(island.getProtectionRange()).thenReturn(240);
-        when(playerLocation.getWorld()).thenReturn(null);
-        // Player is not in the island world → viewport should center on island
-        ChunksDialog dialog = new ChunksDialog(addon, user, island, ChunksDialog.ViewMode.PLAYER_CENTER);
-        boolean centerVisible = dialog.cells().stream()
-                .anyMatch(c -> c.dx() == 0 && c.dz() == 0);
-        assertTrue(centerVisible);
+        ChunksDialog dialog = new ChunksDialog(addon, user, island);
+        assertTrue(dialog.cells().stream().anyMatch(c -> c.dx() == 0 && c.dz() == 0));
     }
 }

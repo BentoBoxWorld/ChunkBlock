@@ -75,6 +75,10 @@ chunkblock:
       close: "<white>Bezárás"
       view-island: "<gold>Középre a szigetedre"
       view-player: "<aqua>Középre a pozíciódra"
+      pan-north: "<white>Térkép görgetése északra"
+      pan-south: "<white>Térkép görgetése délre"
+      pan-east: "<white>Térkép görgetése keletre"
+      pan-west: "<white>Térkép görgetése nyugatra"
       arrow-to-island: "<gold>A szigeted közepe erre van"
       arrow-to-player: "<aqua>Te erre vagy"
       tooltip:

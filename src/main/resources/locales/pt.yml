@@ -71,6 +71,10 @@ chunkblock:
       close: "<white>Fechar"
       view-island: "<gold>Centralizar na ilha"
       view-player: "<aqua>Centralizar na sua posição"
+      pan-north: "<white>Rolar o mapa para o norte"
+      pan-south: "<white>Rolar o mapa para o sul"
+      pan-east: "<white>Rolar o mapa para o leste"
+      pan-west: "<white>Rolar o mapa para o oeste"
       arrow-to-island: "<gold>O centro da sua ilha está nesta direção"
       arrow-to-player: "<aqua>Você está nesta direção"
       tooltip:
