@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Zavřít"
       view-island: "<gold>Vycentrovat na ostrov"
       view-player: "<aqua>Vycentrovat na vaši pozici"
+      pan-north: "<white>Posunout mapu na sever"
+      pan-south: "<white>Posunout mapu na jih"
+      pan-east: "<white>Posunout mapu na východ"
+      pan-west: "<white>Posunout mapu na západ"
       arrow-to-island: "<gold>Střed vašeho ostrova je tímto směrem"
       arrow-to-player: "<aqua>Jste tímto směrem"
       tooltip:

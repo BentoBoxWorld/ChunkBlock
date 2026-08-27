@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Đóng"
       view-island: "<gold>Căn giữa theo đảo"
       view-player: "<aqua>Căn giữa theo vị trí của bạn"
+      pan-north: "<white>Cuộn bản đồ về phía bắc"
+      pan-south: "<white>Cuộn bản đồ về phía nam"
+      pan-east: "<white>Cuộn bản đồ về phía đông"
+      pan-west: "<white>Cuộn bản đồ về phía tây"
       arrow-to-island: "<gold>Trung tâm đảo của bạn ở hướng này"
       arrow-to-player: "<aqua>Bạn ở hướng này"
       tooltip:

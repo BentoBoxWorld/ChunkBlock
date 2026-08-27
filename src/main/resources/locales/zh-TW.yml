@@ -222,6 +222,10 @@ chunkblock:
       close: '<white>關閉'
       view-island: "<gold>以島嶼為中心"
       view-player: "<aqua>以你的位置為中心"
+      pan-north: "<white>向北捲動地圖"
+      pan-south: "<white>向南捲動地圖"
+      pan-east: "<white>向東捲動地圖"
+      pan-west: "<white>向西捲動地圖"
       arrow-to-island: "<gold>你的島嶼中心在這個方向"
       arrow-to-player: "<aqua>你在這個方向"
       tooltip:

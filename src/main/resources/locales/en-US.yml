@@ -68,6 +68,10 @@ chunkblock:
       close: "<white>Close"
       view-island: "<gold>Center on your island"
       view-player: "<aqua>Center on your position"
+      pan-north: "<white>Scroll the map north"
+      pan-south: "<white>Scroll the map south"
+      pan-east: "<white>Scroll the map east"
+      pan-west: "<white>Scroll the map west"
       arrow-to-island: "<gold>Your island center is this way"
       arrow-to-player: "<aqua>You are this way"
       tooltip:

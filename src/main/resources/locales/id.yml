@@ -74,6 +74,10 @@ chunkblock:
       close: "<white>Tutup"
       view-island: "<gold>Pusatkan ke pulau"
       view-player: "<aqua>Pusatkan ke posisi Anda"
+      pan-north: "<white>Geser peta ke utara"
+      pan-south: "<white>Geser peta ke selatan"
+      pan-east: "<white>Geser peta ke timur"
+      pan-west: "<white>Geser peta ke barat"
       arrow-to-island: "<gold>Pusat pulau Anda ada di arah ini"
       arrow-to-player: "<aqua>Anda ada di arah ini"
       tooltip:
