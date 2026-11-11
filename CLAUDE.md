@@ -37,6 +37,10 @@ mvn verify + SonarCloud), Jenkins at ci.codemc.org builds release jars on master
   finds the aimed locked chunk).
 - `listeners/LevelListener.java` — Level addon integration: credit announcements,
   LIFO re-locks on level loss, claim celebrations, island create/reset handling.
+- `listeners/FinaleListener.java` — phase finales: the boss (from a phase file's `finale:`
+  section) that seals the magic block at the end of a phase until it is killed. Shared with
+  AOneBlock; the only ChunkBlock-specific part is the leash that keeps the boss out of
+  locked chunks.
 - `oneblocks/`, `listeners/BlockListener.java`, phases under `src/main/resources/phases/`
   — the magic-block engine copied from AOneBlock; avoid diverging from upstream so fixes
   can be ported.
