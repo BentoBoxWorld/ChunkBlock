@@ -467,8 +467,18 @@ public class BlockListener extends FlagListener implements Listener {
         OneBlockPhase phase = oneBlocksManager.getPhase(is.getBlockNumber());
         String prevPhaseName = is.getPhaseName();
 
-        if (Objects.requireNonNull(phase).getGotoBlock() != null) {
+        if (phase != null && phase.getGotoBlock() != null) {
             phase = handleGoto(is, phase.getGotoBlock());
+        }
+
+        if (phase == null) {
+            // No phase covers this block number. This happens when no phase files loaded,
+            // when the first phase does not start at block 0, or when a goto points below
+            // the first phase. Keep the block in place rather than breaking the island.
+            addon.logError("No phase found for block number " + is.getBlockNumber() + " on island "
+                    + i.getUniqueId() + ". Check the phase files in the phases folder.");
+            e.setCancelled(true);
+            return null;
         }
 
         String currPhaseName = phase.getPhaseName() == null ? "" : phase.getPhaseName();
