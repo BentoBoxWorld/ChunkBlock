@@ -559,7 +559,7 @@ public class ChunkBlock extends GameModeAddon {
      * @return the blockListener
      */
     public FinaleListener getFinaleListener() {
-        return blockListener.getFinaleListener();
+        return blockListener == null ? null : blockListener.getFinaleListener();
     }
 
     /**
