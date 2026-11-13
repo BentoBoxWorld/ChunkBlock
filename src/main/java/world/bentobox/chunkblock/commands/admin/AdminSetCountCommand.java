@@ -60,6 +60,7 @@ public class AdminSetCountCommand extends CompositeCommand {
             user.sendMessage("chunkblock.commands.admin.setcount.set-lifetime", TextVariables.NUMBER, String.valueOf(count), TextVariables.NAME, getPlayers().getName(targetUUID));
         } else {
             i.setBlockNumber(count);
+            addon.getFinaleListener().clear(island, i);
             i.clearQueue();
             user.sendMessage("chunkblock.commands.admin.setcount.set", TextVariables.NUMBER, String.valueOf(count), TextVariables.NAME, getPlayers().getName(targetUUID));
         }

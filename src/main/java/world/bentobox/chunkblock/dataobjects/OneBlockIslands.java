@@ -95,6 +95,23 @@ public class OneBlockIslands implements DataObject {
     /** Fast membership view of {@link #unlockedChunks}; rebuilt lazily after loads/edits */
     private Set<Long> unlockedSet;
 
+    /**
+     * Name of the phase whose finale boss must be defeated before the island can
+     * move on. Empty if no finale is pending.
+     */
+    @Expose
+    private String finalePending = "";
+    /**
+     * How many times in a row the pending finale has been lost.
+     */
+    @Expose
+    private int finaleFails = 0;
+    /**
+     * Names of the phases whose finale this island has defeated at least once.
+     */
+    @Expose
+    private Set<String> defeatedFinales = new HashSet<>();
+
     private Queue<OneBlockObject> queue = new LinkedList<>();
 
     private static long chunkKey(int dx, int dz) {
@@ -422,5 +439,50 @@ public class OneBlockIslands implements DataObject {
      */
     public void setLastPhaseChangeTime(long lastPhaseChangeTime) {
         this.lastPhaseChangeTime = lastPhaseChangeTime;
+    }
+
+    /**
+     * @return name of the phase whose finale is pending, or an empty string
+     */
+    public String getFinalePending() {
+        return finalePending == null ? "" : finalePending;
+    }
+
+    /**
+     * @param finalePending name of the phase whose finale is pending, or empty for none
+     */
+    public void setFinalePending(String finalePending) {
+        this.finalePending = finalePending == null ? "" : finalePending;
+    }
+
+    /**
+     * @return how many times in a row the pending finale has been lost
+     */
+    public int getFinaleFails() {
+        return finaleFails;
+    }
+
+    /**
+     * @param finaleFails how many times in a row the pending finale has been lost
+     */
+    public void setFinaleFails(int finaleFails) {
+        this.finaleFails = finaleFails;
+    }
+
+    /**
+     * @return names of the phases whose finale has been defeated at least once
+     */
+    public Set<String> getDefeatedFinales() {
+        if (defeatedFinales == null) {
+            defeatedFinales = new HashSet<>();
+        }
+        return defeatedFinales;
+    }
+
+    /**
+     * @param defeatedFinales names of the phases whose finale has been defeated
+     */
+    public void setDefeatedFinales(Set<String> defeatedFinales) {
+        this.defeatedFinales = defeatedFinales;
     }
 }
