@@ -122,6 +122,11 @@ public class BlockListener extends FlagListener implements Listener {
     private final WarningSounder warningSounder;
 
     /**
+     * Runs the boss fights that end phases.
+     */
+    private final FinaleListener finaleListener;
+
+    /**
      * How many blocks ahead the queue should look when populating.
      */
     public static final int MAX_LOOK_AHEAD = 5;
@@ -171,6 +176,7 @@ public class BlockListener extends FlagListener implements Listener {
         oneBlocksManager = addon.getOneBlockManager();
         check = new CheckPhase(addon, this);
         warningSounder = new WarningSounder(addon);
+        finaleListener = new FinaleListener(addon);
     }
 
     /**
@@ -461,8 +467,18 @@ public class BlockListener extends FlagListener implements Listener {
         OneBlockPhase phase = oneBlocksManager.getPhase(is.getBlockNumber());
         String prevPhaseName = is.getPhaseName();
 
-        if (Objects.requireNonNull(phase).getGotoBlock() != null) {
+        if (phase != null && phase.getGotoBlock() != null) {
             phase = handleGoto(is, phase.getGotoBlock());
+        }
+
+        if (phase == null) {
+            // No phase covers this block number. This happens when no phase files loaded,
+            // when the first phase does not start at block 0, or when a goto points below
+            // the first phase. Keep the block in place rather than breaking the island.
+            addon.logError("No phase found for block number " + is.getBlockNumber() + " on island "
+                    + i.getUniqueId() + ". Check the phase files in the phases folder.");
+            e.setCancelled(true);
+            return null;
         }
 
         String currPhaseName = phase.getPhaseName() == null ? "" : phase.getPhaseName();
@@ -470,6 +486,11 @@ public class BlockListener extends FlagListener implements Listener {
 
         boolean isCurrPhaseNew = !is.getPhaseName().equalsIgnoreCase(currPhaseName);
         if (isCurrPhaseNew) {
+            // The old phase's boss, if it has one, must be defeated first.
+            if (finaleListener.gate(i, is, player, block)) {
+                e.setCancelled(true);
+                return new ProcessPhaseResult(phase, true, 0);
+            }
             // Check if the player meets the requirements for the new phase.
             if (check.phaseRequirementsFail(player, i, is, phase, world)) {
                 e.setCancelled(true);
@@ -553,6 +574,9 @@ public class BlockListener extends FlagListener implements Listener {
         if (addon.getSettings().getMobWarning() > 0) {
             warningSounder.play(is, block);
         }
+        if (addon.getSettings().isPhaseFinales() && phase.getFinale() != null) {
+            warningSounder.omen(block, phase.getFinale(), oneBlocksManager.getNextPhaseBlocks(is));
+        }
     }
 
     /**
@@ -576,6 +600,8 @@ public class BlockListener extends FlagListener implements Listener {
         }
 
         is.incrementBlockNumber();
+        // If that was the last block of the phase, its boss is next
+        finaleListener.arm(is, phaseResult.phase);
         handleBlockBreak(e, i, player, block, nextBlock);
     }
 
@@ -1071,6 +1097,20 @@ public class BlockListener extends FlagListener implements Listener {
      */
     public OneBlocksManager getOneBlocksManager() {
         return oneBlocksManager;
+    }
+
+    /**
+     * @return the phase checker
+     */
+    CheckPhase getCheckPhase() {
+        return check;
+    }
+
+    /**
+     * @return the listener that runs phase finales
+     */
+    public FinaleListener getFinaleListener() {
+        return finaleListener;
     }
 
     /**

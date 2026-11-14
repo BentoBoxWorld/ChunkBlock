@@ -23,6 +23,7 @@ import world.bentobox.chunkblock.commands.island.PlayerCommand;
 import world.bentobox.chunkblock.dataobjects.OneBlockIslands;
 import world.bentobox.chunkblock.generators.ChunkGeneratorWorld;
 import world.bentobox.chunkblock.listeners.BlockListener;
+import world.bentobox.chunkblock.listeners.FinaleListener;
 import world.bentobox.chunkblock.listeners.BlockProtect;
 import world.bentobox.chunkblock.listeners.ChunkClaimListener;
 import world.bentobox.chunkblock.listeners.ChunkGuardListener;
@@ -263,6 +264,7 @@ public class ChunkBlock extends GameModeAddon {
         // Initialize and register listeners
         blockListener = new BlockListener(this);
         registerListener(blockListener);
+        registerListener(blockListener.getFinaleListener());
         chunkGuardListener = new ChunkGuardListener(this);
         registerListener(chunkGuardListener);
         registerListener(new LockedChunkProtect(this));
@@ -329,6 +331,11 @@ public class ChunkBlock extends GameModeAddon {
         // Stop border rendering and restore client-side blocks
         if (borderDisplay != null) {
             borderDisplay.stop();
+        }
+
+        // Remove any bosses
+        if (blockListener != null) {
+            blockListener.getFinaleListener().onDisable();
         }
 
         // Clear holograms
@@ -546,6 +553,13 @@ public class ChunkBlock extends GameModeAddon {
      */
     public OneBlocksManager getOneBlockManager() {
         return oneBlockManager;
+    }
+
+    /**
+     * @return the blockListener
+     */
+    public FinaleListener getFinaleListener() {
+        return blockListener == null ? null : blockListener.getFinaleListener();
     }
 
     /**
