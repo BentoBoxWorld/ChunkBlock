@@ -1381,6 +1381,9 @@ class OneBlocksManagerTest3 extends CommonTestSetup {
 				finale:
 				  mythic-boss: SkeletonKing
 				  mythic-level: 5
+				  mythic-minions:
+				    Imp: 3
+				    BoneGuard: 1
 				""");
 		OneBlockPhase phase = new OneBlockPhase("0");
 		phase.setPhaseName("Plains");
@@ -1393,6 +1396,7 @@ class OneBlocksManagerTest3 extends CommonTestSetup {
 		assertEquals("SkeletonKing", f.name());
 		assertEquals(0D, f.health());
 		assertEquals(0D, f.scale());
+		assertEquals(java.util.Map.of("Imp", 3, "BoneGuard", 1), f.mythicMinions());
 
 		cfg.loadFromString("""
 				finale:
