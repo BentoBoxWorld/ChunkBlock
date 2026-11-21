@@ -109,6 +109,7 @@ public class ChunkBlock extends GameModeAddon {
             .type(Type.WORLD_SETTING)
             .listener(new StartSafetyListener(this))
             .defaultSetting(false)
+            .setGameMode(this)
             .build();
     /** The listener for the boss bar */
     private final BossBarListener bossBar = new BossBarListener(this);
@@ -120,6 +121,7 @@ public class ChunkBlock extends GameModeAddon {
             .type(Type.SETTING)
             .listener(bossBar)
             .defaultSetting(true)
+            .setGameMode(this)
             .build();
     /**
      * Flag to enable or disable the OneBlock action bar.
@@ -129,7 +131,8 @@ public class ChunkBlock extends GameModeAddon {
             .type(Type.SETTING)
             .listener(bossBar)
             .defaultSetting(true)
-            .build();    
+            .setGameMode(this)
+            .build();
     /**
      * Flag to set who can break the magic block.
      */
@@ -137,6 +140,7 @@ public class ChunkBlock extends GameModeAddon {
             .mode(Mode.BASIC)
             .type(Type.PROTECTION)
             .defaultRank(RanksManager.COOP_RANK)
+            .setGameMode(this)
             .build();
     /**
      * Flag to set who can spend the island's level credit on new chunks. Defaults to the
@@ -146,6 +150,7 @@ public class ChunkBlock extends GameModeAddon {
             .mode(Mode.BASIC)
             .type(Type.PROTECTION)
             .defaultRank(RanksManager.OWNER_RANK)
+            .setGameMode(this)
             .build();
 
     @Override
