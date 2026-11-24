@@ -1,5 +1,8 @@
 # ChunkBlock
 
+<!-- BentoBox stats badges: https://download.bentobox.world/admin (Badges tab) -->
+[![Servers](https://download.bentobox.world/badge/ChunkBlock/servers.svg)](https://download.bentobox.world/) [![Downloads](https://download.bentobox.world/badge/ChunkBlock/downloads.svg)](https://download.bentobox.world/) [![Minecraft](https://download.bentobox.world/badge/ChunkBlock/mc.svg)](https://download.bentobox.world/)
+
 One block, one chunk.
 
 [![Build Status](https://ci.codemc.org/buildStatus/icon?job=BentoBoxWorld/ChunkBlock)](https://ci.codemc.org/job/BentoBoxWorld/job/ChunkBlock/)[
